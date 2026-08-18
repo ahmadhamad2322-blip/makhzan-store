@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مخزن | عروض تستحق التخزين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#23201B;
+    --paper:#FBF6EC;
+    --forest:#1F4D3D;
+    --forest-light:#2E6B54;
+    --amber:#F2A93B;
+    --tomato:#D64545;
+    --sky:#3E8FB0;
+    --card:#FFFDF8;
+    --line:rgba(35,32,27,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.disp{font-family:'Cairo',sans-serif;}
+
+  /* ===== Header ===== */
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background:var(--forest);
+    color:var(--paper);
+    padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .mark{
+    width:38px;height:38px;border-radius:10px;
+    background:var(--amber); color:var(--forest);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cairo',sans-serif; font-weight:900; font-size:18px;
+    transform:rotate(-6deg);
+  }
+  .brand-text h1{font-size:19px;margin:0;font-weight:900;letter-spacing:.5px;}
+  .brand-text span{font-size:11px;opacity:.8;}
+
+  .cart-btn{
+    position:relative;
+    background:var(--amber); color:var(--forest);
+    border:none; border-radius:12px;
+    padding:10px 14px;
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:14px;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer;
+  }
+  .cart-badge{
+    position:absolute; top:-8px; left:-8px;
+    background:var(--tomato); color:#fff;
+    font-size:11px; font-weight:800;
+    width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--paper);
+  }
+
+  /* ===== Tabs (shelf tags) ===== */
+  nav.tags{
+    display:flex; gap:10px; overflow-x:auto;
+    padding:16px 14px 6px;
+    -webkit-overflow-scrolling:touch;
+  }
+  nav.tags::-webkit-scrollbar{display:none;}
+  .tag-btn{
+    flex:0 0 auto;
+    position:relative;
+    background:var(--card);
+    border:2px solid var(--ink);
+    border-radius:8px;
+    padding:10px 16px 10px 22px;
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:13px;
+    cursor:pointer; white-space:nowrap;
+    transform:rotate(-1.2deg);
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .tag-btn:nth-child(2n){transform:rotate(1.4deg);}
+  .tag-btn::before{
+    content:''; position:absolute; right:8px; top:50%;
+    width:6px;height:6px;border-radius:50%;
+    background:var(--paper); border:1.5px solid var(--ink);
+    transform:translateY(-50%);
+  }
+  .tag-btn.active{
+    background:var(--ink); color:var(--paper); border-color:var(--ink);
+    transform:rotate(0deg) scale(1.03);
+  }
+  .tag-btn .em{margin-left:6px;}
+
+  section.panel{display:none; padding:6px 16px 90px;}
+  section.panel.active{display:block;}
+
+  .panel-head{margin:10px 2px 16px;}
+  .panel-head h2{font-size:22px; margin:0 0 4px; font-weight:900;}
+  .panel-head p{margin:0; font-size:13px; color:var(--forest-light); font-weight:700;}
+
+  /* ===== Product grid ===== */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+  }
+  @media(min-width:640px){ .grid{grid-template-columns:repeat(3,1fr);} }
+
+  .card{
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:12px;
+    position:relative;
+    display:flex; flex-direction:column;
+    gap:8px;
+  }
+  .card .icon-wrap{
+    height:78px; border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:34px;
+    background:linear-gradient(135deg, rgba(31,77,61,0.08), rgba(62,143,176,0.10));
+    overflow:hidden;
+  }
+  .card .icon-wrap.img{padding:0;}
+  .card .icon-wrap.img img{width:100%; height:100%; object-fit:cover;}
+  .badge{
+    position:absolute; top:-8px; left:-8px;
+    background:var(--tomato); color:#fff;
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:11px;
+    padding:5px 9px;
+    clip-path:polygon(10% 0%,100% 0%,90% 100%,0% 100%);
+    transform:rotate(-8deg);
+  }
+  .card h3{font-size:14px; margin:2px 0 0; font-weight:800; line-height:1.3;}
+  .card .unit{font-size:11px; color:#7a7568; font-weight:500;}
+  .price-row{display:flex; align-items:baseline; gap:8px; margin-top:2px;}
+  .price-now{font-family:'Cairo',sans-serif; font-weight:900; font-size:16px; color:var(--forest);}
+  .price-old{font-size:12px; color:#a39d8c; text-decoration:line-through;}
+  .add-btn{
+    margin-top:auto;
+    background:var(--forest); color:#fff; border:none;
+    border-radius:9px; padding:8px 0;
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:13px;
+    cursor:pointer;
+  }
+  .add-btn:active{transform:scale(.97);}
+  .add-btn.added{background:var(--sky);}
+
+  /* subscription cards look a bit different */
+  .sub-card{grid-column:span 2;}
+  @media(min-width:640px){ .sub-card{grid-column:span 1;} }
+  .sub-card .icon-wrap{background:linear-gradient(135deg, rgba(242,169,59,0.18), rgba(31,77,61,0.10));}
+  .freq{
+    display:inline-block; font-size:10px; font-weight:800;
+    background:var(--amber); color:var(--forest);
+    padding:2px 8px; border-radius:20px; width:fit-content;
+  }
+
+  /* ===== Cart Drawer ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(35,32,27,0.45);
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+    z-index:50;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+
+  .drawer{
+    position:fixed; top:0; bottom:0; left:0;
+    width:min(380px,88vw);
+    background:var(--paper);
+    transform:translateX(-105%);
+    transition:transform .25s ease;
+    z-index:60;
+    display:flex; flex-direction:column;
+    box-shadow:6px 0 24px rgba(0,0,0,0.18);
+  }
+  .drawer.show{transform:translateX(0);}
+  .drawer-head{
+    background:var(--forest); color:#fff;
+    padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .drawer-head h2{margin:0; font-size:18px; font-weight:900;}
+  .close-btn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;}
+
+  .drawer-body{flex:1; overflow-y:auto; padding:14px 16px;}
+  .empty-cart{text-align:center; margin-top:60px; color:#8a8574;}
+  .empty-cart .em{font-size:40px; display:block; margin-bottom:10px;}
+
+  .cart-item{
+    display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:10px; margin-bottom:10px;
+  }
+  .cart-item .em{font-size:26px; width:40px; text-align:center;}
+  .cart-item .info{flex:1;}
+  .cart-item .info h4{margin:0 0 3px; font-size:13px; font-weight:800;}
+  .cart-item .info .p{font-size:12px; color:var(--forest); font-weight:800;}
+  .qty{display:flex; align-items:center; gap:6px;}
+  .qty button{
+    width:24px;height:24px;border-radius:6px; border:1px solid var(--line);
+    background:#fff; cursor:pointer; font-weight:800;
+  }
+  .qty span{min-width:18px; text-align:center; font-weight:800; font-size:13px;}
+  .rm-btn{background:none;border:none;color:var(--tomato);font-size:16px;cursor:pointer;margin-right:2px;}
+
+  .coupon-box{
+    margin-top:6px; padding:14px;
+    background:var(--card);
+    border:2px dashed var(--forest);
+    border-radius:12px;
+    position:relative;
+  }
+  .coupon-box::before,.coupon-box::after{
+    content:''; position:absolute; top:50%; width:16px; height:16px;
+    background:var(--paper); border-radius:50%; transform:translateY(-50%);
+  }
+  .coupon-box::before{left:-9px;}
+  .coupon-box::after{right:-9px;}
+  .coupon-box label{display:block; font-size:12px; font-weight:800; margin-bottom:8px; color:var(--forest);}
+  .coupon-row{display:flex; gap:8px;}
+  .coupon-row input{
+    flex:1; border:1px solid var(--line); border-radius:8px;
+    padding:9px 10px; font-family:'Tajawal',sans-serif; font-size:13px;
+    background:#fff;
+  }
+  .coupon-row button{
+    background:var(--amber); border:none; color:var(--forest);
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:12px;
+    padding:0 14px; border-radius:8px; cursor:pointer;
+  }
+  .coupon-msg{font-size:11px; margin-top:7px; font-weight:700;}
+  .coupon-msg.ok{color:var(--forest);}
+  .coupon-msg.err{color:var(--tomato);}
+
+  .drawer-foot{
+    border-top:1.5px dashed var(--line);
+    padding:14px 18px 18px;
+    background:var(--card);
+  }
+  .row{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#5a5648;}
+  .row.total{font-family:'Cairo',sans-serif; font-weight:900; font-size:17px; color:var(--ink); margin-top:8px;}
+  .checkout-btn{
+    width:100%; margin-top:12px; padding:13px 0;
+    background:var(--forest); color:#fff; border:none; border-radius:10px;
+    font-family:'Cairo',sans-serif; font-weight:900; font-size:15px; cursor:pointer;
+  }
+
+  .toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:var(--paper);
+    padding:10px 18px; border-radius:30px; font-size:13px; font-weight:700;
+    opacity:0; pointer-events:none; transition:all .25s ease; z-index:80;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="mark">خ</div>
+    <div class="brand-text">
+      <h1>مخزن</h1>
+      <span>عروض تستحق التخزين</span>
+    </div>
+  </div>
+  <button class="cart-btn" onclick="openCart()">
+    🛒 السلة
+    <span class="cart-badge" id="cartCount">0</span>
+  </button>
+</header>
+
+<nav class="tags" id="tabs">
+  <button class="tag-btn active" data-tab="frozen"><span class="em">❄️</span>عروض المجمدات</button>
+  <button class="tag-btn" data-tab="clean"><span class="em">🧴</span>عروض المنظفات</button>
+  <button class="tag-btn" data-tab="daily"><span class="em">⚡</span>عروض اليوم الواحد</button>
+  <button class="tag-btn" data-tab="sub"><span class="em">📦</span>اشتراكات شهرية</button>
+</nav>
+
+<!-- FROZEN -->
+<section class="panel active" id="frozen">
+  <div class="panel-head">
+    <h2>عروض المجمدات ❄️</h2>
+    <p>من التلاجة لبيتك بأفضل الأسعار</p>
+  </div>
+  <div class="grid" id="grid-frozen"></div>
+</section>
+
+<!-- CLEANING -->
+<section class="panel" id="clean">
+  <div class="panel-head">
+    <h2>عروض المنظفات 🧴</h2>
+    <p>نظافة بيتك بأقل تكلفة</p>
+  </div>
+  <div class="grid" id="grid-clean"></div>
+</section>
+
+<!-- DAILY -->
+<section class="panel" id="daily">
+  <div class="panel-head">
+    <h2>عروض اليوم الواحد ⚡</h2>
+    <p>عروض صاروخية.. تنتهي منتصف الليل!</p>
+  </div>
+  <div class="grid" id="grid-daily"></div>
+</section>
+
+<!-- SUBSCRIPTIONS -->
+<section class="panel" id="sub">
+  <div class="panel-head">
+    <h2>اشتراكات وطلبات شهرية 📦</h2>
+    <p>خزّن بيتك أول كل شهر تلقائيًا ووفّر أكتر</p>
+  </div>
+  <div class="grid" id="grid-sub"></div>
+</section>
+
+<!-- CART OVERLAY + DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2>سلة مشترياتك</h2>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot" id="cartFoot" style="display:none;">
+    <div class="coupon-box">
+      <label>🏷️ عندك كوبون خصم؟</label>
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="اكتب كود الخصم هنا">
+        <button onclick="applyCoupon()">تفعيل</button>
+      </div>
+      <div class="coupon-msg" id="couponMsg"></div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="row"><span>المجموع الفرعي</span><span id="sub-amt">0 ج.م</span></div>
+      <div class="row" id="disc-row" style="display:none;"><span>الخصم</span><span id="disc-amt">0 ج.م</span></div>
+      <div class="row total"><span>الإجمالي</span><span id="total-amt">0 ج.م</span></div>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">إتمام الطلب</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== ⚙️ إعدادات ربط جوجل شيت ===================== */
+/* حط هنا رابط "نشر على الويب" بصيغة CSV لشيت المنتجات وشيت الكوبونات.
+   لو سبتهم فاضيين "" هيشتغل الموقع بالعروض التجريبية الموجودة تحت. */
+const PRODUCTS_SHEET_CSV_URL = ""; // مثال: https://docs.google.com/spreadsheets/d/e/xxxxx/pub?gid=0&single=true&output=csv
+const COUPONS_SHEET_CSV_URL  = ""; // مثال: https://docs.google.com/spreadsheets/d/e/xxxxx/pub?gid=123456&single=true&output=csv
+
+/* محلل CSV بسيط يدعم الفواصل جوه علامات التنصيص */
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"' && next === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\n' || c === '\r'){
+        if(field !== '' || row.length){ row.push(field); rows.push(row); row=[]; field=''; }
+        if(c === '\r' && next === '\n') i++;
+      } else field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).filter(r => r.some(v => v && v.trim() !== '')).map(r => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (r[i] || '').trim());
+    return obj;
+  });
+}
+
+function buildProductsFromRows(rows){
+  const grouped = {frozen:[], clean:[], daily:[], sub:[]};
+  rows.forEach(r => {
+    if((r.active || 'نعم').trim() === 'لا') return; // active=لا يخفي المنتج
+    const cat = (r.category || '').trim();
+    if(!grouped[cat]) return;
+    grouped[cat].push({
+      id: r.id || (cat + '-' + Math.random().toString(36).slice(2,8)),
+      name: r.name || 'منتج بدون اسم',
+      unit: r.unit || '',
+      em: r.emoji || '🛒',
+      image_url: r.image_url || '',
+      price: Number(r.price) || 0,
+      old: r.old_price ? Number(r.old_price) : null,
+      badge: r.badge || '',
+      freq: r.freq || 'يتجدد كل شهر'
+    });
+  });
+  return grouped;
+}
+
+function buildCouponsFromRows(rows){
+  const map = {};
+  rows.forEach(r => {
+    if((r.active || 'نعم').trim() === 'لا') return;
+    const code = (r.code || '').trim();
+    const rate = Number(r.rate);
+    if(code && !isNaN(rate)) map[code] = rate > 1 ? rate/100 : rate; // يقبل 10 أو 0.10
+  });
+  return map;
+}
+
+async function loadFromSheets(){
+  if(PRODUCTS_SHEET_CSV_URL){
+    try{
+      const res = await fetch(PRODUCTS_SHEET_CSV_URL);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const grouped = buildProductsFromRows(rows);
+      Object.assign(PRODUCTS, grouped);
+      renderAllGrids();
+    }catch(err){
+      console.warn('تعذر تحميل شيت المنتجات، هيتم استخدام العروض التجريبية', err);
+    }
+  }
+  if(COUPONS_SHEET_CSV_URL){
+    try{
+      const res = await fetch(COUPONS_SHEET_CSV_URL);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      const map = buildCouponsFromRows(rows);
+      Object.keys(COUPONS).forEach(k => delete COUPONS[k]);
+      Object.assign(COUPONS, map);
+    }catch(err){
+      console.warn('تعذر تحميل شيت الكوبونات، هيتم استخدام الكوبونات التجريبية', err);
+    }
+  }
+}
+
+/* ===================== DATA (عروض تجريبية تظهر لحد ما تربط الشيت) ===================== */
+const PRODUCTS = {
+  frozen: [
+    {id:'f1', name:'فراخ مجمدة كامل', unit:'1 كجم', em:'🍗', price:85, old:105, badge:'٪19-'},
+    {id:'f2', name:'كفتة لحم مجمدة', unit:'500 جم', em:'🥩', price:70, old:90, badge:'٪22-'},
+    {id:'f3', name:'خضار مشكل مجمد', unit:'450 جم', em:'🥦', price:28, old:35, badge:'٪20-'},
+    {id:'f4', name:'بطاطس مقرمشة مجمدة', unit:'1 كجم', em:'🍟', price:45, old:58, badge:'٪22-'},
+    {id:'f5', name:'سمك فيليه مجمد', unit:'500 جم', em:'🐟', price:95, old:120, badge:'٪21-'},
+    {id:'f6', name:'مكرونة بالصلصة جاهزة', unit:'400 جم', em:'🍝', price:38, old:46, badge:'٪17-'},
+  ],
+  clean: [
+    {id:'c1', name:'سائل غسيل أطباق', unit:'900 مل', em:'🧴', price:34, old:42, badge:'٪19-'},
+    {id:'c2', name:'مسحوق غسيل ملابس', unit:'3 كجم', em:'🧺', price:110, old:135, badge:'٪19-'},
+    {id:'c3', name:'معقم أسطح متعدد', unit:'750 مل', em:'🧽', price:26, old:33, badge:'٪21-'},
+    {id:'c4', name:'مناديل مطبخ ملفوفة', unit:'6 لفة', em:'🧻', price:48, old:60, badge:'٪20-'},
+    {id:'c5', name:'منعم أقمشة', unit:'1 لتر', em:'🌸', price:40, old:50, badge:'٪20-'},
+    {id:'c6', name:'ملمع زجاج', unit:'500 مل', em:'🪟', price:22, old:28, badge:'٪21-'},
+  ],
+  daily: [
+    {id:'d1', name:'زيت عباد الشمس', unit:'1.5 لتر', em:'🫙', price:65, old:98, badge:'٪34-'},
+    {id:'d2', name:'أرز مصري فاخر', unit:'5 كجم', em:'🍚', price:150, old:210, badge:'٪29-'},
+    {id:'d3', name:'شاي أحمر فاخر', unit:'250 جم', em:'🍵', price:32, old:52, badge:'٪38-'},
+    {id:'d4', name:'قهوة سريعة الذوبان', unit:'200 جم', em:'☕', price:58, old:85, badge:'٪32-'},
+    {id:'d5', name:'عسل نحل طبيعي', unit:'400 جم', em:'🍯', price:90, old:140, badge:'٪36-'},
+    {id:'d6', name:'تمر فاخر', unit:'1 كجم', em:'🌴', price:55, old:80, badge:'٪31-'},
+  ],
+  sub: [
+    {id:'s1', name:'اشتراك سلة مجمدات شهرية', unit:'صندوق شهري', em:'🧊', price:480, freq:'يتجدد كل شهر'},
+    {id:'s2', name:'اشتراك منظفات المنزل', unit:'صندوق شهري', em:'🧼', price:320, freq:'يتجدد كل شهر'},
+    {id:'s3', name:'اشتراك مؤن أساسية', unit:'صندوق شهري', em:'🛍️', price:550, freq:'يتجدد كل شهر'},
+    {id:'s4', name:'اشتراك عناية شخصية', unit:'صندوق شهري', em:'🧴', price:260, freq:'يتجدد كل شهر'},
+  ]
+};
+
+const COUPONS = {
+  'خصم10': 0.10,
+  'خصم20': 0.20,
+  'مخزن15': 0.15,
+};
+
+/* ===================== STATE ===================== */
+let cart = {}; // id -> {product, qty}
+let appliedCoupon = null;
+
+/* ===================== RENDER PRODUCTS ===================== */
+function iconMarkup(p){
+  if(p.image_url && p.image_url.trim()){
+    return `<div class="icon-wrap img"><img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='${p.em||'🛒'}'"></div>`;
+  }
+  return `<div class="icon-wrap">${p.em || '🛒'}</div>`;
+}
+
+function renderGrid(catKey){
+  const el = document.getElementById('grid-' + catKey);
+  const list = PRODUCTS[catKey] || [];
+  if(list.length === 0){
+    el.innerHTML = `<div class="empty-cart" style="grid-column:1/-1;"><span class="em">📭</span>لا توجد عروض هنا حاليًا</div>`;
+    return;
+  }
+  el.innerHTML = list.map(p => {
+    if(catKey === 'sub'){
+      return `
+      <div class="card sub-card">
+        ${iconMarkup(p)}
+        <span class="freq">${p.freq || 'يتجدد كل شهر'}</span>
+        <h3>${p.name}</h3>
+        <div class="unit">${p.unit || ''}</div>
+        <div class="price-row"><span class="price-now">${p.price} ج.م / شهر</span></div>
+        <button class="add-btn" id="btn-${p.id}" onclick="addToCart('${catKey}','${p.id}')">اشترك الآن</button>
+      </div>`;
+    }
+    return `
+    <div class="card">
+      ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
+      ${iconMarkup(p)}
+      <h3>${p.name}</h3>
+      <div class="unit">${p.unit || ''}</div>
+      <div class="price-row">
+        <span class="price-now">${p.price} ج.م</span>
+        ${p.old ? `<span class="price-old">${p.old} ج.م</span>` : ''}
+      </div>
+      <button class="add-btn" id="btn-${p.id}" onclick="addToCart('${catKey}','${p.id}')">أضف للسلة</button>
+    </div>`;
+  }).join('');
+}
+
+function renderAllGrids(){
+  ['frozen','clean','daily','sub'].forEach(renderGrid);
+}
+renderAllGrids();
+
+/* ===================== TABS ===================== */
+document.getElementById('tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tag-btn');
+  if(!btn) return;
+  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.tab).classList.add('active');
+});
+
+/* ===================== CART LOGIC ===================== */
+function addToCart(catKey, id){
+  const product = PRODUCTS[catKey].find(p => p.id === id);
+  if(cart[id]) cart[id].qty += 1;
+  else cart[id] = {product, qty:1};
+  updateCartUI();
+  const btn = document.getElementById('btn-' + id);
+  btn.classList.add('added');
+  const original = btn.textContent;
+  btn.textContent = 'أُضيف ✓';
+  setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = original; }, 900);
+  showToast(`تمت إضافة "${product.name}" للسلة`);
+}
+
+function changeQty(id, delta){
+  if(!cart[id]) return;
+  cart[id].qty += delta;
+  if(cart[id].qty <= 0) delete cart[id];
+  updateCartUI();
+}
+
+function removeItem(id){
+  delete cart[id];
+  updateCartUI();
+}
+
+function cartCount(){
+  return Object.values(cart).reduce((s,i)=>s+i.qty,0);
+}
+function cartSubtotal(){
+  return Object.values(cart).reduce((s,i)=>s+i.qty*i.product.price,0);
+}
+
+function updateCartUI(){
+  document.getElementById('cartCount').textContent = cartCount();
+  const body = document.getElementById('cartBody');
+  const foot = document.getElementById('cartFoot');
+  const items = Object.entries(cart);
+
+  if(items.length === 0){
+    body.innerHTML = `<div class="empty-cart"><span class="em">🧺</span>السلة فاضية دلوقتي<br>يلا اختار عروضك المفضلة!</div>`;
+    foot.style.display = 'none';
+    return;
+  }
+  foot.style.display = 'block';
+  body.innerHTML = items.map(([id, item]) => `
+    <div class="cart-item">
+      <div class="em">${item.product.em}</div>
+      <div class="info">
+        <h4>${item.product.name}</h4>
+        <div class="p">${item.product.price} ج.م</div>
+      </div>
+      <div class="qty">
+        <button onclick="changeQty('${id}',-1)">−</button>
+        <span>${item.qty}</span>
+        <button onclick="changeQty('${id}',1)">+</button>
+      </div>
+      <button class="rm-btn" onclick="removeItem('${id}')">✕</button>
+    </div>
+  `).join('');
+
+  const subtotal = cartSubtotal();
+  const discount = appliedCoupon ? subtotal * appliedCoupon.rate : 0;
+  const total = subtotal - discount;
+
+  document.getElementById('sub-amt').textContent = subtotal.toFixed(0) + ' ج.م';
+  document.getElementById('total-amt').textContent = total.toFixed(0) + ' ج.م';
+  const discRow = document.getElementById('disc-row');
+  if(discount > 0){
+    discRow.style.display = 'flex';
+    document.getElementById('disc-amt').textContent = '- ' + discount.toFixed(0) + ' ج.م';
+  } else {
+    discRow.style.display = 'none';
+  }
+}
+
+function applyCoupon(){
+  const input = document.getElementById('couponInput');
+  const code = input.value.trim();
+  const msg = document.getElementById('couponMsg');
+  if(!code){
+    msg.textContent = 'اكتب كود الكوبون أولاً';
+    msg.className = 'coupon-msg err';
+    return;
+  }
+  if(COUPONS[code]){
+    appliedCoupon = {code, rate: COUPONS[code]};
+    msg.textContent = `تم تفعيل الكوبون بنجاح — خصم ${COUPONS[code]*100}٪ 🎉`;
+    msg.className = 'coupon-msg ok';
+  } else {
+    appliedCoupon = null;
+    msg.textContent = 'الكود غير صحيح أو منتهي الصلاحية';
+    msg.className = 'coupon-msg err';
+  }
+  updateCartUI();
+}
+
+function checkout(){
+  if(cartCount() === 0) return;
+  showToast('تم استلام طلبك بنجاح! 🎉');
+  cart = {};
+  appliedCoupon = null;
+  document.getElementById('couponInput').value = '';
+  document.getElementById('couponMsg').textContent = '';
+  updateCartUI();
+  closeCart();
+}
+
+/* ===================== DRAWER ===================== */
+function openCart(){
+  document.getElementById('drawer').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeCart(){
+  document.getElementById('drawer').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+/* ===================== TOAST ===================== */
+let toastTimer;
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+updateCartUI();
+loadFromSheets();
+</script>
+</body>
+</html>
