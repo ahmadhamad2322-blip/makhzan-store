@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,8 +6,8 @@
 <title>مخزن | عروض تستحق التخزين</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --ink:#23201B;
@@ -414,51 +413,87 @@ const firebaseConfig = {
 };
 
 let db = null;
-try{
-  if(firebaseConfig.apiKey){
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
+let firebaseListenerUnsubscribe = null;
+
+/* Firebase خدمة اختيارية: فشلها لا يجوز أن يوقف أي جزء من واجهة المتجر. */
+function initFirebaseSafely(){
+  try{
+    if(!firebaseConfig || !firebaseConfig.apiKey) return false;
+
+    const sdk = window.firebase;
+    if(!sdk || typeof sdk.initializeApp !== 'function' || typeof sdk.firestore !== 'function'){
+      console.warn('مكتبات فايربيز غير متاحة، سيتم استخدام العروض التجريبية');
+      return false;
+    }
+
+    if(!sdk.apps || sdk.apps.length === 0){
+      sdk.initializeApp(firebaseConfig);
+    }
+
+    db = sdk.firestore();
+    return !!db;
+  }catch(err){
+    console.warn('تعذر تهيئة فايربيز، سيستمر الموقع بالعروض التجريبية', err);
+    db = null;
+    return false;
   }
-}catch(err){
-  console.warn('تعذر الاتصال بفايربيز، هيفضل الموقع شغال بالعروض التجريبية', err);
-  db = null;
 }
 
 function buildProductsFromDocs(docs){
   const grouped = {frozen:[], clean:[], daily:[], sub:[]};
-  docs.forEach(doc => {
-    const r = doc.data();
-    if(r.active === false) return; // اتقفل من لوحة التحكم
-    const cat = r.category;
-    if(!grouped[cat]) return;
-    grouped[cat].push({
-      id: doc.id,
-      name: r.name || 'منتج بدون اسم',
-      unit: r.unit || '',
-      em: r.emoji || '🛒',
-      image_url: r.image_url || '',
-      price: Number(r.price) || 0,
-      old: r.old_price ? Number(r.old_price) : null,
-      badge: r.badge || '',
-      freq: r.freq || 'يتجدد كل شهر'
-    });
+  (Array.isArray(docs) ? docs : []).forEach(doc => {
+    try{
+      const r = doc && typeof doc.data === 'function' ? (doc.data() || {}) : {};
+      if(r.active === false) return; // اتقفل من لوحة التحكم
+      const cat = r.category;
+      if(!grouped[cat]) return;
+      grouped[cat].push({
+        id: String(doc.id),
+        name: r.name || 'منتج بدون اسم',
+        unit: r.unit || '',
+        em: r.emoji || '🛒',
+        image_url: r.image_url || '',
+        price: Number(r.price) || 0,
+        old: r.old_price ? Number(r.old_price) : null,
+        badge: r.badge || '',
+        freq: r.freq || 'يتجدد كل شهر'
+      });
+    }catch(err){
+      console.warn('تم تجاهل منتج غير صالح من فايربيز', err);
+    }
   });
   return grouped;
 }
 
 function loadFromFirebase(){
-  if(!db) return; // مفيش إعدادات لسه، سيب العروض التجريبية شغالة
+  if(!db) return; // لا توجد خدمة متاحة: اترك العروض التجريبية تعمل
+
   try{
-    db.collection('products').onSnapshot(snapshot => {
-      if(snapshot.empty) return; // مفيش منتجات حقيقية لسه، سيب العروض التجريبية شغالة
-      const grouped = buildProductsFromDocs(snapshot.docs);
-      Object.assign(PRODUCTS, grouped);
-      renderAllGrids();
+    const productsRef = db.collection('products');
+    if(!productsRef || typeof productsRef.onSnapshot !== 'function'){
+      console.warn('مرجع المنتجات غير متاح، سيتم استخدام العروض التجريبية');
+      return;
+    }
+
+    firebaseListenerUnsubscribe = productsRef.onSnapshot(snapshot => {
+      try{
+        if(!snapshot || snapshot.empty) return; // لا توجد منتجات حقيقية بعد
+
+        const grouped = buildProductsFromDocs(snapshot.docs || []);
+        const hasValidProducts = Object.values(grouped).some(list => list.length > 0);
+        if(!hasValidProducts) return; // لا تستبدل العروض التجريبية ببيانات فارغة
+
+        Object.assign(PRODUCTS, grouped);
+        renderAllGrids();
+      }catch(err){
+        console.warn('تعذر معالجة منتجات فايربيز، ستظل العروض التجريبية ظاهرة', err);
+      }
     }, err => {
-      console.warn('تعذر تحميل المنتجات من فايربيز، هيتم استخدام العروض التجريبية', err);
+      console.warn('تعذر تحميل المنتجات من فايربيز، ستظل العروض التجريبية ظاهرة', err);
     });
   }catch(err){
-    console.warn('تعذر تحميل المنتجات من فايربيز، هيتم استخدام العروض التجريبية', err);
+    console.warn('تعذر تشغيل مستمع فايربيز، سيستمر الموقع بصورة طبيعية', err);
+    firebaseListenerUnsubscribe = null;
   }
 }
 
@@ -516,7 +551,8 @@ function iconMarkup(p){
 
 function renderGrid(catKey){
   const el = document.getElementById('grid-' + catKey);
-  const list = PRODUCTS[catKey] || [];
+  if(!el) return;
+  const list = Array.isArray(PRODUCTS[catKey]) ? PRODUCTS[catKey] : [];
   if(list.length === 0){
     el.innerHTML = `<div class="empty-cart" style="grid-column:1/-1;"><span class="em">📭</span>لا توجد عروض هنا حاليًا</div>`;
     return;
@@ -565,15 +601,25 @@ document.getElementById('tabs').addEventListener('click', e => {
 
 /* ===================== CART LOGIC ===================== */
 function addToCart(catKey, id){
-  const product = PRODUCTS[catKey].find(p => p.id === id);
+  const list = Array.isArray(PRODUCTS[catKey]) ? PRODUCTS[catKey] : [];
+  const product = list.find(p => p && String(p.id) === String(id));
+  if(!product) return;
+
   if(cart[id]) cart[id].qty += 1;
   else cart[id] = {product, qty:1};
   updateCartUI();
+
   const btn = document.getElementById('btn-' + id);
-  btn.classList.add('added');
-  const original = btn.textContent;
-  btn.textContent = 'أُضيف ✓';
-  setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = original; }, 900);
+  if(btn){
+    btn.classList.add('added');
+    const original = btn.textContent;
+    btn.textContent = 'أُضيف ✓';
+    setTimeout(()=>{
+      if(!btn.isConnected) return;
+      btn.classList.remove('added');
+      btn.textContent = original;
+    }, 900);
+  }
   showToast(`تمت إضافة "${product.name}" للسلة`);
 }
 
@@ -699,8 +745,21 @@ function showToast(text){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
+function startFirebaseSafely(){
+  const connect = () => {
+    try{
+      if(initFirebaseSafely()) loadFromFirebase();
+    }catch(err){
+      console.warn('تعذر تشغيل اتصال فايربيز، وستظل واجهة المتجر عاملة', err);
+    }
+  };
+
+  if(document.readyState === 'complete') setTimeout(connect, 0);
+  else window.addEventListener('load', connect, {once:true});
+}
+
 updateCartUI();
-try{ loadFromFirebase(); }catch(err){ console.warn('تعذر تحميل فايربيز', err); }
+startFirebaseSafely();
 </script>
 </body>
 </html>
