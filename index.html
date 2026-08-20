@@ -213,6 +213,16 @@
   .qty span{min-width:18px; text-align:center; font-weight:800; font-size:13px;}
   .rm-btn{background:none;border:none;color:var(--tomato);font-size:16px;cursor:pointer;margin-right:2px;}
 
+  .user-info-box{
+    background:var(--card); border:1.5px solid var(--line);
+    border-radius:12px; padding:12px; margin-bottom:10px;
+  }
+  .user-info-box label{display:block; font-size:12px; font-weight:800; margin-bottom:6px; color:var(--forest);}
+  .user-info-box input{
+    width:100%; border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; font-family:'Tajawal',sans-serif; font-size:13px; background:#fff; margin-bottom:8px;
+  }
+
   .coupon-box{
     margin-top:6px; padding:14px;
     background:var(--card);
@@ -251,8 +261,9 @@
   .row.total{font-family:'Cairo',sans-serif; font-weight:900; font-size:17px; color:var(--ink); margin-top:8px;}
   .checkout-btn{
     width:100%; margin-top:12px; padding:13px 0;
-    background:var(--forest); color:#fff; border:none; border-radius:10px;
+    background:#25D366; color:#fff; border:none; border-radius:10px;
     font-family:'Cairo',sans-serif; font-weight:900; font-size:15px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
   }
 
   .toast{
@@ -359,6 +370,13 @@
   </div>
   <div class="drawer-body" id="cartBody"></div>
   <div class="drawer-foot" id="cartFoot" style="display:none;">
+    <div class="user-info-box">
+      <label>📍 بيانات التوصيل</label>
+      <input type="text" id="custName" placeholder="الاسم بالكامل">
+      <input type="tel" id="custPhone" placeholder="رقم الهاتف">
+      <input type="text" id="custAddress" placeholder="العنوان بالتفصيل">
+    </div>
+
     <div class="coupon-box">
       <label>🏷️ عندك كوبون خصم؟</label>
       <div class="coupon-row">
@@ -390,7 +408,7 @@
       <div class="row" id="disc-row" style="display:none;"><span>الخصم</span><span id="disc-amt">0 ج.م</span></div>
       <div class="row total"><span>الإجمالي</span><span id="total-amt">0 ج.م</span></div>
     </div>
-    <button class="checkout-btn" onclick="checkout()">إتمام الطلب</button>
+    <button class="checkout-btn" onclick="checkout()">💬 إرسال الطلب عبر واتساب</button>
   </div>
 </div>
 
@@ -405,7 +423,7 @@ const PRODUCTS = {
     {id:'f3', name:'خضار مشكل مجمد', unit:'450 جم', em:'🥦', price:28, old:35, badge:'٪20-'},
     {id:'f4', name:'بطاطس مقرمشة مجمدة', unit:'1 كجم', em:'🍟', price:45, old:58, badge:'٪22-'},
     {id:'f5', name:'سمك فيليه مجمد', unit:'500 جم', em:'🐟', price:95, old:120, badge:'٪21-'},
-    {id:'f6', name:'مكرونة بالصلصة جاهزة', unit:'400 جم', em:'🍝', price:38, old:46, badge:'٪17-'},
+    {id:'f6', name:'مكرونة بالصلصةجاهزة', unit:'400 جم', em:'🍝', price:38, old:46, badge:'٪17-'},
   ],
   clean: [
     {id:'c1', name:'سائل غسيل أطباق', unit:'900 مل', em:'🧴', price:34, old:42, badge:'٪19-'},
@@ -506,7 +524,7 @@ function initTabs(){
 /* ===================== CART LOGIC ===================== */
 function addToCart(catKey, id){
   const list = PRODUCTS[catKey] || [];
-  const product = list.find(p => String(p.id) === String(id));
+    const product = list.find(p => String(p.id) === String(id));
   if(!product) return;
 
   if(cart[id]) cart[id].qty += 1;
@@ -544,7 +562,6 @@ function cartCount(){
 }
 
 function cartSubtotal(){
-  retufunction cartSubtotal(){
   return Object.values(cart).reduce((s,i)=>s+i.qty*i.product.price, 0);
 }
 
@@ -618,7 +635,42 @@ function applyCoupon(){
 
 function checkout(){
   if(cartCount() === 0) return;
-  showToast('تم استلام طلبك بنجاح! 🎉');
+  
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+
+  if(!name || !phone || !address){
+    showToast('يرجى كتابة الاسم ورقم الهاتف والعنوان أولاً');
+    return;
+  }
+
+  const subtotal = cartSubtotal();
+  const discount = appliedCoupon ? subtotal * appliedCoupon.rate : 0;
+  const total = subtotal - discount;
+
+  let msg = `🛒 *طلب جديد من متجر مخزن*\n\n`;
+  msg += `👤 *الاسم:* ${name}\n`;
+  msg += `📞 *الهاتف:* ${phone}\n`;
+  msg += `📍 *العنوان:* ${address}\n\n`;
+  msg += `📦 *المنتجات المطلوب تحضيرها:*\n`;
+
+  Object.values(cart).forEach((item, index) => {
+    msg += `${index + 1}. ${item.product.name} (الكمية: ${item.qty}) - ${item.qty * item.product.price} ج.م\n`;
+  });
+
+  msg += `\n💵 *المجموع:* ${subtotal.toFixed(0)} ج.م`;
+  if(discount > 0){
+    msg += `\n🏷️ *الخصم:* -${discount.toFixed(0)} ج.م (${appliedCoupon.code})`;
+  }
+  msg += `\n💰 *الإجمالي المطلوب:* ${total.toFixed(0)} ج.م`;
+
+  const myWhatsAppNumber = "201127491224";
+  const waUrl = `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(msg)}`;
+
+  window.open(waUrl, '_blank');
+
+  showToast('تم تحويلك للواتساب لإرسال الطلب! 🎉');
   cart = {};
   appliedCoupon = null;
   document.getElementById('couponInput').value = '';
