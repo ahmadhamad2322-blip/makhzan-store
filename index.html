@@ -488,7 +488,7 @@ function renderAllGrids(){
 }
 
 /* ===================== TABS SWITCHING ===================== */
-document.addEventListener('DOMContentLoaded', () => {
+function initTabs(){
   const tabsNav = document.getElementById('tabs');
   if(tabsNav){
     tabsNav.addEventListener('click', e => {
@@ -501,11 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(targetPanel) targetPanel.classList.add('active');
     });
   }
-  
-  renderAllGrids();
-  updateCartUI();
-  initFirebaseSilently();
-});
+}
 
 /* ===================== CART LOGIC ===================== */
 function addToCart(catKey, id){
@@ -548,6 +544,7 @@ function cartCount(){
 }
 
 function cartSubtotal(){
+  retufunction cartSubtotal(){
   return Object.values(cart).reduce((s,i)=>s+i.qty*i.product.price, 0);
 }
 
@@ -690,6 +687,12 @@ function initFirebaseSilently(){
     }
   } catch(e) {}
 }
+
+/* ===================== STARTUP ===================== */
+initTabs();
+renderAllGrids();
+updateCartUI();
+initFirebaseSilently();
 </script>
 </body>
 </html>
