@@ -543,7 +543,7 @@ function removeItem(id){
   updateCartUI();
 }
 
-function cfunction cartCount(){
+function cartCount(){
   return Object.values(cart).reduce((s,i)=>s+i.qty, 0);
 }
 
