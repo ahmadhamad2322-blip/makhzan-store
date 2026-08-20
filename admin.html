@@ -69,7 +69,7 @@
     border:2px solid var(--paper);
   }
 
-  /* ===== Tabs (shelf tags) ===== */
+  /* ===== Tabs ===== */
   nav.tags{
     display:flex; gap:10px; overflow-x:auto;
     padding:16px 14px 6px;
@@ -108,7 +108,7 @@
   .panel-head h2{font-size:22px; margin:0 0 4px; font-weight:900;}
   .panel-head p{margin:0; font-size:13px; color:var(--forest-light); font-weight:700;}
 
-  /* ===== Product grid ===== */
+  /* ===== Product Grid ===== */
   .grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
@@ -157,7 +157,6 @@
   .add-btn:active{transform:scale(.97);}
   .add-btn.added{background:var(--sky);}
 
-  /* subscription cards look a bit different */
   .sub-card{grid-column:span 2;}
   @media(min-width:640px){ .sub-card{grid-column:span 1;} }
   .sub-card .icon-wrap{background:linear-gradient(135deg, rgba(242,169,59,0.18), rgba(31,77,61,0.10));}
@@ -264,7 +263,6 @@
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
-  /* ===== WhatsApp floating button ===== */
   .whatsapp-btn{
     position:fixed; bottom:20px; left:20px; z-index:45;
     width:56px; height:56px; border-radius:50%;
@@ -273,7 +271,6 @@
     font-size:28px; box-shadow:0 4px 14px rgba(0,0,0,0.3);
   }
 
-  /* ===== Payment methods box ===== */
   .pay-box{
     margin-top:14px; background:var(--card); border:1.5px solid var(--line);
     border-radius:12px; padding:14px;
@@ -400,75 +397,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===================== ⚙️ إعدادات فايربيز ===================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
-  authDomain: "makhzan-9eb1f.firebaseapp.com",
-  projectId: "makhzan-9eb1f",
-  storageBucket: "makhzan-9eb1f.firebasestorage.app",
-  messagingSenderId: "695067759501",
-  appId: "1:695067759501:web:df932ff7bac0b1470523c4"
-};
-
-let db = null;
-
-function initFirebaseSafely(){
-  try{
-    if(!firebaseConfig || !firebaseConfig.apiKey) return false;
-    const sdk = window.firebase;
-    if(!sdk || typeof sdk.initializeApp !== 'function' || typeof sdk.firestore !== 'function'){
-      return false;
-    }
-    if(!sdk.apps || sdk.apps.length === 0){
-      sdk.initializeApp(firebaseConfig);
-    }
-    db = sdk.firestore();
-    return !!db;
-  }catch(err){
-    db = null;
-    return false;
-  }
-}
-
-function buildProductsFromDocs(docs){
-  const grouped = {frozen:[], clean:[], daily:[], sub:[]};
-  (Array.isArray(docs) ? docs : []).forEach(doc => {
-    try{
-      const r = doc && typeof doc.data === 'function' ? (doc.data() || {}) : {};
-      if(r.active === false) return;
-      const cat = r.category;
-      if(!grouped[cat]) return;
-      grouped[cat].push({
-        id: String(doc.id),
-        name: r.name || 'منتج بدون اسم',
-        unit: r.unit || '',
-        em: r.emoji || '🛒',
-        image_url: r.image_url || '',
-        price: Number(r.price) || 0,
-        old: r.old_price ? Number(r.old_price) : null,
-        badge: r.badge || '',
-        freq: r.freq || 'يتجدد كل شهر'
-      });
-    }catch(err){}
-  });
-  return grouped;
-}
-
-function loadFromFirebase(){
-  if(!db) return;
-  try{
-    const productsRef = db.collection('products');
-    productsRef.onSnapshot(snapshot => {
-      if(!snapshot || snapshot.empty) return;
-      const grouped = buildProductsFromDocs(snapshot.docs || []);
-      if(Object.values(grouped).some(list => list.length > 0)){
-        Object.assign(PRODUCTS, grouped);
-        renderAllGrids();
-      }
-    }, err => {});
-  }catch(err){}
-}
-
 /* ===================== DATA ===================== */
 const PRODUCTS = {
   frozen: [
@@ -509,11 +437,10 @@ const COUPONS = {
   'مخزن15': 0.15,
 };
 
-/* ===================== STATE ===================== */
 let cart = {};
 let appliedCoupon = null;
 
-/* ===================== RENDER PRODUCTS ===================== */
+/* ===================== RENDER FUNCTIONS ===================== */
 function iconMarkup(p){
   if(p.image_url && p.image_url.trim()){
     return `<div class="icon-wrap img"><img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='${p.em||'🛒'}'"></div>`;
@@ -524,7 +451,7 @@ function iconMarkup(p){
 function renderGrid(catKey){
   const el = document.getElementById('grid-' + catKey);
   if(!el) return;
-  const list = Array.isArray(PRODUCTS[catKey]) ? PRODUCTS[catKey] : [];
+  const list = PRODUCTS[catKey] || [];
   if(list.length === 0){
     el.innerHTML = `<div class="empty-cart" style="grid-column:1/-1;"><span class="em">📭</span>لا توجد عروض هنا حاليًا</div>`;
     return;
@@ -560,24 +487,35 @@ function renderAllGrids(){
   ['frozen','clean','daily','sub'].forEach(renderGrid);
 }
 
-/* ===================== TABS ===================== */
-document.getElementById('tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.tag-btn');
-  if(!btn) return;
-  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(btn.dataset.tab).classList.add('active');
+/* ===================== TABS SWITCHING ===================== */
+document.addEventListener('DOMContentLoaded', () => {
+  const tabsNav = document.getElementById('tabs');
+  if(tabsNav){
+    tabsNav.addEventListener('click', e => {
+      const btn = e.target.closest('.tag-btn');
+      if(!btn) return;
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const targetPanel = document.getElementById(btn.dataset.tab);
+      if(targetPanel) targetPanel.classList.add('active');
+    });
+  }
+  
+  renderAllGrids();
+  updateCartUI();
+  initFirebaseSilently();
 });
 
 /* ===================== CART LOGIC ===================== */
 function addToCart(catKey, id){
-  const list = Array.isArray(PRODUCTS[catKey]) ? PRODUCTS[catKey] : [];
-  const product = list.find(p => p && String(p.id) === String(id));
+  const list = PRODUCTS[catKey] || [];
+  const product = list.find(p => String(p.id) === String(id));
   if(!product) return;
 
   if(cart[id]) cart[id].qty += 1;
   else cart[id] = {product, qty:1};
+  
   updateCartUI();
 
   const btn = document.getElementById('btn-' + id);
@@ -586,7 +524,6 @@ function addToCart(catKey, id){
     const original = btn.textContent;
     btn.textContent = 'أُضيف ✓';
     setTimeout(()=>{
-      if(!btn.isConnected) return;
       btn.classList.remove('added');
       btn.textContent = original;
     }, 900);
@@ -606,25 +543,29 @@ function removeItem(id){
   updateCartUI();
 }
 
-function cartCount(){
-  return Object.values(cart).reduce((s,i)=>s+i.qty,0);
+function cfunction cartCount(){
+  return Object.values(cart).reduce((s,i)=>s+i.qty, 0);
 }
 
 function cartSubtotal(){
-  return Object.values(cart).reduce((s,i)=>s+i.qty*i.product.price,0);
+  return Object.values(cart).reduce((s,i)=>s+i.qty*i.product.price, 0);
 }
 
 function updateCartUI(){
-  document.getElementById('cartCount').textContent = cartCount();
+  const countEl = document.getElementById('cartCount');
+  if(countEl) countEl.textContent = cartCount();
+  
   const body = document.getElementById('cartBody');
   const foot = document.getElementById('cartFoot');
-  const items = Object.entries(cart);
+  if(!body || !foot) return;
 
+  const items = Object.entries(cart);
   if(items.length === 0){
     body.innerHTML = `<div class="empty-cart"><span class="em">🧺</span>السلة فاضية دلوقتي<br>يلا اختار عروضك المفضلة!</div>`;
     foot.style.display = 'none';
     return;
   }
+  
   foot.style.display = 'block';
   body.innerHTML = items.map(([id, item]) => `
     <div class="cart-item">
@@ -689,7 +630,7 @@ function checkout(){
   closeCart();
 }
 
-/* ===================== DRAWER ===================== */
+/* ===================== DRAWER CONTROLS ===================== */
 function openCart(){
   document.getElementById('drawer').classList.add('show');
   document.getElementById('overlay').classList.add('show');
@@ -699,7 +640,7 @@ function closeCart(){
   document.getElementById('overlay').classList.remove('show');
 }
 
-/* ===================== TOAST & UTILS ===================== */
+/* ===================== UTILS ===================== */
 let toastTimer;
 function copyNumber(num){
   navigator.clipboard.writeText(num).then(()=>{
@@ -711,25 +652,44 @@ function copyNumber(num){
 
 function showToast(text){
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = text;
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-function startFirebaseSafely(){
-  const connect = () => {
-    try{
-      if(initFirebaseSafely()) loadFromFirebase();
-    }catch(err){}
-  };
-  if(document.readyState === 'complete') setTimeout(connect, 0);
-  else window.addEventListener('load', connect, {once:true});
+/* ===================== SAFE FIREBASE INIT ===================== */
+function initFirebaseSilently(){
+  try {
+    if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
+        authDomain: "makhzan-9eb1f.firebaseapp.com",
+        projectId: "makhzan-9eb1f",
+        storageBucket: "makhzan-9eb1f.firebasestorage.app",
+        messagingSenderId: "695067759501",
+        appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+      });
+      const db = firebase.firestore();
+      db.collection('products').onSnapshot(snapshot => {
+        if(!snapshot.empty){
+          const grouped = {frozen:[], clean:[], daily:[], sub:[]};
+          snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if(data.active !== false && grouped[data.category]){
+              grouped[data.category].push({ id: doc.id, ...data });
+            }
+          });
+          if(Object.values(grouped).some(arr => arr.length > 0)){
+            Object.assign(PRODUCTS, grouped);
+            renderAllGrids();
+          }
+        }
+      }, err => {});
+    }
+  } catch(e) {}
 }
-
-renderAllGrids();
-updateCartUI();
-startFirebaseSafely();
 </script>
 </body>
 </html>
