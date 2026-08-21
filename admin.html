@@ -3,76 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - مخزن المتجر</title>
+    <title>لوحة التحكم - متجر مخزن</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <script>
-      var pass = prompt("من فضلك أدخل كلمة السر لفتح لوحة التحكم:");
-      if (pass !== "1234") { 
-        alert("كلمة سر خاطئة!");
-        window.location.href = "index.html"; 
-      }
-    </script>
-
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-        body { background-color: #f4f6f9; color: #333; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1, h2 { text-align: center; color: #1a252f; margin-bottom: 20px; }
-        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        button { width: 100%; background-color: #27ae60; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .product-item, .order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .btn-delete { background-color: #e74c3c; width: auto; padding: 6px 12px; font-size: 12px; }
-        .badge { background: #e1f5fe; color: #0288d1; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
-    </style>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f1f5f9; padding: 20px; color: #0f172a; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h2, h3 { margin-bottom: 15px; color: #0284c7; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        
+        .upload-box { border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; text-align: center; background: #f0f9ff; cursor: pointer; margin-top: 5px; }
+        .upload-box input { display: none; }
+        .preview-img { max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none; }
+
+        .btn-add { background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .product-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        .product-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>لوحة تحكم المتجر 🛠️</h1>
-
     <div class="card">
-        <h2>إضافة منتج جديد</h2>
-        <form id="addProductForm">
+        <h2>➕ إضافة منتج جديد</h2>
+        <form id="addProductForm" onsubmit="saveProduct(event)">
             <div class="form-group">
                 <label>اسم المنتج:</label>
-                <input type="text" id="prodName" placeholder="مثال: شيبسي عائلي" required>
+                <input type="text" id="pName" required placeholder="مثال: اوكسي 9 كجم">
             </div>
+
             <div class="form-group">
                 <label>السعر (بالجنيه):</label>
-                <input type="number" id="prodPrice" placeholder="مثال: 15" required>
+                <input type="number" id="pPrice" required placeholder="490">
             </div>
+
             <div class="form-group">
                 <label>القسم:</label>
-                <select id="prodCategory" required>
-                    <option value="grocery">بقالة عامة</option>
-                    <option value="food">حلويات وأغذية</option>
-                    <option value="drinks">مشروبات</option>
-                    <option value="beauty">عناية ومنظفات</option>
-                    <option value="weekly">عروض الأسبوع</option>
+                <select id="pCat" required>
+                    <option value="grocery">🛠️ خدمات عامة</option>
+                    <option value="food">🧊 مجمدات</option>
+                    <option value="drinks">🥤 مشروبات</option>
+                    <option value="beauty">✨ منظفات وعناية</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label>رابط صورة المنتج (URL):</label>
-                <input type="url" id="prodImage" placeholder="https://..." required>
+                <label>صورة المنتج (من الهاتف مباشرة):</label>
+                <div class="upload-box" onclick="document.getElementById('pFileInput').click()">
+                    <span>📁 اضغط هنا لاختيار صورة من جهازك</span>
+                    <input type="file" id="pFileInput" accept="image/*" onchange="handleFileSelect(event)">
+                </div>
+                <center><img id="imgPreview" class="preview-img" alt="معاينة"></center>
+                <input type="hidden" id="pImgUrl">
             </div>
-            <button type="submit">إضافة المنتج إلى المتجر 🚀</button>
+
+            <button type="submit" id="submitBtn" class="btn-add">حفظ المنتج 🚀</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>المنتجات المعروضة حالياً</h2>
-        <div id="productsList">جاري تحميل المنتجات...</div>
-    </div>
-
-    <div class="card">
-        <h2>طلبات الشراء الواردة 📦</h2>
-        <div id="ordersList">جاري تحميل الطلبات...</div>
+        <h3>📦 المنتجات الحالية</h3>
+        <div id="productsList">جاري التحميل...</div>
     </div>
 </div>
 
@@ -91,86 +94,101 @@
   }
   const db = firebase.firestore();
 
-  document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+  // تحويل الصورة المرفوعة من الهاتف إلى رابط Base64 وحفظها مباشرة
+  function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-      const name = document.getElementById('prodName').value;
-      const price = parseFloat(document.getElementById('prodPrice').value);
-      const cat = document.getElementById('prodCategory').value;
-      const image = document.getElementById('prodImage').value;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+              // ضغط الصورة لسرعة التحميل على المتجر
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const maxWidth = 500;
+              const scaleSize = maxWidth / img.width;
+              canvas.width = maxWidth;
+              canvas.height = img.height * scaleSize;
+
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+              document.getElementById('pImgUrl').value = resizedDataUrl;
+              const preview = document.getElementById('imgPreview');
+              preview.src = resizedDataUrl;
+              preview.style.display = 'block';
+          };
+          img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+  }
+
+  function saveProduct(e) {
+      e.preventDefault();
+      const name = document.getElementById('pName').value;
+      const price = parseFloat(document.getElementById('pPrice').value);
+      const cat = document.getElementById('pCat').value;
+      const img = document.getElementById('pImgUrl').value;
+
+      if (!img) {
+          alert('يرجى اختيار صورة للمنتج أولاً');
+          return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "جاري الحفظ...";
 
       db.collection('products').add({
-          id: Date.now(),
           name: name,
           price: price,
           cat: cat,
-          img: image,
+          img: img,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-          alert('تمت إضافة المنتج بنجاح!');
+          alert('تم إضافة المنتج بنجاح! 🎉');
           document.getElementById('addProductForm').reset();
-      }).catch((error) => {
-          alert('حدث خطأ: ' + error.message);
+          document.getElementById('imgPreview').style.display = 'none';
+          document.getElementById('pImgUrl').value = '';
+          btn.disabled = false;
+          btn.innerText = "حفظ المنتج 🚀";
+      }).catch(err => {
+          alert('حدث خطأ: ' + err.message);
+          btn.disabled = false;
+          btn.innerText = "حفظ المنتج 🚀";
       });
-  });
+  }
 
-  db.collection('products').onSnapshot((snapshot) => {
-      const container = document.getElementById('productsList');
+  // عرض وتنسيق المنتجات الحالية وإمكانية حذفها
+  db.collection('products').onSnapshot(snapshot => {
+      const list = document.getElementById('productsList');
       if (snapshot.empty) {
-          container.innerHTML = '<p style="text-align:center;">لا توجد منتجات حالياً.</p>';
+          list.innerHTML = '<p>لا توجد منتجات مضافة بعد.</p>';
           return;
       }
       let html = '';
-      snapshot.forEach((doc) => {
-          const data = doc.data();
+      snapshot.forEach(doc => {
+          const p = doc.data();
           html += `
               <div class="product-item">
-                  <div>
-                      <strong>${data.name}</strong> - ${data.price} جنيه 
-                      <span class="badge">${data.cat || 'عام'}</span>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                      <img src="${p.img}" alt="${p.name}">
+                      <div>
+                          <strong>${p.name}</strong><br>
+                          <small>${p.price} جنيه</small>
+                      </div>
                   </div>
-                  <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف</button>
+                  <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
               </div>
           `;
       });
-      container.innerHTML = html;
+      list.innerHTML = html;
   });
 
   function deleteProduct(id) {
-      if (confirm('تأكيد حذف المنتج؟')) {
+      if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
           db.collection('products').doc(id).delete();
-      }
-  }
-
-  db.collection('orders').onSnapshot((snapshot) => {
-      const container = document.getElementById('ordersList');
-      if (snapshot.empty) {
-          container.innerHTML = '<p style="text-align:center;">لا توجد طلبات حتى الآن.</p>';
-          return;
-      }
-      let html = '';
-      snapshot.forEach((doc) => {
-          const data = doc.data();
-          let itemsText = Array.isArray(data.items) ? data.items.join(', ') : 'غير محدد';
-          html += `
-              <div class="order-item" style="flex-direction: column; align-items: flex-start;">
-                  <div>
-                      <strong>الاسم:</strong> ${data.name || 'غير معروف'}<br>
-                      <strong>الهاتف:</strong> ${data.phone || 'بدون رقم'}<br>
-                      <strong>العنوان:</strong> ${data.address || 'بدون عنوان'}<br>
-                      <strong>المنتجات:</strong> ${itemsText}<br>
-                      <strong>الإجمالي:</strong> ${data.total || 0} جنيه
-                  </div>
-                  <button class="btn-delete" style="margin-top:10px;" onclick="deleteOrder('${doc.id}')">حذف الطلب</button>
-              </div>
-          `;
-      });
-      container.innerHTML = html;
-  });
-
-  function deleteOrder(id) {
-      if (confirm('حذف الطلب؟')) {
-          db.collection('orders').doc(id).delete();
       }
   }
 </script>
