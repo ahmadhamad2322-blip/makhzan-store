@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - مخزن المتجر</title>
     
-    <!-- حماية لوحة التحكم بكلمة سر -->
     <script>
       var pass = prompt("من فضلك أدخل كلمة السر لفتح لوحة التحكم:");
       if (pass !== "1234") { 
@@ -15,97 +14,20 @@
     </script>
 
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            background-color: #f4f6f9;
-            color: #333;
-            padding: 15px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1, h2 {
-            text-align: center;
-            color: #1a252f;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        button {
-            width: 100%;
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover {
-            background-color: #219150;
-        }
-        .product-item, .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        .product-item:last-child {
-            border-bottom: none;
-        }
-        .btn-delete {
-            background-color: #e74c3c;
-            width: auto;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        .btn-delete:hover {
-            background-color: #c0392b;
-        }
-        .order-details {
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .badge {
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f6f9; color: #333; padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1, h2 { text-align: center; color: #1a252f; margin-bottom: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { width: 100%; background-color: #27ae60; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .product-item, .order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .btn-delete { background-color: #e74c3c; width: auto; padding: 6px 12px; font-size: 12px; }
+        .badge { background: #e1f5fe; color: #0288d1; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
     </style>
 
-    <!-- مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
@@ -114,13 +36,12 @@
 <div class="container">
     <h1>لوحة تحكم المتجر 🛠️</h1>
 
-    <!-- نموذج إضافة منتج -->
     <div class="card">
         <h2>إضافة منتج جديد</h2>
         <form id="addProductForm">
             <div class="form-group">
                 <label>اسم المنتج:</label>
-                <input type="text" id="prodName" placeholder="مثال: شيبسي عائلي" required>
+                <input type="text" id="prodName" placeholder="مثال: شيبسي" required>
             </div>
             <div class="form-group">
                 <label>السعر (بالجنيه):</label>
@@ -133,24 +54,21 @@
                     <option value="شيبسي">شيبسي ومقرمشات</option>
                     <option value="مشروبات">مشروبات ومشروبات غازية</option>
                     <option value="بقالة">بقالة عامة</option>
-                    <option value="أخرى">أخرى</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>رابط صورة المنتج (URL):</label>
-                <input type="url" id="prodImage" placeholder="ضع رابط الصورة هنا" required>
+                <input type="url" id="prodImage" placeholder="https://..." required>
             </div>
             <button type="submit">إضافة المنتج إلى المتجر 🚀</button>
         </form>
     </div>
 
-    <!-- قائمة المنتجات الحالية -->
     <div class="card">
         <h2>المنتجات المعروضة حالياً</h2>
         <div id="productsList">جاري تحميل المنتجات...</div>
     </div>
 
-    <!-- قائمة طلبات الشراء -->
     <div class="card">
         <h2>طلبات الشراء الواردة 📦</h2>
         <div id="ordersList">جاري تحميل الطلبات...</div>
@@ -158,9 +76,9 @@
 </div>
 
 <script>
-  // بيانات Firebase الخاصة بمشروعك بالضبط
+  // المفتاح والبيانات الكاملة بدون أي اختصار
   const firebaseConfig = {
-    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8...", 
+    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
     projectId: "makhzan-9eb1f",
     storageBucket: "makhzan-9eb1f.appspot.com",
@@ -173,7 +91,6 @@
   }
   const db = firebase.firestore();
 
-  // إضافة منتج جديد
   document.getElementById('addProductForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -189,21 +106,19 @@
           image: image,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-          alert('تم إضافة المنتج بنجاح!');
+          alert('تمت الإضافة بنجاح!');
           document.getElementById('addProductForm').reset();
       }).catch((error) => {
-          alert('حدث خطأ أثناء الإضافة: ' + error.message);
+          alert('خطأ في الإضافة: ' + error.message);
       });
   });
 
-  // عرض المنتجات وتوفير زر الحذف
-  db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+  db.collection('products').onSnapshot((snapshot) => {
       const container = document.getElementById('productsList');
       if (snapshot.empty) {
           container.innerHTML = '<p style="text-align:center;">لا توجد منتجات حالياً.</p>';
           return;
       }
-
       let html = '';
       snapshot.forEach((doc) => {
           const data = doc.data();
@@ -220,31 +135,25 @@
       container.innerHTML = html;
   });
 
-  // حذف منتج
   function deleteProduct(id) {
-      if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
-          db.collection('products').doc(id).delete().then(() => {
-              alert('تم حذف المنتج!');
-          });
+      if (confirm('تأكيد الحذف؟')) {
+          db.collection('products').doc(id).delete();
       }
   }
 
-  // عرض الطلبات القادمة من المتجر
-  db.collection('orders').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+  db.collection('orders').onSnapshot((snapshot) => {
       const container = document.getElementById('ordersList');
       if (snapshot.empty) {
           container.innerHTML = '<p style="text-align:center;">لا توجد طلبات حتى الآن.</p>';
           return;
       }
-
       let html = '';
       snapshot.forEach((doc) => {
           const data = doc.data();
           let itemsText = Array.isArray(data.items) ? data.items.join(', ') : 'غير محدد';
-          
           html += `
               <div class="order-item" style="flex-direction: column; align-items: flex-start;">
-                  <div class="order-details">
+                  <div>
                       <strong>الاسم:</strong> ${data.name || 'غير معروف'}<br>
                       <strong>الهاتف:</strong> ${data.phone || 'بدون رقم'}<br>
                       <strong>العنوان:</strong> ${data.address || 'بدون عنوان'}<br>
@@ -258,9 +167,8 @@
       container.innerHTML = html;
   });
 
-  // حذف طلب
   function deleteOrder(id) {
-      if (confirm('هل تم تنفيذ هذا الطلب وتريد حذفه؟')) {
+      if (confirm('حذف الطلب؟')) {
           db.collection('orders').doc(id).delete();
       }
   }
