@@ -45,11 +45,10 @@
   .brand-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
   .brand-logo .logo-icon {
     width: 40px; height: 40px; background: var(--brand);
-    border-radius: 12px; display: flex; align-items: center; justify-content: justify;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 900; color: #fff;
-    line-height: 40px; text-align: center;
   }
-  .brand-logo h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .brand-logo h1 { font-size: 20px; font-weight: 800; }
 
   .header-actions { display: flex; align-items: center; gap: 12px; }
   .cart-trigger {
@@ -76,7 +75,6 @@
     width: 100%; padding: 12px 16px;
     border: 2px solid var(--border); border-radius: 12px;
     font-size: 14px; outline: none; background: #fff;
-    transition: border-color .2s;
   }
   .search-input-box input:focus { border-color: var(--brand); }
 
@@ -111,7 +109,6 @@
     margin-bottom: 24px; text-align: center;
   }
   .hero-banner h2 { font-size: 22px; margin-bottom: 8px; color: var(--accent); }
-  .hero-banner p { font-size: 14px; opacity: 0.9; }
 
   .section-head { margin-bottom: 16px; }
   .section-head h2 { font-size: 20px; font-weight: 800; }
@@ -155,23 +152,6 @@
     cursor: pointer;
   }
 
-  /* ===== Referral Banner ===== */
-  .referral-box {
-    background: #eff6ff; border: 1px dashed var(--brand);
-    border-radius: 12px; padding: 14px; margin-bottom: 20px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .referral-box h4 { color: var(--brand); font-size: 14px; }
-  .referral-box p { font-size: 12px; color: var(--text-muted); }
-  .referral-row { display: flex; gap: 8px; }
-  .referral-row input {
-    flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px;
-  }
-  .referral-row button {
-    background: var(--brand); color: #fff; border: none; padding: 0 12px;
-    border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
-  }
-
   /* ===== Cart Drawer ===== */
   .drawer-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
@@ -180,7 +160,7 @@
   .drawer-overlay.show { opacity: 1; pointer-events: auto; }
   .cart-drawer {
     position: fixed; top: 0; bottom: 0; left: 0;
-    width: min(400px, 90vw); background: #fff;
+    width: min(400px, 92vw); background: #fff;
     transform: translateX(-100%); transition: transform .3s ease;
     z-index: 100; display: flex; flex-direction: column;
     box-shadow: 4px 0 25px rgba(0,0,0,0.15);
@@ -204,19 +184,17 @@
     border-radius: 6px; background: #fff; font-weight: 700; cursor: pointer;
   }
 
+  .user-info-form {
+    background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .user-info-form label { font-size: 11px; font-weight: 700; color: var(--primary); }
+  .user-info-form input {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; outline: none; background: #fff;
+  }
+
   .drawer-footer { padding: 16px; border-top: 1px solid var(--border); background: #f8fafc; }
-  .payment-options { margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .payment-options label { font-size: 12px; font-weight: 700; }
-  .pay-method-option {
-    display: flex; align-items: center; gap: 8px; font-size: 12px;
-    padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: #fff; cursor: pointer;
-  }
-
-  .pay-details-box {
-    background: #fff; border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px; font-size: 11px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between;
-  }
-
   .checkout-btn {
     width: 100%; padding: 12px; background: #25d366; color: #fff;
     border: none; border-radius: 10px; font-weight: 800; font-size: 14px;
@@ -262,13 +240,14 @@
 <!-- Search Input -->
 <div class="search-wrapper">
   <div class="search-input-box">
-    <input type="text" id="searchInput" placeholder="🔍 ابحث عن أي منتج..." oninput="handleSearch()">
+    <input type="text" id="searchInput" placeholder="🔍 ابحث عن أي منتج أو خدمة..." oninput="handleSearch()">
   </div>
 </div>
 
 <!-- Category Tabs Navigation -->
 <nav class="categories-tab" id="tabsNav">
   <button class="tab-btn active" onclick="switchTab('home')">🏠 الرئيسية</button>
+  <button class="tab-btn" onclick="switchTab('general')">🛠️ خدمات عامة</button>
   <button class="tab-btn" onclick="switchTab('frozen')">❄️ مجمدات</button>
   <button class="tab-btn" onclick="switchTab('birds')">🍗 طيور</button>
   <button class="tab-btn" onclick="switchTab('spices')">🌿 عطارة</button>
@@ -285,21 +264,16 @@
   <section class="panel active" id="home">
     <div class="hero-banner">
       <h2>أهلاً بك في متجر مخزن! 🛍️</h2>
-      <p>أفضل العروض والمنتجات بأسعار التوفير المباشرة</p>
+      <p>أفضل المنتجات والخدمات العامة بأسعار ممتازة</p>
     </div>
-
-    <!-- Referral Link Box -->
-    <div class="referral-box">
-      <h4>🎁 اكسب خصم 5% شارك المتجر مع أصحابك!</h4>
-      <p>أي زبون يدخل عن طريق رابطك وياخد كود الخصم بيحصل على خصم 5% فوراً.</p>
-      <div class="referral-row">
-        <input type="text" id="refLink" readonly>
-        <button onclick="copyRefLink()">نسخ الرابط</button>
-      </div>
-    </div>
-
-    <div class="section-head"><h2>أحدث العروض المميزة</h2></div>
+    <div class="section-head"><h2>أحدث العروض والخدمات</h2></div>
     <div class="products-grid" id="grid-home"></div>
+  </section>
+
+  <!-- General Services Panel -->
+  <section class="panel" id="general">
+    <div class="section-head"><h2>قسم الخدمات العامة 🛠️</h2></div>
+    <div class="products-grid" id="grid-general"></div>
   </section>
 
   <!-- Frozen Panel -->
@@ -356,47 +330,24 @@
   <div class="drawer-body" id="cartBody"></div>
   <div class="drawer-footer" id="cartFooter">
     
-    <!-- Coupon Code Input -->
-    <div style="margin-bottom: 12px;">
-      <label style="font-size:11px; font-weight:700;">كود الخصم:</label>
-      <div style="display:flex; gap:6px; margin-top:4px;">
-        <input type="text" id="couponInput" placeholder="ادخل الكود هنا" style="flex:1; padding:6px; border:1px solid var(--border); border-radius:6px; font-size:12px;">
-        <button onclick="applyCoupon()" style="background:var(--brand); color:#fff; border:none; padding:0 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">تطبيق</button>
-      </div>
-      <span id="couponMsg" style="font-size:10px; display:block; margin-top:2px;"></span>
-    </div>
-
-    <!-- Payment Methods Selection -->
-    <div class="payment-options">
-      <label>طريقة الدفع:</label>
-      <div class="pay-method-option">
-        <input type="radio" id="payCOD" name="payment" value="الدفع عند الاستلام" checked onchange="updatePayDetails()">
-        <label for="payCOD">💵 الدفع عند الاستلام</label>
-      </div>
-      <div class="pay-method-option">
-        <input type="radio" id="payVodafone" name="payment" value="فودافون كاش" onchange="updatePayDetails()">
-        <label for="payVodafone">🔴 محفظة فودافون كاش</label>
-      </div>
-      <div class="pay-method-option">
-        <input type="radio" id="payInsta" name="payment" value="انستا باي" onchange="updatePayDetails()">
-        <label for="payInsta">🟣 محفظة انستا باي</label>
-      </div>
-    </div>
-
-    <!-- Dynamic Payment Number Box -->
-    <div id="payDetailsBox" class="pay-details-box" style="display:none;">
+    <!-- User Info Inputs -->
+    <div class="user-info-form">
       <div>
-        <span id="payDetailsName" style="font-weight:700;"></span>:
-        <span id="payDetailsNum" style="direction:ltr; display:inline-block;"></span>
+        <label>الاسم بالكامل *</label>
+        <input type="text" id="custName" placeholder="اكتب اسمك الثلاثي">
       </div>
-      <button onclick="copyPayNumber()" style="background:var(--brand); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer;">نسخ الرقم</button>
+      <div>
+        <label>رقم الواتساب / الهاتف *</label>
+        <input type="tel" id="custPhone" placeholder="010xxxxxxx">
+      </div>
+      <div>
+        <label>العنوان بالكامل *</label>
+        <input type="text" id="custAddress" placeholder="المنطقة - اسم الشارع - رقم العقار">
+      </div>
     </div>
 
-    <!-- Total Amounts -->
-    <div style="margin: 12px 0; font-size: 13px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>المجموع:</span><span id="cartSubtotal">0 ج.م</span></div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--green); display:none;" id="discountRow"><span>الخصم:</span><span id="cartDiscount">0 ج.م</span></div>
-      <div style="display:flex; justify-content:space-between; font-weight:800; font-size:16px; margin-top:6px; border-top:1px solid var(--border); padding-top:6px;"><span>الإجمالي:</span><span id="cartTotal">0 ج.م</span></div>
+    <div style="margin: 10px 0; font-size: 15px; font-weight:800; display:flex; justify-content:space-between;">
+      <span>الإجمالي:</span><span id="cartTotal">0 ج.م</span>
     </div>
 
     <button class="checkout-btn" onclick="checkoutWhatsApp()">إرسال الطلب عبر الواتساب 💬</button>
@@ -427,56 +378,33 @@ function initFirebase(){
   } catch(e) { console.warn("Firebase Init Error", e); }
 }
 
-/* ===================== LOCAL DATA & INITIAL STATE ===================== */
+/* ===================== EMPTY LOCAL DATA ===================== */
 let PRODUCTS = {
-  frozen: [
-    {id:'f1', name:"كفتة لحم فاخرة", unit:"500 جم", price:75, old:90, em:'🥩'},
-    {id:'f2', name:"فراخ بانيه متبلة", unit:"1 كجم", price:140, old:160, em:'🍗'}
-  ],
-  birds: [
-    {id:'b1', name:"وراك فراخ طازجة", unit:"1 كجم", price:85, old:95, em:'🍗'},
-    {id:'b2', name:"دبابيس دجاج", unit:"1 كجم", price:90, old:105, em:'🍗'}
-  ],
-  spices: [
-    {id:'s1', name:"فلفل أسود حصى", unit:"250 جم", price:40, old:50, em:'🌿'},
-    {id:'s2', name:"كمون بلدي مطحون", unit:"250 جم", price:35, old:45, em:'🌿'}
-  ],
-  acc: [
-    {id:'a1', name:"توكة شعر أنيقة", unit:"طقم 3 قطع", price:25, old:35, em:'🎀'},
-    {id:'a2', name:"سلسلة رقيقة", unit:"قطعة واحدة", price:60, old:80, em:'✨'}
-  ],
-  beauty: [
-    {id:'bt1', name:"سيروم البشرة الفعال", unit:"30 مل", price:110, old:140, em:'💄'},
-    {id:'bt2', name:"كريم ترطيب طبيعي", unit:"100 مل", price:55, old:70, em:'🧴'}
-  ],
-  daily: [
-    {id:'d1', name:"عرض زيت عباد الشمس", unit:"1 لتر", price:50, old:70, em:'⚡'}
-  ],
-  weekly: [
-    {id:'w1', name:"كرتونة بيض أبيض", unit:"30 بيضة", price:140, old:165, em:'🔥'}
-  ]
+  general: [],
+  frozen: [],
+  birds: [],
+  spices: [],
+  acc: [],
+  beauty: [],
+  daily: [],
+  weekly: []
 };
 
 let cart = {};
-let activeCouponRate = 0;
 
 /* ===================== TAB SWITCHING ===================== */
 function switchTab(tabId){
-  // 1. Hide all panels
   const panels = document.querySelectorAll('.panel');
   panels.forEach(p => p.classList.remove('active'));
 
-  // 2. Remove active class from buttons
   const buttons = document.querySelectorAll('.tab-btn');
   buttons.forEach(b => b.classList.remove('active'));
 
-  // 3. Activate selected panel
   const targetPanel = document.getElementById(tabId);
   if(targetPanel){
     targetPanel.classList.add('active');
   }
 
-  // 4. Activate button
   buttons.forEach(b => {
     if(b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId)){
       b.classList.add('active');
@@ -497,7 +425,7 @@ function renderProducts(catKey, filterText = ''){
   }
 
   if(!items.length){
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات متاحة حالياً</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر في هذا القسم حالياً، يرجى إضافتها من لوحة التحكم</div>`;
     return;
   }
 
@@ -505,7 +433,7 @@ function renderProducts(catKey, filterText = ''){
     <div class="product-card">
       ${p.old ? `<span class="product-badge">خصم</span>` : ''}
       <div class="product-img">
-        ${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.em || '🛍️')}
+        ${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.em || '📦')}
       </div>
       <div class="product-details">
         <h3>${p.name}</h3>
@@ -521,7 +449,7 @@ function renderProducts(catKey, filterText = ''){
 }
 
 function renderAllGrids(filter = ''){
-  const cats = ['frozen','birds','spices','acc','beauty','daily','weekly'];
+  const cats = ['general','frozen','birds','spices','acc','beauty','daily','weekly'];
   cats.forEach(c => renderProducts(c, filter));
 
   const homeGrid = document.getElementById('grid-home');
@@ -530,9 +458,14 @@ function renderAllGrids(filter = ''){
     cats.forEach(c => { allProducts = allProducts.concat(PRODUCTS[c] || []); });
     if(filter) allProducts = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
     
-    homeGrid.innerHTML = allProducts.slice(0, 8).map(p => `
+    if(!allProducts.length){
+      homeGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر مضافة بعد</div>`;
+      return;
+    }
+
+    homeGrid.innerHTML = allProducts.map(p => `
       <div class="product-card">
-        <div class="product-img">${p.img ? `<img src="${p.img}">` : (p.em || '🛍️')}</div>
+        <div class="product-img">${p.img ? `<img src="${p.img}">` : (p.em || '📦')}</div>
         <div class="product-details">
           <h3>${p.name}</h3>
           <span class="unit">${p.unit || ''}</span>
@@ -558,7 +491,7 @@ function addToCart(catKey, id){
   else cart[id] = { product, qty: 1 };
 
   updateCart();
-  showToast('تمت إضافة المنتج للسلة بنجاح');
+  showToast('تمت الإضافة للسلة بنجاح');
 }
 
 function addToCartDirect(id){
@@ -571,7 +504,7 @@ function addToCartDirect(id){
     if(cart[id]) cart[id].qty++;
     else cart[id] = { product: found, qty: 1 };
     updateCart();
-    showToast('تمت إضافة المنتج للسلة بنجاح');
+    showToast('تمت الإضافة للسلة بنجاح');
   }
 }
 
@@ -599,7 +532,7 @@ function updateCart(){
   footer.style.display = 'block';
   body.innerHTML = items.map(([id, item]) => `
     <div class="cart-item">
-      <div style="font-size:24px;">${item.product.em || '🛍️'}</div>
+      <div style="font-size:24px;">${item.product.em || '📦'}</div>
       <div class="cart-item-info">
         <h5>${item.product.name}</h5>
         <div class="price">${item.product.price} ج.م</div>
@@ -612,20 +545,8 @@ function updateCart(){
     </div>
   `).join('');
 
-  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
-  const discount = subtotal * activeCouponRate;
-  const total = subtotal - discount;
-
-  document.getElementById('cartSubtotal').textContent = subtotal.toFixed(0) + ' ج.م';
+  const total = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
   document.getElementById('cartTotal').textContent = total.toFixed(0) + ' ج.م';
-  
-  const discRow = document.getElementById('discountRow');
-  if(discount > 0){
-    discRow.style.display = 'flex';
-    document.getElementById('cartDiscount').textContent = '-' + discount.toFixed(0) + ' ج.م';
-  } else {
-    discRow.style.display = 'none';
-  }
 }
 
 function toggleCart(){
@@ -633,97 +554,46 @@ function toggleCart(){
   document.getElementById('drawerOverlay').classList.toggle('show');
 }
 
-/* ===================== COUPON & REFERRAL SYSTEM ===================== */
-function applyCoupon(){
-  const code = document.getElementById('couponInput').value.trim();
-  const msg = document.getElementById('couponMsg');
-
-  if(code === 'SAVE5' || code === 'خصم5'){
-    activeCouponRate = 0.05;
-    msg.style.color = 'var(--green)';
-    msg.textContent = 'تم تطبيق الخصم بنجاح (5%) 🎉';
-  } else {
-    activeCouponRate = 0;
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'كود الخصم غير صحيح';
-  }
-  updateCart();
-}
-
-function setupReferral(){
-  const linkInput = document.getElementById('refLink');
-  const refUrl = window.location.origin + window.location.pathname + '?ref=SAVE5';
-  linkInput.value = refUrl;
-
-  const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.get('ref') === 'SAVE5'){
-    document.getElementById('couponInput').value = 'SAVE5';
-    applyCoupon();
-    showToast('أهلاً بك! تم إضافة كود الخصم 5% لسلتك تلقائياً 🎁');
-  }
-}
-
-function copyRefLink(){
-  const linkInput = document.getElementById('refLink');
-  navigator.clipboard.writeText(linkInput.value);
-  showToast('تم نسخ رابط الإحالة بنجاح!');
-}
-
-/* ===================== PAYMENT & CHECKOUT ===================== */
-function updatePayDetails(){
-  const payMethod = document.querySelector('input[name="payment"]:checked').value;
-  const box = document.getElementById('payDetailsBox');
-  const nameEl = document.getElementById('payDetailsName');
-  const numEl = document.getElementById('payDetailsNum');
-
-  if(payMethod === 'فودافون كاش'){
-    box.style.display = 'flex';
-    nameEl.textContent = 'فودافون كاش';
-    numEl.textContent = '01012517345';
-  } else if(payMethod === 'انستا باي'){
-    box.style.display = 'flex';
-    nameEl.textContent = 'انستا باي';
-    numEl.textContent = '01127491224';
-  } else {
-    box.style.display = 'none';
-  }
-}
-
-function copyPayNumber(){
-  const num = document.getElementById('payDetailsNum').textContent;
-  navigator.clipboard.writeText(num);
-  showToast('تم نسخ الرقم: ' + num);
-}
-
+/* ===================== CHECKOUT WITH DIRECT WHATSAPP MESSAGE ===================== */
 function checkoutWhatsApp(){
   const items = Object.values(cart);
   if(!items.length) return;
 
-  const payMethod = document.querySelector('input[name="payment"]:checked').value;
-  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
-  const discount = subtotal * activeCouponRate;
-  const total = subtotal - discount;
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
 
-  let msg = `طلب جديد من متجر مخزن 🛍️\n\n`;
-  msg += `📋 *المنتجات المطلوبة:*\n`;
-  items.forEach(i => {
-    msg += `- ${i.product.name} (العدد: ${i.qty}) بسعر ${i.qty * i.product.price} ج.م\n`;
+  if(!name || !phone || !address){
+    showToast('⚠️ يرجى ملء بيانات الاسم والرقم والعنوان أولاً');
+    return;
+  }
+
+  const total = items.reduce((s, i) => s + (i.qty * i.product.price), 0);
+
+  let msg = `🛒 *طلب جديد من متجر مخزن*\n\n`;
+  msg += `👤 *الاسم:* ${name}\n`;
+  msg += `📞 *الواتساب/الهاتف:* ${phone}\n`;
+  msg += `📍 *العنوان:* ${address}\n\n`;
+  msg += `📋 *قائمة المشتريات/الخدمات:*\n`;
+  
+  items.forEach((i, idx) => {
+    msg += `${idx + 1}. ${i.product.name} - (العدد: ${i.qty}) بسعر ${i.qty * i.product.price} ج.م\n`;
   });
 
-  msg += `\n💳 *طريقة الدفع:* ${payMethod}\n`;
-  if(discount > 0) msg += `🏷️ *الخصم:* ${discount.toFixed(0)} ج.م\n`;
-  msg += `💰 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م\n`;
+  msg += `\n💰 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م`;
 
-  const encoded = encodeURIComponent(msg);
-  window.open(`https://wa.me/201127491224?text=${encoded}`, '_blank');
+  // Direct redirection with pre-filled message text
+  const targetPhone = "201127491224";
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(msg)}`;
+  
+  window.open(whatsappUrl, '_blank');
 }
 
 /* ===================== FIREBASE REALTIME LISTENER ===================== */
 function listenToProducts(){
   if(!db) return;
   db.collection('products').onSnapshot(snapshot => {
-    if(snapshot.empty) return;
-    const loaded = { frozen:[], birds:[], spices:[], acc:[], beauty:[], daily:[], weekly:[] };
+    const loaded = { general:[], frozen:[], birds:[], spices:[], acc:[], beauty:[], daily:[], weekly:[] };
     
     snapshot.docs.forEach(doc => {
       const data = doc.data();
@@ -747,7 +617,6 @@ function showToast(text){
 
 /* Initialize */
 renderAllGrids();
-setupReferral();
 initFirebase();
 </script>
 </body>
