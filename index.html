@@ -1,705 +1,115 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>متجر مخزن | التسوق الذكي</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<style>
-  :root {
-    --primary: #0f172a;
-    --brand: #2563eb;
-    --brand-accent: #3b82f6;
-    --accent: #f59e0b;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --text: #1e293b;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
-    --green: #10b981;
-    --red: #ef4444;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر مخزن</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Tajawal', sans-serif;
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-  h1, h2, h3, h4, .font-cairo { font-family: 'Cairo', sans-serif; }
-
-  /* ===== Header & Navbar ===== */
-  header.top-bar {
-    position: sticky; top: 0; z-index: 50;
-    background: var(--primary);
-    color: #fff;
-    padding: 12px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  }
-  .brand-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .brand-logo .logo-icon {
-    width: 40px; height: 40px; background: var(--brand);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 900; color: #fff;
-  }
-  .brand-logo h1 { font-size: 20px; font-weight: 800; }
-
-  .header-actions { display: flex; align-items: center; gap: 12px; }
-  .cart-trigger {
-    position: relative;
-    background: var(--brand);
-    color: #fff; border: none;
-    padding: 8px 16px; border-radius: 10px;
-    font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .cart-badge {
-    position: absolute; top: -6px; right: -6px;
-    background: var(--red); color: #fff;
-    font-size: 11px; font-weight: 800;
-    width: 20px; height: 20px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid var(--primary);
-  }
-
-  /* ===== Search Bar ===== */
-  .search-wrapper { padding: 16px 20px 8px; max-width: 800px; margin: 0 auto; }
-  .search-input-box { position: relative; width: 100%; }
-  .search-input-box input {
-    width: 100%; padding: 12px 16px;
-    border: 2px solid var(--border); border-radius: 12px;
-    font-size: 14px; outline: none; background: #fff;
-  }
-  .search-input-box input:focus { border-color: var(--brand); }
-
-  /* ===== Category Navigation Tabs ===== */
-  nav.categories-tab {
-    display: flex; gap: 8px; overflow-x: auto;
-    padding: 12px 20px; max-width: 1200px; margin: 0 auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-  }
-  nav.categories-tab::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    flex: 0 0 auto;
-    background: #fff; border: 1px solid var(--border);
-    padding: 8px 16px; border-radius: 20px;
-    font-size: 13px; font-weight: 700; color: var(--text-muted);
-    cursor: pointer; transition: all .2s;
-  }
-  .tab-btn.active {
-    background: var(--brand); color: #fff; border-color: var(--brand);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-  }
-
-  /* ===== Main Content Panels ===== */
-  main.container { max-width: 1200px; margin: 0 auto; padding: 10px 20px; }
-  section.panel { display: none; }
-  section.panel.active { display: block; }
-
-  .hero-banner {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    color: #fff; border-radius: 16px; padding: 24px;
-    margin-bottom: 24px; text-align: center;
-  }
-  .hero-banner h2 { font-size: 22px; margin-bottom: 8px; color: var(--accent); }
-
-  .section-head { margin-bottom: 16px; }
-  .section-head h2 { font-size: 20px; font-weight: 800; }
-
-  /* ===== Product Cards Grid ===== */
-  .products-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-  }
-  @media(min-width: 640px) {
-    .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-  }
-
-  .product-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; overflow: hidden;
-    display: flex; flex-direction: column;
-    position: relative; transition: transform .2s;
-  }
-  .product-badge {
-    position: absolute; top: 8px; right: 8px; z-index: 2;
-    background: var(--red); color: #fff; font-size: 10px; font-weight: 800;
-    padding: 3px 8px; border-radius: 6px;
-  }
-  .product-img {
-    width: 100%; height: 130px; background: #f1f5f9;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; overflow: hidden;
-  }
-  .product-img img { width: 100%; height: 100%; object-fit: cover; }
-  .product-details { padding: 12px; display: flex; flex-direction: column; flex: 1; gap: 6px; }
-  .product-details h3 { font-size: 14px; font-weight: 700; line-height: 1.3; }
-  .product-details .unit { font-size: 11px; color: var(--text-muted); }
-  .price-box { display: flex; align-items: baseline; gap: 6px; margin-top: auto; }
-  .price-now { font-size: 15px; font-weight: 800; color: var(--brand); }
-  .price-old { font-size: 12px; color: var(--text-muted); text-decoration: line-through; }
-  .add-to-cart-btn {
-    width: 100%; margin-top: 8px;
-    background: var(--primary); color: #fff; border: none;
-    padding: 8px; border-radius: 8px; font-weight: 700; font-size: 12px;
-    cursor: pointer;
-  }
-
-  /* ===== Cart Drawer ===== */
-  .drawer-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 90;
-  }
-  .drawer-overlay.show { opacity: 1; pointer-events: auto; }
-  .cart-drawer {
-    position: fixed; top: 0; bottom: 0; left: 0;
-    width: min(400px, 92vw); background: #fff;
-    transform: translateX(-100%); transition: transform .3s ease;
-    z-index: 100; display: flex; flex-direction: column;
-    box-shadow: 4px 0 25px rgba(0,0,0,0.15);
-  }
-  .cart-drawer.show { transform: translateX(0); }
-  .drawer-header {
-    padding: 16px; background: var(--primary); color: #fff;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .drawer-body { flex: 1; overflow-y: auto; padding: 16px; }
-  .cart-item {
-    display: flex; gap: 10px; align-items: center;
-    padding: 10px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px;
-  }
-  .cart-item-info { flex: 1; }
-  .cart-item-info h5 { font-size: 13px; margin-bottom: 2px; }
-  .cart-item-info .price { font-weight: 800; font-size: 12px; color: var(--brand); }
-  .qty-controls { display: flex; align-items: center; gap: 6px; }
-  .qty-controls button {
-    width: 24px; height: 24px; border: 1px solid var(--border);
-    border-radius: 6px; background: #fff; font-weight: 700; cursor: pointer;
-  }
-
-  .user-info-form {
-    background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 14px;
-    display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border);
-  }
-  .user-info-form label { font-size: 11px; font-weight: 700; color: var(--primary); }
-  .user-info-form input {
-    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
-    border-radius: 6px; font-size: 12px; outline: none; background: #fff;
-  }
-
-  .referral-display {
-    background: #eff6ff; border: 1px dashed var(--brand);
-    border-radius: 8px; padding: 8px 10px; font-size: 11px; color: var(--brand);
-    display: flex; align-items: center; justify-content: space-between; margin-top: 4px;
-  }
-
-  .drawer-footer { padding: 16px; border-top: 1px solid var(--border); background: #f8fafc; }
-  .checkout-btn {
-    width: 100%; padding: 12px; background: #25d366; color: #fff;
-    border: none; border-radius: 10px; font-weight: 800; font-size: 14px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-
-  /* ===== Floating WhatsApp ===== */
-  .float-wa {
-    position: fixed; bottom: 20px; left: 20px; z-index: 80;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: #25d366; color: #fff; display: flex;
-    align-items: center; justify-content: center; font-size: 28px;
-    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); text-decoration: none;
-  }
-
-  /* ===== Toast ===== */
-  .toast {
-    position: fixed; bottom: 20px; right: 50%; transform: translateX(50%) translateY(100px);
-    background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; opacity: 0; transition: all .3s; z-index: 200;
-  }
-  .toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
-</style>
+    <style>
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+        header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background: #0284c7; color: white; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
+        .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
+        .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; }
+        .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
+        .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+    </style>
 </head>
 <body>
 
-<!-- Floating WhatsApp -->
-<a href="https://wa.me/201127491224" class="float-wa" target="_blank" title="تواصل معنا عبر واتساب">💬</a>
-
-<!-- Header -->
-<header class="top-bar">
-  <div class="brand-logo" onclick="switchTab('home')">
-    <div class="logo-icon">م</div>
-    <h1>متجر مخزن</h1>
-  </div>
-  <div class="header-actions">
-    <button class="cart-trigger" onclick="toggleCart()">
-      🛒 السلة <span class="cart-badge" id="cartBadge">0</span>
-    </button>
-  </div>
+<header>
+    <div class="logo">🛒 متجر مخزن</div>
 </header>
 
-<!-- Search Input -->
-<div class="search-wrapper">
-  <div class="search-input-box">
-    <input type="text" id="searchInput" placeholder="🔍 ابحث عن أي منتج أو خدمة..." oninput="handleSearch()">
-  </div>
+<div class="categories">
+    <button class="cat-btn active" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('grocery')">🛠️ خدمات عامة</button>
+    <button class="cat-btn" onclick="filterCategory('food')">🧊 مجمدات</button>
+    <button class="cat-btn" onclick="filterCategory('drinks')">🥤 مشروبات</button>
+    <button class="cat-btn" onclick="filterCategory('beauty')">✨ منظفات وعناية</button>
 </div>
 
-<!-- Category Tabs Navigation -->
-<nav class="categories-tab" id="tabsNav">
-  <button class="tab-btn active" onclick="switchTab('home')">🏠 الرئيسية</button>
-  <button class="tab-btn" onclick="switchTab('general')">🛠️ خدمات عامة</button>
-  <button class="tab-btn" onclick="switchTab('frozen')">❄️ مجمدات</button>
-  <button class="tab-btn" onclick="switchTab('birds')">🍗 طيور</button>
-  <button class="tab-btn" onclick="switchTab('spices')">🌿 عطارة</button>
-  <button class="tab-btn" onclick="switchTab('acc')">🎀 إكسسوارات بنات</button>
-  <button class="tab-btn" onclick="switchTab('beauty')">💄 مستحضرات تجميل</button>
-  <button class="tab-btn" onclick="switchTab('daily')">⚡ عروض يومية</button>
-  <button class="tab-btn" onclick="switchTab('weekly')">🔥 عروض أسبوعية</button>
-</nav>
-
-<!-- Main Sections -->
-<main class="container">
-
-  <!-- Home Panel -->
-  <section class="panel active" id="home">
-    <div class="hero-banner">
-      <h2>أهلاً بك في متجر مخزن! 🛍️</h2>
-      <p>أفضل المنتجات والخدمات العامة بأسعار ممتازة</p>
-    </div>
-    <div class="section-head"><h2>أحدث العروض والخدمات</h2></div>
-    <div class="products-grid" id="grid-home"></div>
-  </section>
-
-  <!-- General Services Panel -->
-  <section class="panel" id="general">
-    <div class="section-head"><h2>قسم الخدمات العامة 🛠️</h2></div>
-    <div class="products-grid" id="grid-general"></div>
-  </section>
-
-  <!-- Frozen Panel -->
-  <section class="panel" id="frozen">
-    <div class="section-head"><h2>قسم المجمدات ❄️</h2></div>
-    <div class="products-grid" id="grid-frozen"></div>
-  </section>
-
-  <!-- Birds Panel -->
-  <section class="panel" id="birds">
-    <div class="section-head"><h2>قسم الطيور والدواجن 🍗</h2></div>
-    <div class="products-grid" id="grid-birds"></div>
-  </section>
-
-  <!-- Spices Panel -->
-  <section class="panel" id="spices">
-    <div class="section-head"><h2>قسم العطارة والتوابل 🌿</h2></div>
-    <div class="products-grid" id="grid-spices"></div>
-  </section>
-
-  <!-- Accessories Panel -->
-  <section class="panel" id="acc">
-    <div class="section-head"><h2>قسم إكسسوارات البنات 🎀</h2></div>
-    <div class="products-grid" id="grid-acc"></div>
-  </section>
-
-  <!-- Beauty Panel -->
-  <section class="panel" id="beauty">
-    <div class="section-head"><h2>قسم مستحضرات التجميل 💄</h2></div>
-    <div class="products-grid" id="grid-beauty"></div>
-  </section>
-
-  <!-- Daily Offers Panel -->
-  <section class="panel" id="daily">
-    <div class="section-head"><h2>العروض اليومية ⚡</h2></div>
-    <div class="products-grid" id="grid-daily"></div>
-  </section>
-
-  <!-- Weekly Offers Panel -->
-  <section class="panel" id="weekly">
-    <div class="section-head"><h2>العروض الأسبوعية 🔥</h2></div>
-    <div class="products-grid" id="grid-weekly"></div>
-  </section>
-
-</main>
-
-<!-- Cart Drawer -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="toggleCart()"></div>
-<div class="cart-drawer" id="cartDrawer">
-  <div class="drawer-header">
-    <h3>سلة المشتريات 🛒</h3>
-    <button style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;" onclick="toggleCart()">✕</button>
-  </div>
-  <div class="drawer-body" id="cartBody"></div>
-  <div class="drawer-footer" id="cartFooter">
-    
-    <!-- Customer Info Form -->
-    <div class="user-info-form">
-      <div>
-        <label>الاسم بالكامل *</label>
-        <input type="text" id="custName" placeholder="اكتب اسمك الثلاثي">
-      </div>
-      <div>
-        <label>رقم الواتساب / الهاتف *</label>
-        <input type="tel" id="custPhone" placeholder="010xxxxxxx" oninput="generatePersonalCoupon()">
-      </div>
-      <div>
-        <label>العنوان بالكامل *</label>
-        <input type="text" id="custAddress" placeholder="المنطقة - اسم الشارع - رقم العقار">
-      </div>
-
-      <!-- User Generated Coupon -->
-      <div id="personalCouponBox" style="display:none;" class="referral-display">
-        <span>كود الخصم المخصص لك: <strong id="myCouponCode">---</strong></span>
-        <button onclick="copyMyCoupon()" style="background:var(--brand); color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">نسخ الكود</button>
-      </div>
+<div class="container">
+    <div class="banner">
+        <h2>أهلاً بك في متجر مخزن! 🎁</h2>
+        <p>أفضل المنتجات والخدمات العامة بأسعار ممتازة</p>
     </div>
 
-    <!-- Coupon Input for Discount -->
-    <div style="margin-bottom: 10px;">
-      <label style="font-size:11px; font-weight:700;">هل لديك كود خصم؟</label>
-      <div style="display:flex; gap:6px; margin-top:4px;">
-        <input type="text" id="appliedCouponInput" placeholder="ادخل كود صديقك هنا" style="flex:1; padding:6px; border:1px solid var(--border); border-radius:6px; font-size:12px;">
-        <button onclick="applyDiscountCoupon()" style="background:var(--brand); color:#fff; border:none; padding:0 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">تطبيق</button>
-      </div>
-      <span id="couponStatusMsg" style="font-size:10px; display:block; margin-top:2px;"></span>
+    <h3 style="margin-bottom: 15px;">أحدث العروض والخدمات</h3>
+    <div class="products-grid" id="productsContainer">
+        <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
     </div>
-
-    <!-- Totals -->
-    <div style="margin: 10px 0; font-size: 13px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>المجموع:</span><span id="cartSubtotal">0 ج.م</span></div>
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--green); display:none;" id="discountRow"><span>الخصم (5%):</span><span id="cartDiscount">0 ج.م</span></div>
-      <div style="display:flex; justify-content:space-between; font-weight:800; font-size:16px; margin-top:6px; border-top:1px solid var(--border); padding-top:6px;"><span>الإجمالي النهائي:</span><span id="cartTotal">0 ج.م</span></div>
-    </div>
-
-    <button class="checkout-btn" onclick="checkoutWhatsApp()">إرسال الطلب عبر الواتساب 💬</button>
-  </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-/* ===================== FIREBASE CONFIG ===================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
-  authDomain: "makhzan-9eb1f.firebaseapp.com",
-  projectId: "makhzan-9eb1f",
-  storageBucket: "makhzan-9eb1f.firebasestorage.app",
-  messagingSenderId: "695067759501",
-  appId: "1:695067759501:web:df932ff7bac0b1470523c4"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
+    authDomain: "makhzan-9eb1f.firebaseapp.com",
+    projectId: "makhzan-9eb1f",
+    storageBucket: "makhzan-9eb1f.appspot.com",
+    messagingSenderId: "695067759501",
+    appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+  };
 
-let db = null;
-function initFirebase(){
-  try {
-    if(window.firebase && !firebase.apps.length){
+  if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      listenToProducts();
-    }
-  } catch(e) { console.warn("Firebase Init Error", e); }
-}
-
-/* ===================== EMPTY PRODUCTS STATE ===================== */
-let PRODUCTS = {
-  general: [],
-  frozen: [],
-  birds: [],
-  spices: [],
-  acc: [],
-  beauty: [],
-  daily: [],
-  weekly: []
-};
-
-let cart = {};
-let hasDiscount = false;
-
-/* ===================== TAB SWITCHING ===================== */
-function switchTab(tabId){
-  const panels = document.querySelectorAll('.panel');
-  panels.forEach(p => p.classList.remove('active'));
-
-  const buttons = document.querySelectorAll('.tab-btn');
-  buttons.forEach(b => b.classList.remove('active'));
-
-  const targetPanel = document.getElementById(tabId);
-  if(targetPanel){
-    targetPanel.classList.add('active');
   }
+  const db = firebase.firestore();
 
-  buttons.forEach(b => {
-    if(b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId)){
-      b.classList.add('active');
-    }
+  let allProducts = [];
+
+  db.collection('products').onSnapshot((snapshot) => {
+      allProducts = [];
+      snapshot.forEach((doc) => {
+          allProducts.push({ id: doc.id, ...doc.data() });
+      });
+      renderProducts(allProducts);
   });
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ===================== RENDER FUNCTIONS ===================== */
-function renderProducts(catKey, filterText = ''){
-  const grid = document.getElementById('grid-' + catKey);
-  if(!grid) return;
-  let items = PRODUCTS[catKey] || [];
-
-  if(filterText){
-    items = items.filter(p => p.name.toLowerCase().includes(filterText.toLowerCase()));
-  }
-
-  if(!items.length){
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر المتاحة حالياً، أضف المنتجات من لوحة التحكم</div>`;
-    return;
-  }
-
-  grid.innerHTML = items.map(p => `
-    <div class="product-card">
-      ${p.old ? `<span class="product-badge">خصم</span>` : ''}
-      <div class="product-img">
-        ${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.em || '📦')}
-      </div>
-      <div class="product-details">
-        <h3>${p.name}</h3>
-        <span class="unit">${p.unit || ''}</span>
-        <div class="price-box">
-          <span class="price-now">${p.price} ج.م</span>
-          ${p.old ? `<span class="price-old">${p.old} ج.م</span>` : ''}
-        </div>
-        <button class="add-to-cart-btn" onclick="addToCart('${catKey}','${p.id}')">أضف للسلة 🛒</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderAllGrids(filter = ''){
-  const cats = ['general','frozen','birds','spices','acc','beauty','daily','weekly'];
-  cats.forEach(c => renderProducts(c, filter));
-
-  const homeGrid = document.getElementById('grid-home');
-  if(homeGrid){
-    let allProducts = [];
-    cats.forEach(c => { allProducts = allProducts.concat(PRODUCTS[c] || []); });
-    if(filter) allProducts = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
-    
-    if(!allProducts.length){
-      homeGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد منتجات مضافة بعد</div>`;
-      return;
-    }
-
-    homeGrid.innerHTML = allProducts.map(p => `
-      <div class="product-card">
-        <div class="product-img">${p.img ? `<img src="${p.img}">` : (p.em || '📦')}</div>
-        <div class="product-details">
-          <h3>${p.name}</h3>
-          <span class="unit">${p.unit || ''}</span>
-          <div class="price-box"><span class="price-now">${p.price} ج.م</span></div>
-          <button class="add-to-cart-btn" onclick="addToCartDirect('${p.id}')">أضف للسلة 🛒</button>
-        </div>
-      </div>
-    `).join('');
-  }
-}
-
-function handleSearch(){
-  const val = document.getElementById('searchInput').value;
-  renderAllGrids(val);
-}
-
-/* ===================== CART & USER COUPON SYSTEM ===================== */
-function addToCart(catKey, id){
-  const product = (PRODUCTS[catKey] || []).find(p => String(p.id) === String(id));
-  if(!product) return;
-  
-  if(cart[id]) cart[id].qty++;
-  else cart[id] = { product, qty: 1 };
-
-  updateCart();
-  showToast('تمت الإضافة للسلة بنجاح');
-}
-
-function addToCartDirect(id){
-  let found = null;
-  Object.values(PRODUCTS).forEach(list => {
-    const p = list.find(item => String(item.id) === String(id));
-    if(p) found = p;
-  });
-  if(found){
-    if(cart[id]) cart[id].qty++;
-    else cart[id] = { product: found, qty: 1 };
-    updateCart();
-    showToast('تمت الإضافة للسلة بنجاح');
-  }
-}
-
-function changeQty(id, delta){
-  if(!cart[id]) return;
-  cart[id].qty += delta;
-  if(cart[id].qty <= 0) delete cart[id];
-  updateCart();
-}
-
-function generatePersonalCoupon(){
-  const phone = document.getElementById('custPhone').value.trim();
-  const box = document.getElementById('personalCouponBox');
-  const codeEl = document.getElementById('myCouponCode');
-
-  if(phone.length >= 6){
-    const cleanPhone = phone.replace(/\D/g, '');
-    const uniqueNum = cleanPhone.slice(-6);
-    const code = 'REF-' + uniqueNum;
-    codeEl.textContent = code;
-    box.style.display = 'flex';
-  } else {
-    box.style.display = 'none';
-  }
-}
-
-function copyMyCoupon(){
-  const code = document.getElementById('myCouponCode').textContent;
-  navigator.clipboard.writeText(code);
-  showToast('تم نسخ كود الخصم المخصص لك!');
-}
-
-function applyDiscountCoupon(){
-  const inputCode = document.getElementById('appliedCouponInput').value.trim();
-  const msg = document.getElementById('couponStatusMsg');
-
-  if(inputCode.startsWith('REF-') && inputCode.length >= 8){
-    hasDiscount = true;
-    msg.style.color = 'var(--green)';
-    msg.textContent = 'تم تطبيق خصم الإحالة (5%) بنجاح 🎉';
-  } else {
-    hasDiscount = false;
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'كود الخصم غير صالح';
-  }
-  updateCart();
-}
-
-function updateCart(){
-  const count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-  document.getElementById('cartBadge').textContent = count;
-
-  const body = document.getElementById('cartBody');
-  const footer = document.getElementById('cartFooter');
-  const items = Object.entries(cart);
-
-  if(!items.length){
-    body.innerHTML = `<div style="text-align:center; padding:40px 0; color:var(--text-muted);">السلة فارغة حالياً 🧺</div>`;
-    footer.style.display = 'none';
-    return;
-  }
-
-  footer.style.display = 'block';
-  body.innerHTML = items.map(([id, item]) => `
-    <div class="cart-item">
-      <div style="font-size:24px;">${item.product.em || '📦'}</div>
-      <div class="cart-item-info">
-        <h5>${item.product.name}</h5>
-        <div class="price">${item.product.price} ج.م</div>
-      </div>
-      <div class="qty-controls">
-        <button onclick="changeQty('${id}', -1)">-</button>
-        <span style="font-size:12px; font-weight:700;">${item.qty}</span>
-        <button onclick="changeQty('${id}', 1)">+</button>
-      </div>
-    </div>
-  `).join('');
-
-  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
-  const discountAmount = hasDiscount ? (subtotal * 0.05) : 0;
-  const total = subtotal - discountAmount;
-
-  document.getElementById('cartSubtotal').textContent = subtotal.toFixed(0) + ' ج.م';
-  document.getElementById('cartTotal').textContent = total.toFixed(0) + ' ج.م';
-
-  const discRow = document.getElementById('discountRow');
-  if(discountAmount > 0){
-    discRow.style.display = 'flex';
-    document.getElementById('cartDiscount').textContent = '-' + discountAmount.toFixed(0) + ' ج.م';
-  } else {
-    discRow.style.display = 'none';
-  }
-}
-
-function toggleCart(){
-  document.getElementById('cartDrawer').classList.toggle('show');
-  document.getElementById('drawerOverlay').classList.toggle('show');
-}
-
-/* ===================== CHECKOUT WITH DIRECT WHATSAPP MESSAGE ===================== */
-function checkoutWhatsApp(){
-  const items = Object.values(cart);
-  if(!items.length) return;
-
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const address = document.getElementById('custAddress').value.trim();
-  const myCoupon = document.getElementById('myCouponCode').textContent;
-  const usedCoupon = document.getElementById('appliedCouponInput').value.trim();
-
-  if(!name || !phone || !address){
-    showToast('⚠️ يرجى ملء بيانات الاسم ورقم الواتساب والعنوان أولاً');
-    return;
-  }
-
-  const subtotal = items.reduce((s, i) => s + (i.qty * i.product.price), 0);
-  const discountAmount = hasDiscount ? (subtotal * 0.05) : 0;
-  const total = subtotal - discountAmount;
-
-  let msg = `🛒 *طلب جديد من متجر مخزن*\n\n`;
-  msg += `👤 *الاسم:* ${name}\n`;
-  msg += `📞 *الواتساب:* ${phone}\n`;
-  msg += `📍 *العنوان:* ${address}\n`;
-  if(myCoupon !== '---') msg += `🏷️ *كود الإحالة الخاص بالعميل:* ${myCoupon}\n`;
-  if(hasDiscount) msg += `🎁 *استخدم كود خصم:* ${usedCoupon} (خصم 5%)\n`;
-  
-  msg += `\n📋 *قائمة المشتريات/الخدمات:*\n`;
-  items.forEach((i, idx) => {
-    msg += `${idx + 1}. ${i.product.name} - (العدد: ${i.qty}) بسعر ${i.qty * i.product.price} ج.م\n`;
-  });
-
-  if(discountAmount > 0) msg += `\n💰 *المجموع:* ${subtotal.toFixed(0)} ج.م\n🏷️ *الخصم:* -${discountAmount.toFixed(0)} ج.م`;
-  msg += `\n💵 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م`;
-
-  const targetPhone = "201127491224";
-  const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(msg)}`;
-  
-  window.open(whatsappUrl, '_blank');
-}
-
-/* ===================== FIREBASE REALTIME LISTENER ===================== */
-function listenToProducts(){
-  if(!db) return;
-  db.collection('products').onSnapshot(snapshot => {
-    const loaded = { general:[], frozen:[], birds:[], spices:[], acc:[], beauty:[], daily:[], weekly:[] };
-    
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if(data.category && loaded[data.category]){
-        loaded[data.category].push({ id: doc.id, ...data });
+  function renderProducts(products) {
+      const container = document.getElementById('productsContainer');
+      if (products.length === 0) {
+          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد.</p>';
+          return;
       }
-    });
+      let html = '';
+      products.forEach((p) => {
+          html += `
+              <div class="product-card">
+                  <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.name}">
+                  <div class="product-title">${p.name}</div>
+                  <div class="product-price">${p.price} جنيه</div>
+                  <button class="add-btn">طلب المنتج</button>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
+  }
 
-    Object.assign(PRODUCTS, loaded);
-    renderAllGrids();
-  }, err => console.warn("Firestore error", err));
-}
-
-/* ===================== TOAST NOTIFICATION ===================== */
-function showToast(text){
-  const t = document.getElementById('toast');
-  t.textContent = text;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-/* Initialize */
-renderAllGrids();
-initFirebase();
+  function filterCategory(cat) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (cat === 'all') {
+          renderProducts(allProducts);
+      } else {
+          const filtered = allProducts.filter(p => p.cat === cat);
+          renderProducts(filtered);
+      }
+  }
 </script>
+
 </body>
 </html>
