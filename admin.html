@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Firebase SDK Compat -->
-    <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -82,7 +82,6 @@
             cursor: pointer;
         }
 
-        /* Modal Styles */
         .modal {
             position: fixed;
             inset: 0;
@@ -136,58 +135,59 @@
 </header>
 
 <div class="container">
-    <button class="btn-add" onclick="openModal()">+ إضافة صنف / خدمة جديدة</button>
+    <button type="button" class="btn-add" onclick="openModal()">+ إضافة صنف / خدمة جديدة</button>
     <div id="adminProductList">
         <p style="text-align: center;">جاري تحميل المنتجات...</p>
     </div>
 </div>
 
-<!-- Modal -->
 <div class="modal" id="prodModal">
     <div class="modal-content">
         <h2 style="margin-top:0; font-family:'Cairo';">إضافة صنف جديد</h2>
         
-        <div class="field">
-            <label>القسم *</label>
-            <select id="pCat">
-                <option value="birds">🐦 الطيور</option>
-                <option value="frozen">❄️ المجمدات</option>
-                <option value="clean">🧼 المنظفات</option>
-                <option value="spices">🌿 العطارة</option>
-                <option value="daily">⚡ عروض اليوم</option>
-                <option value="services">🛠️ خدمات عامة (فنيين وتصليح)</option>
-            </select>
-        </div>
+        <form id="addForm" onsubmit="saveProduct(event)">
+            <div class="field">
+                <label>القسم *</label>
+                <select id="pCat">
+                    <option value="birds">🐦 الطيور</option>
+                    <option value="frozen">❄️ المجمدات</option>
+                    <option value="clean">🧼 المنظفات</option>
+                    <option value="spices">🌿 العطارة</option>
+                    <option value="daily">⚡ عروض اليوم</option>
+                    <option value="services">🛠️ خدمات عامة (فنيين وتصليح)</option>
+                </select>
+            </div>
 
-        <div class="field">
-            <label>اسم المنتج / الخدمة *</label>
-            <input type="text" id="pName" placeholder="مثال: فراخ بانيه / فني سباكة">
-        </div>
+            <div class="field">
+                <label>اسم المنتج / الخدمة *</label>
+                <input type="text" id="pName" placeholder="مثال: فراخ بانيه / فني سباكة" required>
+            </div>
 
-        <div class="field">
-            <label>السعر (ج.م) *</label>
-            <input type="number" id="pPrice" placeholder="مثال: 150">
-        </div>
+            <div class="field">
+                <label>السعر (ج.م) *</label>
+                <input type="number" step="any" id="pPrice" placeholder="مثال: 150" required>
+            </div>
 
-        <div class="field">
-            <label>السعر القديم (اختياري)</label>
-            <input type="number" id="pOld" placeholder="مثال: 180">
-        </div>
+            <div class="field">
+                <label>السعر القديم (اختياري)</label>
+                <input type="number" step="any" id="pOld" placeholder="مثال: 180">
+            </div>
 
-        <div class="field">
-            <label>شارة التمييز (اختياري)</label>
-            <input type="text" id="pBadge" placeholder="مثال: الأكثر مبيعاً / خصم 20%">
-        </div>
+            <div class="field">
+                <label>شارة التمييز (اختياري)</label>
+                <input type="text" id="pBadge" placeholder="مثال: الأكثر مبيعاً / خصم 20%">
+            </div>
 
-        <div class="field">
-            <label>رابط الصورة (اختياري)</label>
-            <input type="text" id="pImg" placeholder="ضع رابط صورة من الإنترنت">
-        </div>
+            <div class="field">
+                <label>رابط الصورة (اختياري)</label>
+                <input type="text" id="pImg" placeholder="ضع رابط صورة من الإنترنت">
+            </div>
 
-        <div class="modal-btns">
-            <button class="btn-save" onclick="saveProduct()">حفظ ونشر في المتجر</button>
-            <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
-        </div>
+            <div class="modal-btns">
+                <button type="submit" class="btn-save" id="saveBtn">حفظ ونشر في المتجر</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">إلغاء</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -195,13 +195,14 @@
     let db;
 
     function initFirebase() {
-        firebase.initializeApp({
-            apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
-            projectId: "makhzan-9eb1f"
-        });
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
+                projectId: "makhzan-9eb1f"
+            });
+        }
         db = firebase.firestore();
 
-        // Real-time listener for admin list
         db.collection('products').onSnapshot(snapshot => {
             const list = document.getElementById('adminProductList');
             list.innerHTML = '';
@@ -219,10 +220,13 @@
                             <h3>${p.pName} <span class="cat-tag">${getCatName(p.pCat)}</span></h3>
                             <p>${p.pPrice} ج.م</p>
                         </div>
-                        <button class="btn-del" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                        <button type="button" class="btn-del" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
                     </div>
                 `;
             });
+        }, error => {
+            console.error("Firestore Error: ", error);
+            alert("حدث خطأ في الاتصال بقاعدة البيانات: " + error.message);
         });
     }
 
@@ -244,9 +248,16 @@
 
     function closeModal() {
         document.getElementById('prodModal').classList.remove('show');
+        document.getElementById('addForm').reset();
     }
 
-    function saveProduct() {
+    function saveProduct(event) {
+        event.preventDefault();
+
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "جاري الحفظ...";
+        btn.disabled = true;
+
         const cat = document.getElementById('pCat').value;
         const name = document.getElementById('pName').value.trim();
         const price = parseFloat(document.getElementById('pPrice').value);
@@ -254,34 +265,31 @@
         const badge = document.getElementById('pBadge').value.trim();
         const img = document.getElementById('pImg').value.trim();
 
-        if (!name || isNaN(price)) {
-            alert('يرجى كتابة اسم المنتج والسعر الصحيح!');
-            return;
-        }
-
         db.collection('products').add({
             pCat: cat,
             pName: name,
             pPrice: price,
-            pOld: oldPrice || null,
+            pOld: oldPrice ? parseFloat(oldPrice) : null,
             pBadge: badge || null,
             img: img || null,
             active: true,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
-            alert('تمت إضافة المنتج بنجاح وسيظهر في المتجر مباشرة!');
+            alert('تمت إضافة المنتج بنجاح!');
             closeModal();
-            document.getElementById('pName').value = '';
-            document.getElementById('pPrice').value = '';
-            document.getElementById('pOld').value = '';
-            document.getElementById('pBadge').value = '';
-            document.getElementById('pImg').value = '';
+        }).catch(err => {
+            alert('خطأ أثناء الحفظ: ' + err.message);
+        }).finally(() => {
+            btn.innerText = "حفظ ونشر في المتجر";
+            btn.disabled = false;
         });
     }
 
     function deleteProduct(id) {
         if (confirm('هل أنت تأكد من حذف هذا المنتج من المتجر؟')) {
-            db.collection('products').doc(id).delete();
+            db.collection('products').doc(id).delete().catch(err => {
+                alert('خطأ أثناء الحذف: ' + err.message);
+            });
         }
     }
 
