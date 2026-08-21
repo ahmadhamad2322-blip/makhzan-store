@@ -11,26 +11,47 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+        body { background-color: #f8fafc; color: #1e293b; padding-bottom: 80px; }
+        
         header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; }
+        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
+
         .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
         .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; }
         .cat-btn.active { background: #0284c7; color: white; }
+
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; }
+
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
         .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
         .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; }
         .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
         .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+
+        /* نافذة السلة والشراء */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">🛒 متجر مخزن</div>
+    <button class="cart-icon-btn" onclick="openCart()">
+        السلة 🛍️
+        <span class="cart-count" id="cartCount">0</span>
+    </button>
 </header>
 
 <div class="categories">
@@ -44,16 +65,61 @@
 <div class="container">
     <div class="banner">
         <h2>أهلاً بك في متجر مخزن! 🎁</h2>
-        <p>أفضل المنتجات والخدمات العامة بأسعار ممتازة</p>
+        <p>أفضل المنتجات بأفضل الأسعار - طلبك يصلك فوراً على الواتساب</p>
     </div>
 
-    <h3 style="margin-bottom: 15px;">أحدث العروض والخدمات</h3>
+    <h3 style="margin-bottom: 15px;">المنتجات المتاحة</h3>
     <div class="products-grid" id="productsContainer">
         <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
     </div>
 </div>
 
+<!-- نافذة السلة وإكمال الطلب -->
+<div class="modal" id="cartModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>سلة الشراء 🛒</h3>
+            <button class="close-btn" onclick="closeCart()">✕</button>
+        </div>
+        
+        <div id="cartItemsList"></div>
+        <hr style="margin: 15px 0;">
+        <h4 style="display: flex; justify-content: space-between;">
+            <span>الإجمالي:</span>
+            <span id="cartTotal">0 جنيه</span>
+        </h4>
+
+        <form id="checkoutForm" style="margin-top: 15px;" onsubmit="sendOrderToWhatsApp(event)">
+            <h4>بيانات التوصيل والدفع 📝</h4>
+            <div class="form-group">
+                <label>الاسم الكامل:</label>
+                <input type="text" id="custName" required placeholder="أدخل اسمك">
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف:</label>
+                <input type="tel" id="custPhone" required placeholder="01xxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>العنوان التفصيلي:</label>
+                <input type="text" id="custAddress" required placeholder="المنطقة، الشارع، رقم الشقة">
+            </div>
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <select id="payMethod" required>
+                    <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
+                    <option value="فودافون كاش">📱 فودافون كاش</option>
+                    <option value="إنستاباي InstaPay">💳 إنستاباي (InstaPay)</option>
+                </select>
+            </div>
+            <button type="submit" class="send-btn">إرسال الطلب عبر الواتساب 💬</button>
+        </form>
+    </div>
+</div>
+
 <script>
+  // تم وضع رقم الواتساب الخاص بك هنا تلقائياً
+  const ADMIN_WHATSAPP_NUMBER = "201127491224";
+
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
@@ -69,6 +135,7 @@
   const db = firebase.firestore();
 
   let allProducts = [];
+  let cart = [];
 
   db.collection('products').onSnapshot((snapshot) => {
       allProducts = [];
@@ -86,12 +153,15 @@
       }
       let html = '';
       products.forEach((p) => {
+          const imgSrc = p.img || 'https://via.placeholder.com/150?text=لا+توجد+صورة';
           html += `
               <div class="product-card">
-                  <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img" alt="${p.name}">
-                  <div class="product-title">${p.name}</div>
-                  <div class="product-price">${p.price} جنيه</div>
-                  <button class="add-btn">طلب المنتج</button>
+                  <img src="${imgSrc}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=خطأ+بالصورة'">
+                  <div>
+                      <div class="product-title">${p.name}</div>
+                      <div class="product-price">${p.price} جنيه</div>
+                  </div>
+                  <button class="add-btn" onclick="addToCart('${p.id}')">إضافة للسلة 🛒</button>
               </div>
           `;
       });
@@ -101,13 +171,116 @@
   function filterCategory(cat) {
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
-      
       if (cat === 'all') {
           renderProducts(allProducts);
       } else {
           const filtered = allProducts.filter(p => p.cat === cat);
           renderProducts(filtered);
       }
+  }
+
+  function addToCart(id) {
+      const prod = allProducts.find(p => p.id === id);
+      const exist = cart.find(item => item.id === id);
+      if (exist) {
+          exist.qty += 1;
+      } else {
+          cart.push({ ...prod, qty: 1 });
+      }
+      updateCartUI();
+      alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
+  }
+
+  function updateCartUI() {
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCount').innerText = count;
+
+      const itemsList = document.getElementById('cartItemsList');
+      let total = 0;
+      if (cart.length === 0) {
+          itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
+      } else {
+          let html = '';
+          cart.forEach((item) => {
+              const itemTotal = item.price * item.qty;
+              total += itemTotal;
+              html += `
+                  <div class="cart-item">
+                      <div>
+                          <strong>${item.name}</strong><br>
+                          <small>${item.price} × ${item.qty} = ${itemTotal} جنيه</small>
+                      </div>
+                      <div>
+                          <button onclick="changeQty('${item.id}', -1)">-</button>
+                          <span style="margin: 0 5px;">${item.qty}</span>
+                          <button onclick="changeQty('${item.id}', 1)">+</button>
+                      </div>
+                  </div>
+              `;
+          });
+          itemsList.innerHTML = html;
+      }
+      document.getElementById('cartTotal').innerText = total + ' جنيه';
+  }
+
+  function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+          item.qty += delta;
+          if (item.qty <= 0) {
+              cart = cart.filter(i => i.id !== id);
+          }
+      }
+      updateCartUI();
+  }
+
+  function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
+  function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
+
+  function sendOrderToWhatsApp(e) {
+      e.preventDefault();
+      if (cart.length === 0) {
+          alert("السلة فارغة! قم بإضافة منتجات أولاً.");
+          return;
+      }
+
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const address = document.getElementById('custAddress').value;
+      const payment = document.getElementById('payMethod').value;
+
+      let total = 0;
+      let itemsText = "";
+      cart.forEach((item, index) => {
+          const itemTotal = item.price * item.qty;
+          total += itemTotal;
+          itemsText += `${index + 1}. ${item.name} (العدد: ${item.qty}) - ${itemTotal} جنيه\n`;
+      });
+
+      db.collection('orders').add({
+          name: name,
+          phone: phone,
+          address: address,
+          payment: payment,
+          items: cart,
+          total: total,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      const message = `طلب جديد من المتجر 🛒:\n\n` +
+                      `👤 *الاسم:* ${name}\n` +
+                      `📞 *الهاتف:* ${phone}\n` +
+                      `📍 *العنوان:* ${address}\n` +
+                      `💳 *طريقة الدفع:* ${payment}\n\n` +
+                      `📦 *المنتجات:*\n${itemsText}\n` +
+                      `💰 *الإجمالي النهائي:* ${total} جنيه`;
+
+      const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      cart = [];
+      updateCartUI();
+      closeCart();
   }
 </script>
 
