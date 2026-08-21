@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - مخزن المتجر</title>
     
-    <!-- قفل كلمة السر -->
     <script>
       var pass = prompt("من فضلك أدخل كلمة السر لفتح لوحة التحكم:");
       if (pass !== "1234") { 
@@ -49,13 +48,13 @@
                 <input type="number" id="prodPrice" placeholder="مثال: 15" required>
             </div>
             <div class="form-group">
-                <label>القسم (اختر قسم يطابق المتجر):</label>
+                <label>القسم:</label>
                 <select id="prodCategory" required>
-                    <option value="grocery">بقالة عامة (grocery)</option>
-                    <option value="food">حلويات وأغذية (food)</option>
-                    <option value="drinks">مشروبات ومشروبات غازية (drinks)</option>
-                    <option value="beauty">عناية ومنظفات (beauty)</option>
-                    <option value="weekly">عروض الأسبوع (weekly)</option>
+                    <option value="grocery">بقالة عامة</option>
+                    <option value="food">حلويات وأغذية</option>
+                    <option value="drinks">مشروبات</option>
+                    <option value="beauty">عناية ومنظفات</option>
+                    <option value="weekly">عروض الأسبوع</option>
                 </select>
             </div>
             <div class="form-group">
@@ -100,7 +99,6 @@
       const cat = document.getElementById('prodCategory').value;
       const image = document.getElementById('prodImage').value;
 
-      // إضافة المنتج بنفس الهيكل المطلوب في index.html
       db.collection('products').add({
           id: Date.now(),
           name: name,
@@ -109,14 +107,13 @@
           img: image,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-          alert('تمت إضافة المنتج بنجاح وتوجيهه للقسم الصحيح!');
+          alert('تمت إضافة المنتج بنجاح!');
           document.getElementById('addProductForm').reset();
       }).catch((error) => {
           alert('حدث خطأ: ' + error.message);
       });
   });
 
-  // عرض المنتجات
   db.collection('products').onSnapshot((snapshot) => {
       const container = document.getElementById('productsList');
       if (snapshot.empty) {
@@ -145,7 +142,6 @@
       }
   }
 
-  // عرض طلبات العميل
   db.collection('orders').onSnapshot((snapshot) => {
       const container = document.getElementById('ordersList');
       if (snapshot.empty) {
