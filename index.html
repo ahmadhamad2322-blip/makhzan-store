@@ -42,6 +42,13 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
         .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+        /* صندوق معلومات طريقة الدفع */
+        .payment-info { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: #166534; display: none; }
+
+        /* زر الواتساب العائم */
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 1000; display: flex; justify-content: center; align-items: center; text-decoration: none; }
+        .whatsapp-float:hover { background-color: #128c7e; }
     </style>
 </head>
 <body>
@@ -74,6 +81,11 @@
     </div>
 </div>
 
+<!-- زر الواتساب العائم -->
+<a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">
+    💬
+</a>
+
 <!-- نافذة السلة وإكمال الطلب -->
 <div class="modal" id="cartModal">
     <div class="modal-content">
@@ -105,11 +117,13 @@
             </div>
             <div class="form-group">
                 <label>طريقة الدفع:</label>
-                <select id="payMethod" required>
+                <select id="payMethod" required onchange="togglePaymentInfo()">
                     <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
                     <option value="فودافون كاش">📱 فودافون كاش</option>
                     <option value="إنستاباي InstaPay">💳 إنستاباي (InstaPay)</option>
                 </select>
+
+                <div id="paymentNotice" class="payment-info"></div>
             </div>
             <button type="submit" class="send-btn">إرسال الطلب عبر الواتساب 💬</button>
         </form>
@@ -117,7 +131,6 @@
 </div>
 
 <script>
-  // تم وضع رقم الواتساب الخاص بك هنا تلقائياً
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
 
   const firebaseConfig = {
@@ -236,6 +249,20 @@
 
   function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
   function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
+
+  function togglePaymentInfo() {
+      const method = document.getElementById('payMethod').value;
+      const notice = document.getElementById('paymentNotice');
+      if (method === 'فودافون كاش') {
+          notice.style.display = 'block';
+          notice.innerHTML = '📲 يرجى تحويل المبلغ على رقم فودافون كاش: <strong>01012517345</strong> وإرفاق صورة التحويل في الواتساب.';
+      } else if (method === 'إنستاباي InstaPay') {
+          notice.style.display = 'block';
+          notice.innerHTML = '💳 يرجى تحويل المبلغ عبر تطبيق إنستاباي على الرقم: <strong>01127491224</strong> وإرفاق إيصال التحويل.';
+      } else {
+          notice.style.display = 'none';
+      }
+  }
 
   function sendOrderToWhatsApp(e) {
       e.preventDefault();
