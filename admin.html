@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - مخزن المتجر</title>
     
+    <!-- قفل كلمة السر -->
     <script>
       var pass = prompt("من فضلك أدخل كلمة السر لفتح لوحة التحكم:");
       if (pass !== "1234") { 
@@ -41,19 +42,20 @@
         <form id="addProductForm">
             <div class="form-group">
                 <label>اسم المنتج:</label>
-                <input type="text" id="prodName" placeholder="مثال: شيبسي" required>
+                <input type="text" id="prodName" placeholder="مثال: شيبسي عائلي" required>
             </div>
             <div class="form-group">
                 <label>السعر (بالجنيه):</label>
                 <input type="number" id="prodPrice" placeholder="مثال: 15" required>
             </div>
             <div class="form-group">
-                <label>القسم:</label>
+                <label>القسم (اختر قسم يطابق المتجر):</label>
                 <select id="prodCategory" required>
-                    <option value="حلويات">حلويات وشوكولاتة</option>
-                    <option value="شيبسي">شيبسي ومقرمشات</option>
-                    <option value="مشروبات">مشروبات ومشروبات غازية</option>
-                    <option value="بقالة">بقالة عامة</option>
+                    <option value="grocery">بقالة عامة (grocery)</option>
+                    <option value="food">حلويات وأغذية (food)</option>
+                    <option value="drinks">مشروبات ومشروبات غازية (drinks)</option>
+                    <option value="beauty">عناية ومنظفات (beauty)</option>
+                    <option value="weekly">عروض الأسبوع (weekly)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -76,7 +78,6 @@
 </div>
 
 <script>
-  // المفتاح والبيانات الكاملة بدون أي اختصار
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
@@ -96,23 +97,26 @@
 
       const name = document.getElementById('prodName').value;
       const price = parseFloat(document.getElementById('prodPrice').value);
-      const category = document.getElementById('prodCategory').value;
+      const cat = document.getElementById('prodCategory').value;
       const image = document.getElementById('prodImage').value;
 
+      // إضافة المنتج بنفس الهيكل المطلوب في index.html
       db.collection('products').add({
+          id: Date.now(),
           name: name,
           price: price,
-          category: category,
-          image: image,
+          cat: cat,
+          img: image,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-          alert('تمت الإضافة بنجاح!');
+          alert('تمت إضافة المنتج بنجاح وتوجيهه للقسم الصحيح!');
           document.getElementById('addProductForm').reset();
       }).catch((error) => {
-          alert('خطأ في الإضافة: ' + error.message);
+          alert('حدث خطأ: ' + error.message);
       });
   });
 
+  // عرض المنتجات
   db.collection('products').onSnapshot((snapshot) => {
       const container = document.getElementById('productsList');
       if (snapshot.empty) {
@@ -126,7 +130,7 @@
               <div class="product-item">
                   <div>
                       <strong>${data.name}</strong> - ${data.price} جنيه 
-                      <span class="badge">${data.category || 'عام'}</span>
+                      <span class="badge">${data.cat || 'عام'}</span>
                   </div>
                   <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف</button>
               </div>
@@ -136,11 +140,12 @@
   });
 
   function deleteProduct(id) {
-      if (confirm('تأكيد الحذف؟')) {
+      if (confirm('تأكيد حذف المنتج؟')) {
           db.collection('products').doc(id).delete();
       }
   }
 
+  // عرض طلبات العميل
   db.collection('orders').onSnapshot((snapshot) => {
       const container = document.getElementById('ordersList');
       if (snapshot.empty) {
