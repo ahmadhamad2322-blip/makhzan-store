@@ -1,253 +1,291 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة تحكم مخزن</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<style>
-  :root{ --ink:#23201B; --paper:#FBF6EC; --forest:#1F4D3D; --amber:#F2A93B; --tomato:#D64545; --card:#FFFDF8; --line:rgba(35,32,27,0.14); }
-  *{box-sizing:border-box;} body{margin:0; background:var(--paper); color:var(--ink); font-family:'Tajawal',sans-serif;}
-  header{background:var(--forest); color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;}
-  header h1{margin:0; font-family:'Cairo',sans-serif; font-size:18px;}
-  .logout-btn{background:none; border:1px solid rgba(255,255,255,0.4); color:#fff; border-radius:8px; padding:6px 12px; cursor:pointer;}
-  
-  nav.tabs{display:flex; gap:8px; padding:14px; overflow-x:auto;}
-  .tab-btn{background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:8px 14px; font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; cursor:pointer; white-space:nowrap;}
-  .tab-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم مخزن</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK Compat -->
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  .container{padding:0 14px 10px;}
-  .prod-card{background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;}
-  .prod-info{display:flex; align-items:center; gap:12px;}
-  .prod-img{width:50px; height:50px; border-radius:8px; background:#eee; display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;}
-  .prod-img img{width:100%; height:100%; object-fit:cover;}
-  .prod-details h3{margin:0 0 4px; font-size:14px; font-weight:800;}
-  .prod-details p{margin:0; font-size:12px; color:var(--forest); font-weight:700;}
+    <style>
+        :root {
+            --ink: #23201B;
+            --paper: #FBF6EC;
+            --forest: #1F4D3D;
+            --amber: #F2A93B;
+            --tomato: #D94A2B;
+            --card: #FFFFFF;
+            --line: rgba(35,32,27,0.14);
+        }
 
-  .actions{display:flex; gap:8px;}
-  .icon-btn{width:34px; height:34px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px;}
-  .icon-btn.del{color:var(--tomato);}
+        * { box-sizing: border-box; }
 
-  .fab{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--amber); color:var(--forest); border:none; border-radius:30px; padding:12px 28px; font-family:'Cairo',sans-serif; font-weight:900; font-size:15px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Tajawal', sans-serif;
+            padding-bottom: 80px;
+        }
 
-  /* Modal */
-  .modal{position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; padding:14px; z-index:100;}
-  .modal.show{display:flex;}
-  .modal-content{background:var(--paper); border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:90vh; overflow-y:auto;}
-  .modal-content h2{margin:0 0 14px; font-family:'Cairo',sans-serif; font-size:18px;}
-  .field{margin-bottom:10px;}
-  .field label{display:block; font-size:12px; font-weight:800; margin-bottom:4px;}
-  .field input, .field select{width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font-family:'Tajawal',sans-serif; font-size:13px; background:#fff;}
-  .modal-btns{display:flex; gap:10px; margin-top:16px;}
-  .modal-btns button{flex:1; padding:11px 0; border:none; border-radius:8px; font-family:'Cairo',sans-serif; font-weight:800; cursor:pointer;}
-  .btn-save{background:var(--forest); color:#fff;}
-  .btn-cancel{background:#ccc;}
-</style>
+        header {
+            background: var(--forest);
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { margin: 0; font-family: 'Cairo', sans-serif; font-size: 20px; }
+
+        .container { padding: 16px; }
+
+        .btn-add {
+            background: var(--forest);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .prod-card {
+            background: var(--card);
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prod-info h3 { margin: 0 0 5px; font-family: 'Cairo', sans-serif; font-size: 16px; }
+        .prod-info p { margin: 0; color: var(--forest); font-weight: bold; }
+        .cat-tag { font-size: 11px; background: var(--amber); padding: 2px 6px; border-radius: 4px; }
+
+        .btn-del {
+            background: var(--tomato);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: var(--paper);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .field { margin-bottom: 12px; }
+        .field label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+        .field input, .field select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+        .modal-btns button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-save { background: var(--forest); color: #fff; }
+        .btn-cancel { background: #ccc; }
+    </style>
 </head>
 <body>
 
 <header>
-  <h1>لوحة تحكم مخزن</h1>
-  <button class="logout-btn" onclick="location.reload()">تحديث</button>
+    <h1>لوحة تحكم المتجر 🛠️</h1>
 </header>
 
-<nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-cat="frozen">❄️ مجمدات</button>
-  <button class="tab-btn" data-cat="clean">🧴 منظفات</button>
-  <button class="tab-btn" data-cat="daily">⚡ اليوم الواحد</button>
-  <button class="tab-btn" data-cat="sub">📦 اشتراكات</button>
-</nav>
-
-<div class="container" id="prodList"></div>
-
-<button class="fab" onclick="openModal()">+ ضيف منتج جديد</button>
-
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <h2 id="modalTitle">إضافة منتج</h2>
-    <input type="hidden" id="editId">
-    
-    <div class="field">
-      <label>القسم</label>
-      <select id="pCat">
-        <option value="frozen">❄️ عروض المجمدات</option>
-        <option value="clean">🧴 عروض المنظفات</option>
-        <option value="daily">⚡ عروض اليوم الواحد</option>
-        <option value="sub">📦 اشتراكات شهرية</option>
-      </select>
+<div class="container">
+    <button class="btn-add" onclick="openModal()">+ إضافة صنف / خدمة جديدة</button>
+    <div id="adminProductList">
+        <p style="text-align: center;">جاري تحميل المنتجات...</p>
     </div>
-    
-    <div class="field">
-      <label>اسم المنتج</label>
-      <input type="text" id="pName" placeholder="مثال: فراخ مجمدة">
-    </div>
+</div>
 
-    <div class="field">
-      <label>الوحدة / الوزن</label>
-      <input type="text" id="pUnit" placeholder="مثال: 1 كجم أو 500 جم">
-    </div>
+<!-- Modal -->
+<div class="modal" id="prodModal">
+    <div class="modal-content">
+        <h2 style="margin-top:0; font-family:'Cairo';">إضافة صنف جديد</h2>
+        
+        <div class="field">
+            <label>القسم *</label>
+            <select id="pCat">
+                <option value="birds">🐦 الطيور</option>
+                <option value="frozen">❄️ المجمدات</option>
+                <option value="clean">🧼 المنظفات</option>
+                <option value="spices">🌿 العطارة</option>
+                <option value="daily">⚡ عروض اليوم</option>
+                <option value="services">🛠️ خدمات عامة (فنيين وتصليح)</option>
+            </select>
+        </div>
 
-    <div class="field">
-      <label>السعر (ج.م)</label>
-      <input type="number" id="pPrice" placeholder="85">
-    </div>
+        <div class="field">
+            <label>اسم المنتج / الخدمة *</label>
+            <input type="text" id="pName" placeholder="مثال: فراخ بانيه / فني سباكة">
+        </div>
 
-    <div class="field">
-      <label>السعر القديم (اختياري)</label>
-      <input type="number" id="pOld" placeholder="105">
-    </div>
+        <div class="field">
+            <label>السعر (ج.م) *</label>
+            <input type="number" id="pPrice" placeholder="مثال: 150">
+        </div>
 
-    <div class="field">
-      <label>نسبة الخصم / التاج (اختياري)</label>
-      <input type="text" id="pBadge" placeholder="مثال: ٪20-">
-    </div>
+        <div class="field">
+            <label>السعر القديم (اختياري)</label>
+            <input type="number" id="pOld" placeholder="مثال: 180">
+        </div>
 
-    <div class="field">
-      <label>إيموجي الرمز</label>
-      <input type="text" id="pEm" placeholder="🍗">
-    </div>
+        <div class="field">
+            <label>شارة التمييز (اختياري)</label>
+            <input type="text" id="pBadge" placeholder="مثال: الأكثر مبيعاً / خصم 20%">
+        </div>
 
-    <div class="field">
-      <label>رابط الصورة (اختياري)</label>
-      <input type="url" id="pImg" placeholder="https://...">
-    </div>
+        <div class="field">
+            <label>رابط الصورة (اختياري)</label>
+            <input type="text" id="pImg" placeholder="ضع رابط صورة من الإنترنت">
+        </div>
 
-    <div class="modal-btns">
-      <button class="btn-save" onclick="saveProduct()">حفظ المنتج</button>
-      <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+        <div class="modal-btns">
+            <button class="btn-save" onclick="saveProduct()">حفظ ونشر في المتجر</button>
+            <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-let currentCat = 'frozen';
-let db = null;
-let productsData = [];
+    let db;
 
-function initFirebase(){
-  if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
-    firebase.initializeApp({
-      apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
-      authDomain: "makhzan-9eb1f.firebaseapp.com",
-      projectId: "makhzan-9eb1f",
-      storageBucket: "makhzan-9eb1f.firebasestorage.app",
-      messagingSenderId: "695067759501",
-      appId: "1:695067759501:web:df932ff7bac0b1470523c4"
-    });
-    db = firebase.firestore();
-    listenToProducts();
-  }
-}
+    function initFirebase() {
+        firebase.initializeApp({
+            apiKey: "AIzaSyDjWBs5Qw-1bHX_3KOVCwinGY3i50p5swQ",
+            projectId: "makhzan-9eb1f"
+        });
+        db = firebase.firestore();
 
-function listenToProducts(){
-  db.collection('products').onSnapshot(snapshot => {
-    productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderList();
-  });
-}
+        // Real-time listener for admin list
+        db.collection('products').onSnapshot(snapshot => {
+            const list = document.getElementById('adminProductList');
+            list.innerHTML = '';
 
-function renderList(){
-  const container = document.getElementById('prodList');
-  const filtered = productsData.filter(p => p.category === currentCat && p.active !== false);
-  
-  if(filtered.length === 0){
-    container.innerHTML = `<p style="text-align:center; padding:30px; color:#888;">لا توجد منتجات في هذا القسم</p>`;
-    return;
-  }
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="text-align:center;">لا توجد منتجات مضافة بعد.</p>';
+                return;
+            }
 
-  container.innerHTML = filtered.map(p => `
-    <div class="prod-card">
-      <div class="prod-info">
-        <div class="prod-img">
-          ${p.image_url ? `<img src="${p.image_url}">` : (p.em || '🛒')}
-        </div>
-        <div class="prod-details">
-          <h3>${p.name}</h3>
-          <p>${p.price} ج.م ${p.unit ? `(${p.unit})` : ''}</p>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="icon-btn" onclick="editProduct('${p.id}')">✏️</button>
-        <button class="icon-btn del" onclick="deleteProduct('${p.id}')">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                list.innerHTML += `
+                    <div class="prod-card">
+                        <div class="prod-info">
+                            <h3>${p.pName} <span class="cat-tag">${getCatName(p.pCat)}</span></h3>
+                            <p>${p.pPrice} ج.م</p>
+                        </div>
+                        <button class="btn-del" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                    </div>
+                `;
+            });
+        });
+    }
 
-document.getElementById('tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.tab-btn');
-  if(!btn) return;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentCat = btn.dataset.cat;
-  renderList();
-});
+    function getCatName(cat) {
+        const names = {
+            'birds': 'الطيور',
+            'frozen': 'المجمدات',
+            'clean': 'المنظفات',
+            'spices': 'العطارة',
+            'daily': 'عروض اليوم',
+            'services': 'خدمات عامة'
+        };
+        return names[cat] || cat;
+    }
 
-function openModal(){
-  document.getElementById('editId').value = '';
-  document.getElementById('modalTitle').textContent = 'إضافة منتج جديد';
-  document.getElementById('pCat').value = currentCat;
-  document.getElementById('pName').value = '';
-  document.getElementById('pUnit').value = '';
-  document.getElementById('pPrice').value = '';
-  document.getElementById('pOld').value = '';
-  document.getElementById('pBadge').value = '';
-  document.getElementById('pEm').value = '🛒';
-  document.getElementById('pImg').value = '';
-  document.getElementById('modal').classList.add('show');
-}
+    function openModal() {
+        document.getElementById('prodModal').classList.add('show');
+    }
 
-function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+    function closeModal() {
+        document.getElementById('prodModal').classList.remove('show');
+    }
 
-function saveProduct(){
-  const id = document.getElementById('editId').value;
-  const data = {
-    category: document.getElementById('pCat').value,
-    name: document.getElementById('pName').value.trim(),
-    unit: document.getElementById('pUnit').value.trim(),
-    price: Number(document.getElementById('pPrice').value) || 0,
-    old: Number(document.getElementById('pOld').value) || null,
-    badge: document.getElementById('pBadge').value.trim() || null,
-    em: document.getElementById('pEm').value.trim() || '🛒',
-    image_url: document.getElementById('pImg').value.trim() || '',
-    active: true
-  };
+    function saveProduct() {
+        const cat = document.getElementById('pCat').value;
+        const name = document.getElementById('pName').value.trim();
+        const price = parseFloat(document.getElementById('pPrice').value);
+        const oldPrice = document.getElementById('pOld').value.trim();
+        const badge = document.getElementById('pBadge').value.trim();
+        const img = document.getElementById('pImg').value.trim();
 
-  if(!data.name || !data.price){ alert('يرجى كتابة الاسم والسعر!'); return; }
+        if (!name || isNaN(price)) {
+            alert('يرجى كتابة اسم المنتج والسعر الصحيح!');
+            return;
+        }
 
-  if(id){
-    db.collection('products').doc(id).update(data).then(() => closeModal());
-  } else {
-    db.collection('products').add(data).then(() => closeModal());
-  }
-}
+        db.collection('products').add({
+            pCat: cat,
+            pName: name,
+            pPrice: price,
+            pOld: oldPrice || null,
+            pBadge: badge || null,
+            img: img || null,
+            active: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            alert('تمت إضافة المنتج بنجاح وسيظهر في المتجر مباشرة!');
+            closeModal();
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pOld').value = '';
+            document.getElementById('pBadge').value = '';
+            document.getElementById('pImg').value = '';
+        });
+    }
 
-function editProduct(id){
-  const p = productsData.find(item => item.id === id);
-  if(!p) return;
-  document.getElementById('editId').value = p.id;
-  document.getElementById('modalTitle').textContent = 'تعديل المنتج';
-  document.getElementById('pCat').value = p.category || 'frozen';
-  document.getElementById('pName').value = p.name || '';
-  document.getElementById('pUnit').value = p.unit || '';
-  document.getElementById('pPrice').value = p.price || '';
-  document.getElementById('pOld').value = p.old || '';
-  document.getElementById('pBadge').value = p.badge || '';
-  document.getElementById('pEm').value = p.em || '🛒';
-  document.getElementById('pImg').value = p.image_url || '';
-  document.getElementById('modal').classList.add('show');
-}
+    function deleteProduct(id) {
+        if (confirm('هل أنت تأكد من حذف هذا المنتج من المتجر؟')) {
+            db.collection('products').doc(id).delete();
+        }
+    }
 
-function deleteProduct(id){
-  if(confirm('هل أنت تأكد من حذف هذا المنتج؟')){
-    db.collection('products').doc(id).delete();
-  }
-}
-
-window.onload = initFirebase;
+    window.onload = initFirebase;
 </script>
 </body>
 </html>
