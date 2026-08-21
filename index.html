@@ -45,8 +45,9 @@
   .brand-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
   .brand-logo .logo-icon {
     width: 40px; height: 40px; background: var(--brand);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    border-radius: 12px; display: flex; align-items: center; justify-content: justify;
     font-size: 20px; font-weight: 900; color: #fff;
+    line-height: 40px; text-align: center;
   }
   .brand-logo h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
 
@@ -70,11 +71,9 @@
 
   /* ===== Search Bar ===== */
   .search-wrapper { padding: 16px 20px 8px; max-width: 800px; margin: 0 auto; }
-  .search-input-box {
-    position: relative; width: 100%;
-  }
+  .search-input-box { position: relative; width: 100%; }
   .search-input-box input {
-    width: 100%; padding: 12px 16px 12px 42px;
+    width: 100%; padding: 12px 16px;
     border: 2px solid var(--border); border-radius: 12px;
     font-size: 14px; outline: none; background: #fff;
     transition: border-color .2s;
@@ -85,7 +84,8 @@
   nav.categories-tab {
     display: flex; gap: 8px; overflow-x: auto;
     padding: 12px 20px; max-width: 1200px; margin: 0 auto;
-    scrollbar-width: none;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
   }
   nav.categories-tab::-webkit-scrollbar { display: none; }
   .tab-btn {
@@ -118,7 +118,7 @@
 
   /* ===== Product Cards Grid ===== */
   .products-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
   }
   @media(min-width: 640px) {
@@ -129,16 +129,15 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: 14px; overflow: hidden;
     display: flex; flex-direction: column;
-    position: relative; transition: transform .2s, box-shadow .2s;
+    position: relative; transition: transform .2s;
   }
-  .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
   .product-badge {
     position: absolute; top: 8px; right: 8px; z-index: 2;
     background: var(--red); color: #fff; font-size: 10px; font-weight: 800;
     padding: 3px 8px; border-radius: 6px;
   }
   .product-img {
-    width: 100%; height: 140px; background: #f1f5f9;
+    width: 100%; height: 130px; background: #f1f5f9;
     display: flex; align-items: center; justify-content: center;
     font-size: 40px; overflow: hidden;
   }
@@ -153,9 +152,8 @@
     width: 100%; margin-top: 8px;
     background: var(--primary); color: #fff; border: none;
     padding: 8px; border-radius: 8px; font-weight: 700; font-size: 12px;
-    cursor: pointer; transition: background .2s;
+    cursor: pointer;
   }
-  .add-to-cart-btn:hover { background: var(--brand); }
 
   /* ===== Referral Banner ===== */
   .referral-box {
@@ -270,14 +268,14 @@
 
 <!-- Category Tabs Navigation -->
 <nav class="categories-tab" id="tabsNav">
-  <button class="tab-btn active" data-tab="home">🏠 الرئيسية</button>
-  <button class="tab-btn" data-tab="frozen">❄️ مجمدات</button>
-  <button class="tab-btn" data-tab="birds">🍗 طيور</button>
-  <button class="tab-btn" data-tab="spices">🌿 عطارة</button>
-  <button class="tab-btn" data-tab="acc">🎀 إكسسوارات بنات</button>
-  <button class="tab-btn" data-tab="beauty">💄 مستحضرات تجميل</button>
-  <button class="tab-btn" data-tab="daily">⚡ عروض يومية</button>
-  <button class="tab-btn" data-tab="weekly">🔥 عروض أسبوعية</button>
+  <button class="tab-btn active" onclick="switchTab('home')">🏠 الرئيسية</button>
+  <button class="tab-btn" onclick="switchTab('frozen')">❄️ مجمدات</button>
+  <button class="tab-btn" onclick="switchTab('birds')">🍗 طيور</button>
+  <button class="tab-btn" onclick="switchTab('spices')">🌿 عطارة</button>
+  <button class="tab-btn" onclick="switchTab('acc')">🎀 إكسسوارات بنات</button>
+  <button class="tab-btn" onclick="switchTab('beauty')">💄 مستحضرات تجميل</button>
+  <button class="tab-btn" onclick="switchTab('daily')">⚡ عروض يومية</button>
+  <button class="tab-btn" onclick="switchTab('weekly')">🔥 عروض أسبوعية</button>
 </nav>
 
 <!-- Main Sections -->
@@ -427,7 +425,8 @@ function initFirebase(){
       listenToProducts();
     }
   } catch(e) { console.warn("Firebase Init Error", e); }
-  
+}
+
 /* ===================== LOCAL DATA & INITIAL STATE ===================== */
 let PRODUCTS = {
   frozen: [
@@ -457,10 +456,35 @@ let PRODUCTS = {
     {id:'w1', name:"كرتونة بيض أبيض", unit:"30 بيضة", price:140, old:165, em:'🔥'}
   ]
 };
-  
 
 let cart = {};
 let activeCouponRate = 0;
+
+/* ===================== TAB SWITCHING ===================== */
+function switchTab(tabId){
+  // 1. Hide all panels
+  const panels = document.querySelectorAll('.panel');
+  panels.forEach(p => p.classList.remove('active'));
+
+  // 2. Remove active class from buttons
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+
+  // 3. Activate selected panel
+  const targetPanel = document.getElementById(tabId);
+  if(targetPanel){
+    targetPanel.classList.add('active');
+  }
+
+  // 4. Activate button
+  buttons.forEach(b => {
+    if(b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId)){
+      b.classList.add('active');
+    }
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 /* ===================== RENDER FUNCTIONS ===================== */
 function renderProducts(catKey, filterText = ''){
@@ -500,9 +524,231 @@ function renderAllGrids(filter = ''){
   const cats = ['frozen','birds','spices','acc','beauty','daily','weekly'];
   cats.forEach(c => renderProducts(c, filter));
 
-  // Render Home Combined View
   const homeGrid = document.getElementById('grid-home');
   if(homeGrid){
     let allProducts = [];
     cats.forEach(c => { allProducts = allProducts.concat(PRODUCTS[c] || []); });
-    if(filter) allProducts = allProducts.filter(p => p.name.toLowerCase().incl
+    if(filter) allProducts = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+    
+    homeGrid.innerHTML = allProducts.slice(0, 8).map(p => `
+      <div class="product-card">
+        <div class="product-img">${p.img ? `<img src="${p.img}">` : (p.em || '🛍️')}</div>
+        <div class="product-details">
+          <h3>${p.name}</h3>
+          <span class="unit">${p.unit || ''}</span>
+          <div class="price-box"><span class="price-now">${p.price} ج.م</span></div>
+          <button class="add-to-cart-btn" onclick="addToCartDirect('${p.id}')">أضف للسلة 🛒</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function handleSearch(){
+  const val = document.getElementById('searchInput').value;
+  renderAllGrids(val);
+}
+
+/* ===================== CART SYSTEM ===================== */
+function addToCart(catKey, id){
+  const product = (PRODUCTS[catKey] || []).find(p => String(p.id) === String(id));
+  if(!product) return;
+  
+  if(cart[id]) cart[id].qty++;
+  else cart[id] = { product, qty: 1 };
+
+  updateCart();
+  showToast('تمت إضافة المنتج للسلة بنجاح');
+}
+
+function addToCartDirect(id){
+  let found = null;
+  Object.values(PRODUCTS).forEach(list => {
+    const p = list.find(item => String(item.id) === String(id));
+    if(p) found = p;
+  });
+  if(found){
+    if(cart[id]) cart[id].qty++;
+    else cart[id] = { product: found, qty: 1 };
+    updateCart();
+    showToast('تمت إضافة المنتج للسلة بنجاح');
+  }
+}
+
+function changeQty(id, delta){
+  if(!cart[id]) return;
+  cart[id].qty += delta;
+  if(cart[id].qty <= 0) delete cart[id];
+  updateCart();
+}
+
+function updateCart(){
+  const count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById('cartBadge').textContent = count;
+
+  const body = document.getElementById('cartBody');
+  const footer = document.getElementById('cartFooter');
+  const items = Object.entries(cart);
+
+  if(!items.length){
+    body.innerHTML = `<div style="text-align:center; padding:40px 0; color:var(--text-muted);">السلة فارغة حالياً 🧺</div>`;
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  body.innerHTML = items.map(([id, item]) => `
+    <div class="cart-item">
+      <div style="font-size:24px;">${item.product.em || '🛍️'}</div>
+      <div class="cart-item-info">
+        <h5>${item.product.name}</h5>
+        <div class="price">${item.product.price} ج.م</div>
+      </div>
+      <div class="qty-controls">
+        <button onclick="changeQty('${id}', -1)">-</button>
+        <span style="font-size:12px; font-weight:700;">${item.qty}</span>
+        <button onclick="changeQty('${id}', 1)">+</button>
+      </div>
+    </div>
+  `).join('');
+
+  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const discount = subtotal * activeCouponRate;
+  const total = subtotal - discount;
+
+  document.getElementById('cartSubtotal').textContent = subtotal.toFixed(0) + ' ج.م';
+  document.getElementById('cartTotal').textContent = total.toFixed(0) + ' ج.م';
+  
+  const discRow = document.getElementById('discountRow');
+  if(discount > 0){
+    discRow.style.display = 'flex';
+    document.getElementById('cartDiscount').textContent = '-' + discount.toFixed(0) + ' ج.م';
+  } else {
+    discRow.style.display = 'none';
+  }
+}
+
+function toggleCart(){
+  document.getElementById('cartDrawer').classList.toggle('show');
+  document.getElementById('drawerOverlay').classList.toggle('show');
+}
+
+/* ===================== COUPON & REFERRAL SYSTEM ===================== */
+function applyCoupon(){
+  const code = document.getElementById('couponInput').value.trim();
+  const msg = document.getElementById('couponMsg');
+
+  if(code === 'SAVE5' || code === 'خصم5'){
+    activeCouponRate = 0.05;
+    msg.style.color = 'var(--green)';
+    msg.textContent = 'تم تطبيق الخصم بنجاح (5%) 🎉';
+  } else {
+    activeCouponRate = 0;
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'كود الخصم غير صحيح';
+  }
+  updateCart();
+}
+
+function setupReferral(){
+  const linkInput = document.getElementById('refLink');
+  const refUrl = window.location.origin + window.location.pathname + '?ref=SAVE5';
+  linkInput.value = refUrl;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.get('ref') === 'SAVE5'){
+    document.getElementById('couponInput').value = 'SAVE5';
+    applyCoupon();
+    showToast('أهلاً بك! تم إضافة كود الخصم 5% لسلتك تلقائياً 🎁');
+  }
+}
+
+function copyRefLink(){
+  const linkInput = document.getElementById('refLink');
+  navigator.clipboard.writeText(linkInput.value);
+  showToast('تم نسخ رابط الإحالة بنجاح!');
+}
+
+/* ===================== PAYMENT & CHECKOUT ===================== */
+function updatePayDetails(){
+  const payMethod = document.querySelector('input[name="payment"]:checked').value;
+  const box = document.getElementById('payDetailsBox');
+  const nameEl = document.getElementById('payDetailsName');
+  const numEl = document.getElementById('payDetailsNum');
+
+  if(payMethod === 'فودافون كاش'){
+    box.style.display = 'flex';
+    nameEl.textContent = 'فودافون كاش';
+    numEl.textContent = '01012517345';
+  } else if(payMethod === 'انستا باي'){
+    box.style.display = 'flex';
+    nameEl.textContent = 'انستا باي';
+    numEl.textContent = '01127491224';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function copyPayNumber(){
+  const num = document.getElementById('payDetailsNum').textContent;
+  navigator.clipboard.writeText(num);
+  showToast('تم نسخ الرقم: ' + num);
+}
+
+function checkoutWhatsApp(){
+  const items = Object.values(cart);
+  if(!items.length) return;
+
+  const payMethod = document.querySelector('input[name="payment"]:checked').value;
+  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const discount = subtotal * activeCouponRate;
+  const total = subtotal - discount;
+
+  let msg = `طلب جديد من متجر مخزن 🛍️\n\n`;
+  msg += `📋 *المنتجات المطلوبة:*\n`;
+  items.forEach(i => {
+    msg += `- ${i.product.name} (العدد: ${i.qty}) بسعر ${i.qty * i.product.price} ج.م\n`;
+  });
+
+  msg += `\n💳 *طريقة الدفع:* ${payMethod}\n`;
+  if(discount > 0) msg += `🏷️ *الخصم:* ${discount.toFixed(0)} ج.م\n`;
+  msg += `💰 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م\n`;
+
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/201127491224?text=${encoded}`, '_blank');
+}
+
+/* ===================== FIREBASE REALTIME LISTENER ===================== */
+function listenToProducts(){
+  if(!db) return;
+  db.collection('products').onSnapshot(snapshot => {
+    if(snapshot.empty) return;
+    const loaded = { frozen:[], birds:[], spices:[], acc:[], beauty:[], daily:[], weekly:[] };
+    
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if(data.category && loaded[data.category]){
+        loaded[data.category].push({ id: doc.id, ...data });
+      }
+    });
+
+    Object.assign(PRODUCTS, loaded);
+    renderAllGrids();
+  }, err => console.warn("Firestore error", err));
+}
+
+/* ===================== TOAST NOTIFICATION ===================== */
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* Initialize */
+renderAllGrids();
+setupReferral();
+initFirebase();
+</script>
+</body>
+</html>
