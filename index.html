@@ -5,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مخزن - عروض تستحق التخزين</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
     <!-- Firebase SDK Compat -->
     <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Google AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_CLIENT_ID" crossorigin="anonymous"></script>
+
     <style>
         :root {
             --ink: #23201B;
@@ -15,7 +23,6 @@
             --forest: #1F4D3D;
             --amber: #F2A93B;
             --tomato: #D94A2B;
-            --cream: #F4ECE1;
             --card: #FFFFFF;
             --line: rgba(35,32,27,0.14);
         }
@@ -64,6 +71,7 @@
             overflow-x: auto;
             background: var(--paper);
             border-bottom: 1px solid var(--line);
+            white-space: nowrap;
         }
 
         .tab-btn {
@@ -73,7 +81,6 @@
             padding: 8px 16px;
             font-family: 'Cairo', sans-serif;
             font-size: 13px;
-            white-space: nowrap;
             cursor: pointer;
             color: var(--ink);
         }
@@ -85,6 +92,15 @@
         }
 
         .container { padding: 16px; }
+
+        .ad-container {
+            margin: 10px 0;
+            text-align: center;
+            background: #e9e9e9;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
 
         .prod-card {
             background: var(--card);
@@ -149,7 +165,6 @@
             align-self: flex-end;
         }
 
-        /* Cart Footer Bar */
         .cart-bar {
             position: fixed;
             bottom: 0;
@@ -175,7 +190,6 @@
             cursor: pointer;
         }
 
-        /* Modal Styles */
         .modal {
             position: fixed;
             inset: 0;
@@ -244,6 +258,12 @@
 
         .btn-submit { background: var(--forest); color: #fff; }
         .btn-cancel { background: #ccc; }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
@@ -253,16 +273,33 @@
         <h1>مخزن</h1>
         <p>عروض تستحق التخزين</p>
     </div>
-    <div>🛒 <span id="cartCount">0</span></div>
+    <div style="display:flex; gap:15px; align-items:center;">
+        <span onclick="openQRModal()" style="cursor:pointer; font-size:20px;">📱</span>
+        <div>🛒 <span id="cartCount">0</span></div>
+    </div>
 </header>
 
 <nav class="tabs" id="tabs">
-    <button class="tab-btn active" onclick="filterCat('all')">الكل 📦</button>
+    <button class="tab-btn active" onclick="filterCat('all')">الصفحة الرئيسية 📦</button>
+    <button class="tab-btn" onclick="filterCat('birds')">الطيور 🐦</button>
     <button class="tab-btn" onclick="filterCat('frozen')">المجمدات ❄️</button>
     <button class="tab-btn" onclick="filterCat('clean')">المنظفات 🧼</button>
+    <button class="tab-btn" onclick="filterCat('spices')">العطارة 🌿</button>
     <button class="tab-btn" onclick="filterCat('daily')">عروض اليوم ⚡</button>
-    <button class="tab-btn" onclick="filterCat('sub')">الاشتراكات 📅</button>
+    <button class="tab-btn" onclick="filterCat('services')">خدمات عامة 🛠️</button>
 </nav>
+
+<div class="container" style="padding-bottom:0;">
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-YOUR_CLIENT_ID"
+             data-ad-slot="YOUR_AD_SLOT"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+</div>
 
 <div class="container" id="productList">
     <p style="text-align: center;">جاري تحميل العروض والمخزون...</p>
@@ -276,7 +313,6 @@
     <button onclick="openCheckout()">إتمام الطلب 🛒</button>
 </div>
 
-<!-- Checkout Modal -->
 <div class="modal" id="checkoutModal">
     <div class="modal-content">
         <h2>تفاصيل الطلب</h2>
@@ -288,11 +324,18 @@
         </div>
         <div class="field">
             <label>رقم الهاتف (واتساب) *</label>
-            <input type="tel" id="custPhone" placeholder="01xxxxxxxx">
+            <input type="tel" id="custPhone" placeholder="01xxxxxxxx" onchange="checkUserOrders()">
         </div>
         <div class="field">
             <label>العنوان بالتفصيل *</label>
             <textarea id="custAddress" rows="2" placeholder="المنطقة، الشارع، رقم المبنى/الشقة"></textarea>
+        </div>
+
+        <div class="field" style="background:#fff; padding:10px; border-radius:8px; border:1px dashed var(--amber);">
+            <label>هل لديك كود خصم / كود صديق (خصم 5%)؟</label>
+            <input type="text" id="refCode" placeholder="أدخل كود الخصم" style="text-transform:uppercase;">
+            <button type="button" onclick="applyDiscount()" style="margin-top:5px; background:var(--amber); border:none; padding:6px; border-radius:5px; width:100%; cursor:pointer;">تطبيق الخصم</button>
+            <div id="discountMsg" style="font-size:11px; color:var(--forest); margin-top:5px;"></div>
         </div>
 
         <div class="field">
@@ -310,10 +353,20 @@
     </div>
 </div>
 
+<div class="modal" id="qrModal">
+    <div class="modal-content" style="text-align:center;">
+        <h2>رمز QR الخاص بالمتجر</h2>
+        <p style="font-size:12px; color:#666;">امسح الكود لمشاركة المتجر مع أصدقائك</p>
+        <div id="qrcode"></div>
+        <button class="btn-cancel" onclick="closeQRModal()" style="width:100%; padding:10px; border:none; border-radius:8px; margin-top:10px;">إغلاق</button>
+    </div>
+</div>
+
 <script>
     let allProducts = [];
     let cart = {};
     let selectedPay = 'cod';
+    let discountPercent = 0;
 
     function initFirebase() {
         firebase.initializeApp({
@@ -329,6 +382,8 @@
             });
             renderProducts(allProducts);
         });
+
+        requestNotificationPermission();
     }
 
     function renderProducts(prods) {
@@ -343,7 +398,7 @@
             list.innerHTML += `
                 <div class="prod-card">
                     <div class="prod-img">
-                        ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; border-radius:8px; object-fit:cover;">` : (p.em || '🛒')}
+                        ${p.img ? `<img src="${p.img}" style="width:100%; height:100%; border-radius:8px; object-fit:cover;">` : (p.em || '📦')}
                     </div>
                     <div class="prod-details">
                         <h3>${p.pName}</h3>
@@ -353,7 +408,7 @@
                         </div>
                         ${p.pBadge ? `<span class="badge">${p.pBadge}</span>` : ''}
                     </div>
-                    <button class="add-btn" onclick="addToCart('${p.id}', '${p.pName}', ${p.pPrice})">إضافة +</button>
+                    <button class="add-btn" onclick="addToCart('${p.id}', '${p.pName}', ${p.pPrice})">${p.pCat === 'services' ? 'طلب الخدمة 🛠️' : 'إضافة +'}</button>
                 </div>
             `;
         });
@@ -387,8 +442,33 @@
             count += cart[key].qty;
             total += cart[key].price * cart[key].qty;
         }
+        if (discountPercent > 0) {
+            total = total - (total * (discountPercent / 100));
+        }
         document.getElementById('cartCount').innerText = count;
-        document.getElementById('cartTotal').innerText = total;
+        document.getElementById('cartTotal').innerText = Math.round(total);
+    }
+
+    function applyDiscount() {
+        const code = document.getElementById('refCode').value.trim();
+        if (code !== "") {
+            discountPercent = 5;
+            document.getElementById('discountMsg').innerText = "تم تطبيق خصم 5% بنجاح!";
+            updateCartUI();
+        }
+    }
+
+    function checkUserOrders() {
+        const phone = document.getElementById('custPhone').value.trim();
+        if (!phone) return;
+        
+        const db = firebase.firestore();
+        db.collection('orders').where('phone', '==', phone).get().then(snapshot => {
+            const orderCount = snapshot.size;
+            if (orderCount > 0 && orderCount % 10 === 0) {
+                alert(`🎉 مبروك! هذا الطلب رقم ${orderCount + 1} لك. حصلت على كوبون هدية خاص!`);
+            }
+        });
     }
 
     function openCheckout() {
@@ -428,20 +508,69 @@
             return;
         }
 
-        let msg = `طلب جديد من متجر مخزن 🛒%\n\n`;
-        msg += `الاسم: ${name}\nالرقم: ${phone}\nالعنوان: ${address}\nطريقة الدفع: ${selectedPay === 'cod' ? 'الدفع عند الاستلام' : 'فودافون كاش'}\n\n*الطلبات:*\n`;
-
         let total = 0;
+        let itemsList = [];
         for (let key in cart) {
-            msg += `- ${cart[key].name} (عدد ${cart[key].qty}) = ${cart[key].price * cart[key].qty} ج.م\n`;
+            itemsList.push(`${cart[key].name} (x${cart[key].qty})`);
             total += cart[key].price * cart[key].qty;
         }
 
-        msg += `\n*الإجمالي:* ${total} ج.م`;
+        if (discountPercent > 0) {
+            total = total - (total * (discountPercent / 100));
+        }
+
+        const db = firebase.firestore();
+        db.collection('orders').add({
+            name: name,
+            phone: phone,
+            address: address,
+            items: itemsList,
+            total: total,
+            payMethod: selectedPay,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        let userMyCode = "MKZ" + phone.slice(-4);
+        let msg = `طلب جديد من متجر مخزن 🛒\n\n`;
+        msg += `الاسم: ${name}\nالرقم: ${phone}\nالعنوان: ${address}\nطريقة الدفع: ${selectedPay === 'cod' ? 'الدفع عند الاستلام' : 'فودافون كاش'}\n`;
+        msg += `كود المشاركة الخاص بك (شاركه مع أصدقائك للحصول على خصم): *${userMyCode}*\n\n*الطلبات:*\n`;
+
+        for (let key in cart) {
+            msg += `- ${cart[key].name} (عدد ${cart[key].qty}) = ${cart[key].price * cart[key].qty} ج.م\n`;
+        }
+
+        msg += `\n*الإجمالي النهائي:* ${Math.round(total)} ج.م`;
 
         const waUrl = `https://wa.me/201000000000?text=${encodeURIComponent(msg)}`;
         window.open(waUrl, '_blank');
         closeCheckout();
+    }
+
+    function openQRModal() {
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), {
+            text: window.location.href,
+            width: 150,
+            height: 150
+        });
+        document.getElementById('qrModal').classList.add('show');
+    }
+
+    function closeQRModal() {
+        document.getElementById('qrModal').classList.remove('show');
+    }
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    new Notification("مرحباً بك في متجر مخزن!", {
+                        body: "استمتع بأفضل العروض والخصومات الحصرية اليوم.",
+                        icon: "https://via.placeholder.com/100"
+                    });
+                }
+            });
+        }
     }
 
     window.onload = initFirebase;
