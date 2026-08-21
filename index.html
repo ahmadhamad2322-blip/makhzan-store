@@ -8,231 +8,79 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        :root {
-            --main-color: #1a4d3e;
-            --bg-color: #fefae0;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 90px;
-            color: var(--text-color);
-        }
-
-        header {
-            background-color: var(--main-color);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .categories-nav {
-            display: flex;
-            overflow-x: auto;
-            gap: 10px;
-            padding: 15px 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .cat-btn {
-            background: #f1f1f1;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-
-        .cat-btn.active, .cat-btn:hover {
-            background-color: var(--main-color);
-            color: white;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-        }
-
-        .payment-info {
-            background: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .product-card h4 {
-            margin: 10px 0 5px;
-        }
-
-        .price {
-            color: var(--main-color);
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .add-btn {
-            background-color: var(--main-color);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .cart-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 999;
-        }
-
-        .checkout-btn {
-            background-color: #25D366;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .whatsapp-float {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            z-index: 1000;
-        }
+        :root { --main-color: #1a4d3e; --bg-color: #fefae0; }
+        body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 100px; }
+        header { background-color: var(--main-color); color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 20px; }
+        .categories-nav { display: flex; overflow-x: auto; gap: 10px; padding: 10px; background: #fff; }
+        .cat-btn { background: #f1f1f1; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background-color: var(--main-color); color: white; }
+        .container { padding: 15px; }
+        .payment-info { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; border: 1px solid #ddd; }
+        .products-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .product-card { background: white; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 5px; }
+        .price { color: var(--main-color); font-weight: bold; margin: 5px 0; }
+        .add-btn { background-color: var(--main-color); color: white; border: none; padding: 8px; border-radius: 5px; width: 100%; cursor: pointer; }
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; z-index: 999; }
+        .checkout-btn { background-color: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+        .whatsapp-float { position: fixed; bottom: 80px; right: 20px; z-index: 1000; }
+        .whatsapp-float img { width: 50px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">مخزن 📦</div>
-        <div>عروض تستحق التخزين</div>
-    </header>
+    <header>مخزن 📦</header>
 
     <div class="categories-nav">
-        <button class="cat-btn active" onclick="filterCategory('all')">📦 الكل</button>
-        <button class="cat-btn" onclick="filterCategory('poultry')">🐤 الطيور</button>
-        <button class="cat-btn" onclick="filterCategory('frozen')">❄️ المجمدات</button>
-        <button class="cat-btn" onclick="filterCategory('cosmetics')">💄 مستحضرات تجميل</button>
-        <button class="cat-btn" onclick="filterCategory('accessories')">👑 إكسسوارات بنات</button>
+        <button class="cat-btn active" onclick="filterCategory('all')">الكل</button>
+        <button class="cat-btn" onclick="filterCategory('poultry')">الطيور</button>
+        <button class="cat-btn" onclick="filterCategory('frozen')">المجمدات</button>
+        <button class="cat-btn" onclick="filterCategory('cosmetics')">تجميل</button>
+        <button class="cat-btn" onclick="filterCategory('accessories')">إكسسوارات</button>
     </div>
 
     <div class="container">
         <div class="payment-info">
-            <h3 style="margin-top:0; color:#1a4d3e;">💳 طرق الدفع المتاحة:</h3>
-            <p><strong>InstaPay (إنستا باي):</strong> 01127491224</p>
-            <p><strong>Vodafone Cash (فودافون كاش):</strong> 01012517345</p>
+            <strong>💳 الدفع:</strong><br>
+            إنستا باي: 01127491224<br>
+            فودافون كاش: 01012517345
         </div>
-
-        <div class="products-grid" id="productsContainer">
-            <p style="text-align:center; width:100%;">جاري تحميل المنتجات...</p>
-        </div>
+        <div class="products-grid" id="productsContainer"></div>
     </div>
 
+    <!-- زر الواتساب العائم -->
     <a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="تواصل معنا" width="55">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="واتساب">
     </a>
 
     <div class="cart-bar">
         <div>الإجمالي: <span id="totalPrice">0</span> ج.م</div>
-        <button class="checkout-btn" onclick="sendToWhatsApp()">إتمام الطلب عبر الواتساب 🛒</button>
+        <button class="checkout-btn" onclick="sendToWhatsApp()">إتمام الطلب 🛒</button>
     </div>
 
     <script>
-        // إعدادات الفايربيس الخاّصة بمشروعك
-        const firebaseConfig = {
-            apiKey: "AIzaSyDummyKeyForStoreConfig",
-            authDomain: "makhzan-9eb1f.firebaseapp.com",
-            projectId: "makhzan-9eb1f",
-            storageBucket: "makhzan-9eb1f.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
+        const firebaseConfig = { projectId: "makhzan-9eb1f" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let allProducts = [];
-        let cart = {};
-        let totalPrice = 0;
-        const orderWhatsApp = "201127491224";
+        let allProducts = [], cart = {}, totalPrice = 0;
 
-        // سحب المنتجات من Firebase تلقائياً
         db.collection("products").onSnapshot((snapshot) => {
             allProducts = [];
-            snapshot.forEach((doc) => {
-                allProducts.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach((doc) => allProducts.push({ id: doc.id, ...doc.data() }));
             displayProducts(allProducts);
         });
 
         function displayProducts(products) {
             const container = document.getElementById("productsContainer");
             container.innerHTML = "";
-
-            if (products.length === 0) {
-                container.innerHTML = "<p>لا توجد منتجات حالياً.</p>";
-                return;
-            }
-
             products.forEach(p => {
                 container.innerHTML += `
                     <div class="product-card">
-                        <img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}">
-                        <h4>${p.name}</h4>
+                        <img src="${p.image || 'https://via.placeholder.com/150'}">
+                        <div style="font-size:14px; margin-top:5px;">${p.name}</div>
                         <div class="price">${p.price} ج.م</div>
-                        <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">أضف للسلة 🛒</button>
+                        <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">أضف للسلة</button>
                     </div>
                 `;
             });
@@ -241,54 +89,28 @@
         function filterCategory(cat) {
             document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
-            if (cat === 'all') {
-                displayProducts(allProducts);
-            } else {
-                const filtered = allProducts.filter(p => p.category === cat);
-                displayProducts(filtered);
-            }
+            displayProducts(cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat));
         }
 
         function addToCart(name, price) {
-            if (cart[name]) {
-                cart[name].quantity += 1;
-            } else {
-                cart[name] = { price: price, quantity: 1 };
-            }
+            cart[name] = cart[name] ? { ...cart[name], quantity: cart[name].quantity + 1 } : { price: price, quantity: 1 };
             updateCart();
         }
 
         function updateCart() {
             totalPrice = 0;
-            for (let name in cart) {
-                totalPrice += cart[name].price * cart[name].quantity;
-            }
+            for (let name in cart) totalPrice += cart[name].price * cart[name].quantity;
             document.getElementById("totalPrice").innerText = totalPrice;
         }
 
         function sendToWhatsApp() {
-            if (Object.keys(cart).length === 0) {
-                alert("السلة فارغة! قم بإضافة منتجات أولاً.");
-                return;
-            }
-
-            let message = "🛒 *طلب جديد من متجر مخزن*%0A%0A";
-            message += "*المنتجات المطلوبة:*%0A";
-
+            if (Object.keys(cart).length === 0) return alert("السلة فارغة!");
+            let msg = "طلب جديد من مخزن:%0A";
             for (let name in cart) {
-                message += `▪️ ${name} (العدد: ${cart[name].quantity}) - السعر: ${cart[name].price * cart[name].quantity} ج.م%0A`;
+                msg += `- ${name} (x${cart[name].quantity})%0A`;
             }
-
-            message += `%0A💰 *الإجمالي المقدر:* ${totalPrice} ج.م%0A`;
-            message += `-----------------------------------%0A`;
-            message += `💳 *طرق الدفع المتاحة:*%0A`;
-            message += `• إنستا باي: 01127491224%0A`;
-            message += `• فودافون كاش: 01012517345%0A%0A`;
-            message += `برجاء تأكيد الطلب وتحديد العنوان.`;
-
-            let url = `https://wa.me/${orderWhatsApp}?text=${message}`;
-            window.open(url, '_blank');
+            msg += `%0Aالإجمالي: ${totalPrice} ج.م%0A%0Aطرق الدفع:%0Aإنستا باي: 01127491224%0Aفودافون كاش: 01012517345`;
+            window.open("https://wa.me/201127491224?text=" + msg, '_blank');
         }
     </script>
 </body>
