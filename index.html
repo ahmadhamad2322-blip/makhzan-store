@@ -186,12 +186,18 @@
 
   .user-info-form {
     background: #f1f5f9; padding: 12px; border-radius: 10px; margin-bottom: 14px;
-    display: flex; flex-direction: column; gap: 8px;
+    display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border);
   }
   .user-info-form label { font-size: 11px; font-weight: 700; color: var(--primary); }
   .user-info-form input {
     width: 100%; padding: 8px 10px; border: 1px solid var(--border);
     border-radius: 6px; font-size: 12px; outline: none; background: #fff;
+  }
+
+  .referral-display {
+    background: #eff6ff; border: 1px dashed var(--brand);
+    border-radius: 8px; padding: 8px 10px; font-size: 11px; color: var(--brand);
+    display: flex; align-items: center; justify-content: space-between; margin-top: 4px;
   }
 
   .drawer-footer { padding: 16px; border-top: 1px solid var(--border); background: #f8fafc; }
@@ -330,7 +336,7 @@
   <div class="drawer-body" id="cartBody"></div>
   <div class="drawer-footer" id="cartFooter">
     
-    <!-- User Info Inputs -->
+    <!-- Customer Info Form -->
     <div class="user-info-form">
       <div>
         <label>الاسم بالكامل *</label>
@@ -338,16 +344,35 @@
       </div>
       <div>
         <label>رقم الواتساب / الهاتف *</label>
-        <input type="tel" id="custPhone" placeholder="010xxxxxxx">
+        <input type="tel" id="custPhone" placeholder="010xxxxxxx" oninput="generatePersonalCoupon()">
       </div>
       <div>
         <label>العنوان بالكامل *</label>
         <input type="text" id="custAddress" placeholder="المنطقة - اسم الشارع - رقم العقار">
       </div>
+
+      <!-- User Generated Coupon -->
+      <div id="personalCouponBox" style="display:none;" class="referral-display">
+        <span>كود الخصم المخصص لك: <strong id="myCouponCode">---</strong></span>
+        <button onclick="copyMyCoupon()" style="background:var(--brand); color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">نسخ الكود</button>
+      </div>
     </div>
 
-    <div style="margin: 10px 0; font-size: 15px; font-weight:800; display:flex; justify-content:space-between;">
-      <span>الإجمالي:</span><span id="cartTotal">0 ج.م</span>
+    <!-- Coupon Input for Discount -->
+    <div style="margin-bottom: 10px;">
+      <label style="font-size:11px; font-weight:700;">هل لديك كود خصم؟</label>
+      <div style="display:flex; gap:6px; margin-top:4px;">
+        <input type="text" id="appliedCouponInput" placeholder="ادخل كود صديقك هنا" style="flex:1; padding:6px; border:1px solid var(--border); border-radius:6px; font-size:12px;">
+        <button onclick="applyDiscountCoupon()" style="background:var(--brand); color:#fff; border:none; padding:0 12px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">تطبيق</button>
+      </div>
+      <span id="couponStatusMsg" style="font-size:10px; display:block; margin-top:2px;"></span>
+    </div>
+
+    <!-- Totals -->
+    <div style="margin: 10px 0; font-size: 13px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>المجموع:</span><span id="cartSubtotal">0 ج.م</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--green); display:none;" id="discountRow"><span>الخصم (5%):</span><span id="cartDiscount">0 ج.م</span></div>
+      <div style="display:flex; justify-content:space-between; font-weight:800; font-size:16px; margin-top:6px; border-top:1px solid var(--border); padding-top:6px;"><span>الإجمالي النهائي:</span><span id="cartTotal">0 ج.م</span></div>
     </div>
 
     <button class="checkout-btn" onclick="checkoutWhatsApp()">إرسال الطلب عبر الواتساب 💬</button>
@@ -378,7 +403,7 @@ function initFirebase(){
   } catch(e) { console.warn("Firebase Init Error", e); }
 }
 
-/* ===================== EMPTY LOCAL DATA ===================== */
+/* ===================== EMPTY PRODUCTS STATE ===================== */
 let PRODUCTS = {
   general: [],
   frozen: [],
@@ -391,6 +416,7 @@ let PRODUCTS = {
 };
 
 let cart = {};
+let hasDiscount = false;
 
 /* ===================== TAB SWITCHING ===================== */
 function switchTab(tabId){
@@ -425,7 +451,7 @@ function renderProducts(catKey, filterText = ''){
   }
 
   if(!items.length){
-    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر في هذا القسم حالياً، يرجى إضافتها من لوحة التحكم</div>`;
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر المتاحة حالياً، أضف المنتجات من لوحة التحكم</div>`;
     return;
   }
 
@@ -459,7 +485,7 @@ function renderAllGrids(filter = ''){
     if(filter) allProducts = allProducts.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
     
     if(!allProducts.length){
-      homeGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد عناصر مضافة بعد</div>`;
+      homeGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:30px 10px;">لا توجد منتجات مضافة بعد</div>`;
       return;
     }
 
@@ -482,7 +508,7 @@ function handleSearch(){
   renderAllGrids(val);
 }
 
-/* ===================== CART SYSTEM ===================== */
+/* ===================== CART & USER COUPON SYSTEM ===================== */
 function addToCart(catKey, id){
   const product = (PRODUCTS[catKey] || []).find(p => String(p.id) === String(id));
   if(!product) return;
@@ -512,6 +538,44 @@ function changeQty(id, delta){
   if(!cart[id]) return;
   cart[id].qty += delta;
   if(cart[id].qty <= 0) delete cart[id];
+  updateCart();
+}
+
+function generatePersonalCoupon(){
+  const phone = document.getElementById('custPhone').value.trim();
+  const box = document.getElementById('personalCouponBox');
+  const codeEl = document.getElementById('myCouponCode');
+
+  if(phone.length >= 6){
+    const cleanPhone = phone.replace(/\D/g, '');
+    const uniqueNum = cleanPhone.slice(-6);
+    const code = 'REF-' + uniqueNum;
+    codeEl.textContent = code;
+    box.style.display = 'flex';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function copyMyCoupon(){
+  const code = document.getElementById('myCouponCode').textContent;
+  navigator.clipboard.writeText(code);
+  showToast('تم نسخ كود الخصم المخصص لك!');
+}
+
+function applyDiscountCoupon(){
+  const inputCode = document.getElementById('appliedCouponInput').value.trim();
+  const msg = document.getElementById('couponStatusMsg');
+
+  if(inputCode.startsWith('REF-') && inputCode.length >= 8){
+    hasDiscount = true;
+    msg.style.color = 'var(--green)';
+    msg.textContent = 'تم تطبيق خصم الإحالة (5%) بنجاح 🎉';
+  } else {
+    hasDiscount = false;
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'كود الخصم غير صالح';
+  }
   updateCart();
 }
 
@@ -545,8 +609,20 @@ function updateCart(){
     </div>
   `).join('');
 
-  const total = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const subtotal = Object.values(cart).reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const discountAmount = hasDiscount ? (subtotal * 0.05) : 0;
+  const total = subtotal - discountAmount;
+
+  document.getElementById('cartSubtotal').textContent = subtotal.toFixed(0) + ' ج.م';
   document.getElementById('cartTotal').textContent = total.toFixed(0) + ' ج.م';
+
+  const discRow = document.getElementById('discountRow');
+  if(discountAmount > 0){
+    discRow.style.display = 'flex';
+    document.getElementById('cartDiscount').textContent = '-' + discountAmount.toFixed(0) + ' ج.م';
+  } else {
+    discRow.style.display = 'none';
+  }
 }
 
 function toggleCart(){
@@ -562,27 +638,33 @@ function checkoutWhatsApp(){
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
   const address = document.getElementById('custAddress').value.trim();
+  const myCoupon = document.getElementById('myCouponCode').textContent;
+  const usedCoupon = document.getElementById('appliedCouponInput').value.trim();
 
   if(!name || !phone || !address){
-    showToast('⚠️ يرجى ملء بيانات الاسم والرقم والعنوان أولاً');
+    showToast('⚠️ يرجى ملء بيانات الاسم ورقم الواتساب والعنوان أولاً');
     return;
   }
 
-  const total = items.reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const subtotal = items.reduce((s, i) => s + (i.qty * i.product.price), 0);
+  const discountAmount = hasDiscount ? (subtotal * 0.05) : 0;
+  const total = subtotal - discountAmount;
 
   let msg = `🛒 *طلب جديد من متجر مخزن*\n\n`;
   msg += `👤 *الاسم:* ${name}\n`;
-  msg += `📞 *الواتساب/الهاتف:* ${phone}\n`;
-  msg += `📍 *العنوان:* ${address}\n\n`;
-  msg += `📋 *قائمة المشتريات/الخدمات:*\n`;
+  msg += `📞 *الواتساب:* ${phone}\n`;
+  msg += `📍 *العنوان:* ${address}\n`;
+  if(myCoupon !== '---') msg += `🏷️ *كود الإحالة الخاص بالعميل:* ${myCoupon}\n`;
+  if(hasDiscount) msg += `🎁 *استخدم كود خصم:* ${usedCoupon} (خصم 5%)\n`;
   
+  msg += `\n📋 *قائمة المشتريات/الخدمات:*\n`;
   items.forEach((i, idx) => {
     msg += `${idx + 1}. ${i.product.name} - (العدد: ${i.qty}) بسعر ${i.qty * i.product.price} ج.م\n`;
   });
 
-  msg += `\n💰 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م`;
+  if(discountAmount > 0) msg += `\n💰 *المجموع:* ${subtotal.toFixed(0)} ج.م\n🏷️ *الخصم:* -${discountAmount.toFixed(0)} ج.م`;
+  msg += `\n💵 *الإجمالي النهائي:* ${total.toFixed(0)} ج.م`;
 
-  // Direct redirection with pre-filled message text
   const targetPhone = "201127491224";
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(msg)}`;
   
