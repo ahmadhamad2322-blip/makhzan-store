@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر مخزن</title>
+    <title>ماركت نت</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -49,12 +49,14 @@
         /* زر الواتساب العائم */
         .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 1000; display: flex; justify-content: center; align-items: center; text-decoration: none; }
         .whatsapp-float:hover { background-color: #128c7e; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">🛒 متجر مخزن</div>
+    <div class="logo">🛒 ماركت نت</div>
     <button class="cart-icon-btn" onclick="openCart()">
         السلة 🛍️
         <span class="cart-count" id="cartCount">0</span>
@@ -62,17 +64,19 @@
 </header>
 
 <div class="categories">
-    <button class="cat-btn active" onclick="filterCategory('all')">🏠 الكل</button>
-    <button class="cat-btn" onclick="filterCategory('grocery')">🛠️ خدمات عامة</button>
-    <button class="cat-btn" onclick="filterCategory('food')">🧊 مجمدات</button>
-    <button class="cat-btn" onclick="filterCategory('drinks')">🥤 مشروبات</button>
-    <button class="cat-btn" onclick="filterCategory('beauty')">✨ منظفات وعناية</button>
+    <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
+    <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
+    <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
+    <button class="cat-btn" onclick="filterCategory('spices')">🧂 عطارة</button>
+    <button class="cat-btn" onclick="filterCategory('beauty')">💄 مستحضرات تجميل</button>
+    <button class="cat-btn" onclick="filterCategory('accessories')">💍 اكسسوارات بنات</button>
 </div>
 
 <div class="container">
     <div class="banner">
-        <h2>أهلاً بك في متجر مخزن! 🎁</h2>
-        <p>أفضل المنتجات بأفضل الأسعار - طلبك يصلك فوراً على الواتساب</p>
+        <h2>أهلاً بك في ماركت نت! 🎁</h2>
+        <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
     <h3 style="margin-bottom: 15px;">المنتجات المتاحة</h3>
@@ -96,8 +100,18 @@
         
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
-        <h4 style="display: flex; justify-content: space-between;">
-            <span>الإجمالي:</span>
+        
+        <div class="summary-row">
+            <span>إجمالي المنتجات:</span>
+            <span id="subTotal">0 جنيه</span>
+        </div>
+        <div class="summary-row" style="color: #0284c7;">
+            <span>خدمة التوصيل:</span>
+            <span>20 جنيه</span>
+        </div>
+        <hr style="margin: 10px 0;">
+        <h4 style="display: flex; justify-content: space-between; color: #16a34a;">
+            <span>الإجمالي النهائي:</span>
             <span id="cartTotal">0 جنيه</span>
         </h4>
 
@@ -132,6 +146,7 @@
 
 <script>
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
+  const DELIVERY_FEE = 20; // مصاريف التوصيل الثابتة
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -209,14 +224,16 @@
       document.getElementById('cartCount').innerText = count;
 
       const itemsList = document.getElementById('cartItemsList');
-      let total = 0;
+      let subtotal = 0;
       if (cart.length === 0) {
           itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
+          document.getElementById('subTotal').innerText = '0 جنيه';
+          document.getElementById('cartTotal').innerText = '0 جنيه';
       } else {
           let html = '';
           cart.forEach((item) => {
               const itemTotal = item.price * item.qty;
-              total += itemTotal;
+              subtotal += itemTotal;
               html += `
                   <div class="cart-item">
                       <div>
@@ -232,8 +249,9 @@
               `;
           });
           itemsList.innerHTML = html;
+          document.getElementById('subTotal').innerText = subtotal + ' جنيه';
+          document.getElementById('cartTotal').innerText = (subtotal + DELIVERY_FEE) + ' جنيه';
       }
-      document.getElementById('cartTotal').innerText = total + ' جنيه';
   }
 
   function changeQty(id, delta) {
@@ -276,13 +294,15 @@
       const address = document.getElementById('custAddress').value;
       const payment = document.getElementById('payMethod').value;
 
-      let total = 0;
+      let subtotal = 0;
       let itemsText = "";
       cart.forEach((item, index) => {
           const itemTotal = item.price * item.qty;
-          total += itemTotal;
+          subtotal += itemTotal;
           itemsText += `${index + 1}. ${item.name} (العدد: ${item.qty}) - ${itemTotal} جنيه\n`;
       });
+
+      const finalTotal = subtotal + DELIVERY_FEE;
 
       db.collection('orders').add({
           name: name,
@@ -290,17 +310,21 @@
           address: address,
           payment: payment,
           items: cart,
-          total: total,
+          subtotal: subtotal,
+          deliveryFee: DELIVERY_FEE,
+          total: finalTotal,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      const message = `طلب جديد من المتجر 🛒:\n\n` +
+      const message = `طلب جديد من متجر ماركت نت 🛒:\n\n` +
                       `👤 *الاسم:* ${name}\n` +
                       `📞 *الهاتف:* ${phone}\n` +
                       `📍 *العنوان:* ${address}\n` +
                       `💳 *طريقة الدفع:* ${payment}\n\n` +
                       `📦 *المنتجات:*\n${itemsText}\n` +
-                      `💰 *الإجمالي النهائي:* ${total} جنيه`;
+                      `💵 *إجمالي المنتجات:* ${subtotal} جنيه\n` +
+                      `🛵 *مصاريف التوصيل:* ${DELIVERY_FEE} جنيه\n` +
+                      `💰 *الإجمالي النهائي:* ${finalTotal} جنيه`;
 
       const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
