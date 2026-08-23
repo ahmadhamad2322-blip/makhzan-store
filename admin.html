@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - متجر مخزن</title>
+    <title>لوحة التحكم - ماركت نت</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -26,36 +26,44 @@
         .preview-img { max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none; }
 
         .btn-add { background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-cancel { background: #64748b; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 8px; display: none; }
         .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        .product-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        .product-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e2e8f0; gap: 10px; }
         .product-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card">
-        <h2>➕ إضافة منتج جديد</h2>
+        <h2 id="formTitle">➕ إضافة منتج جديد</h2>
         <form id="addProductForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="editProductId" value="">
+
             <div class="form-group">
                 <label>اسم المنتج:</label>
-                <input type="text" id="pName" required placeholder="مثال: اوكسي 9 كجم">
+                <input type="text" id="pName" required placeholder="مثال: فراخ بيضاء 1 كجم">
             </div>
 
             <div class="form-group">
                 <label>السعر (بالجنيه):</label>
-                <input type="number" id="pPrice" required placeholder="490">
+                <input type="number" id="pPrice" required placeholder="120">
             </div>
 
             <div class="form-group">
                 <label>القسم:</label>
                 <select id="pCat" required>
-                    <option value="grocery">🛠️ خدمات عامة</option>
-                    <option value="food">🧊 مجمدات</option>
-                    <option value="drinks">🥤 مشروبات</option>
-                    <option value="beauty">✨ منظفات وعناية</option>
+                    <option value="offers">🔥 العروض اليومية</option>
+                    <option value="poultry">🍗 طيور</option>
+                    <option value="cleaning">✨ منظفات</option>
+                    <option value="spices">🧂 عطارة</option>
+                    <option value="beauty">💄 مستحضرات تجميل</option>
+                    <option value="accessories">💍 اكسسوارات بنات</option>
                 </select>
             </div>
 
@@ -70,6 +78,7 @@
             </div>
 
             <button type="submit" id="submitBtn" class="btn-add">حفظ المنتج 🚀</button>
+            <button type="button" id="cancelBtn" class="btn-cancel" onclick="resetForm()">إلغاء التعديل ✕</button>
         </form>
     </div>
 
@@ -94,7 +103,7 @@
   }
   const db = firebase.firestore();
 
-  // تحويل الصورة المرفوعة من الهاتف إلى رابط Base64 وحفظها مباشرة
+  // تحويل الصورة المرفوعة من الهاتف إلى Base64 مع الضغط
   function handleFileSelect(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -103,7 +112,6 @@
       reader.onload = function(event) {
           const img = new Image();
           img.onload = function() {
-              // ضغط الصورة لسرعة التحميل على المتجر
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               const maxWidth = 500;
@@ -124,8 +132,10 @@
       reader.readAsDataURL(file);
   }
 
+  // حفظ أو تحديث المنتج
   function saveProduct(e) {
       e.preventDefault();
+      const id = document.getElementById('editProductId').value;
       const name = document.getElementById('pName').value;
       const price = parseFloat(document.getElementById('pPrice').value);
       const cat = document.getElementById('pCat').value;
@@ -138,29 +148,68 @@
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.innerText = "جاري الحفظ...";
+      btn.innerText = id ? "جاري التحديث..." : "جاري الحفظ...";
 
-      db.collection('products').add({
+      const productData = {
           name: name,
           price: price,
           cat: cat,
           img: img,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-          alert('تم إضافة المنتج بنجاح! 🎉');
-          document.getElementById('addProductForm').reset();
-          document.getElementById('imgPreview').style.display = 'none';
-          document.getElementById('pImgUrl').value = '';
-          btn.disabled = false;
-          btn.innerText = "حفظ المنتج 🚀";
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (!id) {
+          productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      }
+
+      const docRef = id ? db.collection('products').doc(id) : db.collection('products');
+
+      const operation = id ? docRef.update(productData) : docRef.add(productData);
+
+      operation.then(() => {
+          alert(id ? 'تم تحديث المنتج بنجاح! ✏️' : 'تم إضافة المنتج بنجاح! 🎉');
+          resetForm();
       }).catch(err => {
           alert('حدث خطأ: ' + err.message);
           btn.disabled = false;
-          btn.innerText = "حفظ المنتج 🚀";
+          btn.innerText = id ? "تحديث المنتج ✏️" : "حفظ المنتج 🚀";
       });
   }
 
-  // عرض وتنسيق المنتجات الحالية وإمكانية حذفها
+  // تعبئة البيانات في النموذج عند اختيار التعديل
+  function editProduct(id, name, price, cat, img) {
+      document.getElementById('editProductId').value = id;
+      document.getElementById('pName').value = name;
+      document.getElementById('pPrice').value = price;
+      document.getElementById('pCat').value = cat;
+      document.getElementById('pImgUrl').value = img;
+
+      const preview = document.getElementById('imgPreview');
+      preview.src = img;
+      preview.style.display = 'block';
+
+      document.getElementById('formTitle').innerText = "✏️ تعديل المنتج";
+      document.getElementById('submitBtn').innerText = "تحديث المنتج ✏️";
+      document.getElementById('cancelBtn').style.display = "block";
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // إعادة صياغة النموذج للحالة الافتراضية
+  function resetForm() {
+      document.getElementById('addProductForm').reset();
+      document.getElementById('editProductId').value = '';
+      document.getElementById('pImgUrl').value = '';
+      document.getElementById('imgPreview').style.display = 'none';
+
+      document.getElementById('formTitle').innerText = "➕ إضافة منتج جديد";
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = false;
+      btn.innerText = "حفظ المنتج 🚀";
+      document.getElementById('cancelBtn').style.display = "none";
+  }
+
+  // عرض قائمة المنتجات مع زر التعديل والحذف
   db.collection('products').onSnapshot(snapshot => {
       const list = document.getElementById('productsList');
       if (snapshot.empty) {
@@ -170,6 +219,9 @@
       let html = '';
       snapshot.forEach(doc => {
           const p = doc.data();
+          const safeName = p.name.replace(/'/g, "\\'");
+          const safeImg = p.img ? p.img.replace(/'/g, "\\'") : '';
+          
           html += `
               <div class="product-item">
                   <div style="display:flex; align-items:center; gap:10px;">
@@ -179,13 +231,17 @@
                           <small>${p.price} جنيه</small>
                       </div>
                   </div>
-                  <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                  <div class="action-btns">
+                      <button class="btn-edit" onclick="editProduct('${doc.id}', '${safeName}', ${p.price}, '${p.cat}', '${safeImg}')">تعديل 📝</button>
+                      <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                  </div>
               </div>
           `;
       });
       list.innerHTML = html;
   });
 
+  // حذف المنتج
   function deleteProduct(id) {
       if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
           db.collection('products').doc(id).delete();
