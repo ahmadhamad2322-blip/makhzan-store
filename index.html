@@ -51,6 +51,9 @@
         .whatsapp-float:hover { background-color: #128c7e; }
         
         .summary-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
+        
+        .promo-box { display: flex; gap: 8px; margin-bottom: 12px; }
+        .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -67,6 +70,7 @@
     <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
     <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
     <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
+    <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
     <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
     <button class="cat-btn" onclick="filterCategory('spices')">🧂 عطارة</button>
     <button class="cat-btn" onclick="filterCategory('beauty')">💄 مستحضرات تجميل</button>
@@ -101,13 +105,42 @@
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
         
+        <div class="form-group">
+            <label>كود الخصم (أدخل رقم هاتفك للحصول على خصم 5%):</label>
+            <div class="promo-box">
+                <input type="tel" id="promoCodeInput" placeholder="أدخل رقم الهاتف">
+                <button type="button" class="promo-btn" onclick="applyPromoCode()">تطبيق الخصم</button>
+            </div>
+            <small id="promoMsg" style="display:none; font-weight:bold;"></small>
+        </div>
+
+        <div class="form-group">
+            <label>إكرامية عامل التوصيل (اختياري):</label>
+            <select id="tipAmount" onchange="updateCartUI()">
+                <option value="0">بدون إكرامية 🚴</option>
+                <option value="5">5 جنيه 💙</option>
+                <option value="10">10 جنيه 💛</option>
+                <option value="20">20 جنيه ❤️</option>
+            </select>
+        </div>
+
+        <hr style="margin: 10px 0;">
+
         <div class="summary-row">
             <span>إجمالي المنتجات:</span>
             <span id="subTotal">0 جنيه</span>
         </div>
+        <div class="summary-row" id="discountRow" style="color: #ef4444; display: none;">
+            <span>خصم (5%):</span>
+            <span id="discountTotal">-0 جنيه</span>
+        </div>
         <div class="summary-row" style="color: #0284c7;">
             <span>خدمة التوصيل:</span>
             <span>20 جنيه</span>
+        </div>
+        <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
+            <span>إكرامية الديلفري:</span>
+            <span id="tipTotal">0 جنيه</span>
         </div>
         <hr style="margin: 10px 0;">
         <h4 style="display: flex; justify-content: space-between; color: #16a34a;">
@@ -147,6 +180,7 @@
 <script>
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
   const DELIVERY_FEE = 20; // مصاريف التوصيل الثابتة
+  let isDiscountApplied = false;
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -219,16 +253,39 @@
       alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
   }
 
+  function applyPromoCode() {
+      const codeInput = document.getElementById('promoCodeInput').value.trim();
+      const msg = document.getElementById('promoMsg');
+      
+      if (codeInput.length >= 10) {
+          isDiscountApplied = true;
+          msg.style.display = 'block';
+          msg.style.color = '#16a34a';
+          msg.innerText = '🎉 تم تطبيق خصم 5% بنجاح!';
+          // نقل الرقم إلى خانة الهاتف للسهولة
+          document.getElementById('custPhone').value = codeInput;
+      } else {
+          isDiscountApplied = false;
+          msg.style.display = 'block';
+          msg.style.color = '#ef4444';
+          msg.innerText = '⚠️ يرجى إدخال رقم هاتف صحيح للحصول على الخصم.';
+      }
+      updateCartUI();
+  }
+
   function updateCartUI() {
       const count = cart.reduce((sum, item) => sum + item.qty, 0);
       document.getElementById('cartCount').innerText = count;
 
       const itemsList = document.getElementById('cartItemsList');
       let subtotal = 0;
+      
       if (cart.length === 0) {
           itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
           document.getElementById('subTotal').innerText = '0 جنيه';
           document.getElementById('cartTotal').innerText = '0 جنيه';
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('tipRow').style.display = 'none';
       } else {
           let html = '';
           cart.forEach((item) => {
@@ -249,8 +306,29 @@
               `;
           });
           itemsList.innerHTML = html;
+
+          const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+          let discountAmount = 0;
+
+          if (isDiscountApplied) {
+              discountAmount = Math.round(subtotal * 0.05);
+              document.getElementById('discountRow').style.display = 'flex';
+              document.getElementById('discountTotal').innerText = `-${discountAmount} جنيه`;
+          } else {
+              document.getElementById('discountRow').style.display = 'none';
+          }
+
+          if (tipFee > 0) {
+              document.getElementById('tipRow').style.display = 'flex';
+              document.getElementById('tipTotal').innerText = `${tipFee} جنيه`;
+          } else {
+              document.getElementById('tipRow').style.display = 'none';
+          }
+
+          const finalTotal = subtotal - discountAmount + DELIVERY_FEE + tipFee;
+
           document.getElementById('subTotal').innerText = subtotal + ' جنيه';
-          document.getElementById('cartTotal').innerText = (subtotal + DELIVERY_FEE) + ' جنيه';
+          document.getElementById('cartTotal').innerText = finalTotal + ' جنيه';
       }
   }
 
@@ -293,6 +371,7 @@
       const phone = document.getElementById('custPhone').value;
       const address = document.getElementById('custAddress').value;
       const payment = document.getElementById('payMethod').value;
+      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
 
       let subtotal = 0;
       let itemsText = "";
@@ -302,7 +381,8 @@
           itemsText += `${index + 1}. ${item.name} (العدد: ${item.qty}) - ${itemTotal} جنيه\n`;
       });
 
-      const finalTotal = subtotal + DELIVERY_FEE;
+      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
+      const finalTotal = subtotal - discountAmount + DELIVERY_FEE + tipFee;
 
       db.collection('orders').add({
           name: name,
@@ -311,25 +391,41 @@
           payment: payment,
           items: cart,
           subtotal: subtotal,
+          discount: discountAmount,
           deliveryFee: DELIVERY_FEE,
+          tipFee: tipFee,
           total: finalTotal,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      const message = `طلب جديد من متجر ماركت نت 🛒:\n\n` +
+      let message = `طلب جديد من متجر ماركت نت 🛒:\n\n` +
                       `👤 *الاسم:* ${name}\n` +
                       `📞 *الهاتف:* ${phone}\n` +
                       `📍 *العنوان:* ${address}\n` +
                       `💳 *طريقة الدفع:* ${payment}\n\n` +
                       `📦 *المنتجات:*\n${itemsText}\n` +
-                      `💵 *إجمالي المنتجات:* ${subtotal} جنيه\n` +
-                      `🛵 *مصاريف التوصيل:* ${DELIVERY_FEE} جنيه\n` +
-                      `💰 *الإجمالي النهائي:* ${finalTotal} جنيه`;
+                      `💵 *إجمالي المنتجات:* ${subtotal} جنيه\n`;
+
+      if (discountAmount > 0) {
+          message += `🎁 *الخصم (5%):* -${discountAmount} جنيه\n`;
+      }
+
+      message += `🛵 *مصاريف التوصيل:* ${DELIVERY_FEE} جنيه\n`;
+
+      if (tipFee > 0) {
+          message += `🚴 *إكرامية الديلفري:* ${tipFee} جنيه\n`;
+      }
+
+      message += `💰 *الإجمالي النهائي:* ${finalTotal} جنيه`;
 
       const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       
       cart = [];
+      isDiscountApplied = false;
+      document.getElementById('promoCodeInput').value = '';
+      document.getElementById('promoMsg').style.display = 'none';
+      document.getElementById('tipAmount').value = '0';
       updateCartUI();
       closeCart();
   }
