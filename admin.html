@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - ماركت نت</title>
+    <title>ماركت نت</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,84 +11,201 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #f1f5f9; padding: 20px; color: #0f172a; }
-        .container { max-width: 900px; margin: 0 auto; }
+        body { background-color: #f8fafc; color: #1e293b; padding-bottom: 80px; }
         
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        h2, h3 { margin-bottom: 15px; color: #0284c7; }
+        header { background: #0f172a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .logo-container { display: flex; flex-direction: column; align-items: flex-start; }
+        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
         
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
-        
-        .upload-box { border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; text-align: center; background: #f0f9ff; cursor: pointer; margin-top: 5px; }
-        .upload-box input { display: none; }
-        .preview-img { max-width: 100px; max-height: 100px; border-radius: 8px; margin-top: 10px; display: none; }
+        .user-code-header-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; color: #38bdf8; padding: 2px 8px; border-radius: 12px; margin-top: 2px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .user-code-header-badge:hover { background: rgba(56, 189, 248, 0.25); }
 
-        .btn-add { background: #0284c7; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-cancel { background: #64748b; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 8px; display: none; }
-        .btn-add:disabled { background: #94a3b8; cursor: not-allowed; }
-
-        .product-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e2e8f0; gap: 10px; }
-        .product-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
         
-        .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .share-btn { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
+
+        .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background: #0284c7; color: white; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
+        .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
+        .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; }
+        .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
+        .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+        .payment-info { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: #166534; display: none; }
+
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 1000; display: flex; justify-content: center; align-items: center; text-decoration: none; }
+        .whatsapp-float:hover { background-color: #128c7e; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
+        
+        .promo-box { display: flex; gap: 8px; margin-bottom: 8px; }
+        .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
     </style>
 </head>
 <body>
 
+<header>
+    <div class="logo-container">
+        <div class="logo">🛒 ماركت نت</div>
+        <div class="user-code-header-badge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
+            🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="share-btn" onclick="shareStore()">مشاركة 🔗</button>
+        <button class="cart-icon-btn" onclick="openCart()">
+            السلة 🛍️
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+</header>
+
+<div class="categories">
+    <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
+    <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
+    <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
+    <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
+    <button class="cat-btn" onclick="filterCategory('spices')">🧂 عطارة</button>
+    <button class="cat-btn" onclick="filterCategory('beauty')">💄 مستحضرات تجميل</button>
+    <button class="cat-btn" onclick="filterCategory('accessories')">💍 اكسسوارات بنات</button>
+</div>
+
 <div class="container">
-    <div class="card">
-        <h2 id="formTitle">➕ إضافة منتج جديد</h2>
-        <form id="addProductForm" onsubmit="saveProduct(event)">
-            <input type="hidden" id="editProductId" value="">
-
-            <div class="form-group">
-                <label>اسم المنتج:</label>
-                <input type="text" id="pName" required placeholder="مثال: فراخ بيضاء 1 كجم">
-            </div>
-
-            <div class="form-group">
-                <label>السعر (بالجنيه):</label>
-                <input type="number" id="pPrice" required placeholder="120">
-            </div>
-
-            <div class="form-group">
-                <label>القسم:</label>
-                <select id="pCat" required>
-                    <option value="offers">🔥 العروض اليومية</option>
-                    <option value="poultry">🍗 طيور</option>
-                    <option value="cleaning">✨ منظفات</option>
-                    <option value="spices">🧂 عطارة</option>
-                    <option value="beauty">💄 مستحضرات تجميل</option>
-                    <option value="accessories">💍 اكسسوارات بنات</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>صورة المنتج (من الهاتف مباشرة):</label>
-                <div class="upload-box" onclick="document.getElementById('pFileInput').click()">
-                    <span>📁 اضغط هنا لاختيار صورة من جهازك</span>
-                    <input type="file" id="pFileInput" accept="image/*" onchange="handleFileSelect(event)">
-                </div>
-                <center><img id="imgPreview" class="preview-img" alt="معاينة"></center>
-                <input type="hidden" id="pImgUrl">
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-add">حفظ المنتج 🚀</button>
-            <button type="button" id="cancelBtn" class="btn-cancel" onclick="resetForm()">إلغاء التعديل ✕</button>
-        </form>
+    <div class="banner">
+        <h2>أهلاً بك في ماركت نت! 🎁</h2>
+        <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
-    <div class="card">
-        <h3>📦 المنتجات الحالية</h3>
-        <div id="productsList">جاري التحميل...</div>
+    <h3 style="margin-bottom: 15px;">المنتجات المتاحة</h3>
+    <div class="products-grid" id="productsContainer">
+        <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
+    </div>
+</div>
+
+<a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
+
+<!-- نافذة السلة وإكمال الطلب -->
+<div class="modal" id="cartModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>سلة الشراء 🛒</h3>
+            <button class="close-btn" onclick="closeCart()">✕</button>
+        </div>
+        
+        <div id="cartItemsList"></div>
+        <hr style="margin: 15px 0;">
+        
+        <!-- كود الخصم -->
+        <div class="form-group">
+            <label>كود الخصم أو الإحالة:</label>
+            <div class="promo-box">
+                <input type="text" id="promoCodeInput" placeholder="مثال: 5678B" style="text-transform: uppercase;">
+                <button type="button" class="promo-btn" onclick="applyPromoCode()">تطبيق</button>
+            </div>
+            <small id="promoMsg" style="display:none; font-weight:bold;"></small>
+        </div>
+
+        <div class="form-group">
+            <label>اختر المنطقة/المسافة:</label>
+            <select id="distanceZone" onchange="updateCartUI()">
+                <option value="0">منطقة قريبة (العادية)</option>
+                <option value="10">منطقة متوسطة (+10 ج)</option>
+                <option value="20">منطقة بعيدة (+20 ج)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>إكرامية إضافية لعامل التوصيل (اختياري):</label>
+            <select id="tipAmount" onchange="updateCartUI()">
+                <option value="0">بدون إكرامية إضافية 🚴</option>
+                <option value="10">10 جنيه 💙</option>
+                <option value="15">15 جنيه 💛</option>
+                <option value="20">20 جنيه ❤️</option>
+            </select>
+        </div>
+
+        <hr style="margin: 10px 0;">
+
+        <div class="summary-row">
+            <span>إجمالي المنتجات:</span>
+            <span id="subTotal">0 جنيه</span>
+        </div>
+        <div class="summary-row" id="discountRow" style="color: #ef4444; display: none;">
+            <span>خصم كود الإحالة (5%):</span>
+            <span id="discountTotal">-0 جنيه</span>
+        </div>
+        <div class="summary-row" style="color: #0284c7;">
+            <span>خدمة التوصيل (محسوبة تلقائياً):</span>
+            <span id="deliveryTotal">20 جنيه</span>
+        </div>
+        <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
+            <span>إكرامية الديلفري:</span>
+            <span id="tipTotal">0 جنيه</span>
+        </div>
+        <hr style="margin: 10px 0;">
+        <h4 style="display: flex; justify-content: space-between; color: #16a34a;">
+            <span>الإجمالي النهائي:</span>
+            <span id="cartTotal">0 جنيه</span>
+        </h4>
+
+        <form id="checkoutForm" style="margin-top: 15px;" onsubmit="sendOrderToWhatsApp(event)">
+            <h4>بيانات التوصيل والدفع 📝</h4>
+            <div class="form-group">
+                <label>الاسم الكامل:</label>
+                <input type="text" id="custName" required placeholder="أدخل اسمك">
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف:</label>
+                <input type="tel" id="custPhone" required placeholder="01xxxxxxxx" oninput="handlePhoneInput()">
+            </div>
+            
+            <div class="form-group" style="margin-top: 10px;">
+                <label>العنوان التفصيلي:</label>
+                <input type="text" id="custAddress" required placeholder="المنطقة، الشارع، رقم الشقة">
+            </div>
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <select id="payMethod" required onchange="togglePaymentInfo()">
+                    <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
+                    <option value="فودافون كاش">📱 فودافون كاش</option>
+                    <option value="إنستاباي InstaPay">💳 إنستاباي (InstaPay)</option>
+                </select>
+
+                <div id="paymentNotice" class="payment-info"></div>
+            </div>
+            <button type="submit" class="send-btn">إرسال الطلب عبر الواتساب 💬</button>
+        </form>
     </div>
 </div>
 
 <script>
+  const ADMIN_WHATSAPP_NUMBER = "201127491224";
+  
+  let currentDeliveryFee = 20;
+  let isDiscountApplied = false;
+  let referrerCode = "";
+  let userMyCode = "";
+
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
@@ -103,151 +220,312 @@
   }
   const db = firebase.firestore();
 
-  // تحويل الصورة المرفوعة من الهاتف إلى Base64 مع الضغط
-  function handleFileSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+  let allProducts = [];
+  let cart = [];
 
-      const reader = new FileReader();
-      reader.onload = function(event) {
-          const img = new Image();
-          img.onload = function() {
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              const maxWidth = 500;
-              const scaleSize = maxWidth / img.width;
-              canvas.width = maxWidth;
-              canvas.height = img.height * scaleSize;
+  window.onload = function() {
+      initUserCode();
+      checkUrlReferral();
+  };
 
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-              const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-              document.getElementById('pImgUrl').value = resizedDataUrl;
-              const preview = document.getElementById('imgPreview');
-              preview.src = resizedDataUrl;
-              preview.style.display = 'block';
-          };
-          img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
+  function initUserCode() {
+      let savedCode = localStorage.getItem('marketnet_user_code');
+      if (!savedCode) {
+          const randNum = Math.floor(1000 + Math.random() * 9000);
+          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          const randChar = letters.charAt(Math.floor(Math.random() * letters.length));
+          savedCode = randNum + randChar;
+          localStorage.setItem('marketnet_user_code', savedCode);
+      }
+      userMyCode = savedCode;
+      document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
   }
 
-  // حفظ أو تحديث المنتج
-  function saveProduct(e) {
-      e.preventDefault();
-      const id = document.getElementById('editProductId').value;
-      const name = document.getElementById('pName').value;
-      const price = parseFloat(document.getElementById('pPrice').value);
-      const cat = document.getElementById('pCat').value;
-      const img = document.getElementById('pImgUrl').value;
-
-      if (!img) {
-          alert('يرجى اختيار صورة للمنتج أولاً');
-          return;
+  function checkUrlReferral() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+      if (refCode) {
+          document.getElementById('promoCodeInput').value = refCode.toUpperCase();
+          setTimeout(() => {
+              applyPromoCode();
+          }, 800);
       }
+  }
 
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerText = id ? "جاري التحديث..." : "جاري الحفظ...";
-
-      const productData = {
-          name: name,
-          price: price,
-          cat: cat,
-          img: img,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      if (!id) {
-          productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      }
-
-      const docRef = id ? db.collection('products').doc(id) : db.collection('products');
-
-      const operation = id ? docRef.update(productData) : docRef.add(productData);
-
-      operation.then(() => {
-          alert(id ? 'تم تحديث المنتج بنجاح! ✏️' : 'تم إضافة المنتج بنجاح! 🎉');
-          resetForm();
-      }).catch(err => {
-          alert('حدث خطأ: ' + err.message);
-          btn.disabled = false;
-          btn.innerText = id ? "تحديث المنتج ✏️" : "حفظ المنتج 🚀";
+  db.collection('products').onSnapshot((snapshot) => {
+      allProducts = [];
+      snapshot.forEach((doc) => {
+          allProducts.push({ id: doc.id, ...doc.data() });
       });
-  }
+      renderProducts(allProducts);
+  });
 
-  // تعبئة البيانات في النموذج عند اختيار التعديل
-  function editProduct(id, name, price, cat, img) {
-      document.getElementById('editProductId').value = id;
-      document.getElementById('pName').value = name;
-      document.getElementById('pPrice').value = price;
-      document.getElementById('pCat').value = cat;
-      document.getElementById('pImgUrl').value = img;
-
-      const preview = document.getElementById('imgPreview');
-      preview.src = img;
-      preview.style.display = 'block';
-
-      document.getElementById('formTitle').innerText = "✏️ تعديل المنتج";
-      document.getElementById('submitBtn').innerText = "تحديث المنتج ✏️";
-      document.getElementById('cancelBtn').style.display = "block";
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // إعادة صياغة النموذج للحالة الافتراضية
-  function resetForm() {
-      document.getElementById('addProductForm').reset();
-      document.getElementById('editProductId').value = '';
-      document.getElementById('pImgUrl').value = '';
-      document.getElementById('imgPreview').style.display = 'none';
-
-      document.getElementById('formTitle').innerText = "➕ إضافة منتج جديد";
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = false;
-      btn.innerText = "حفظ المنتج 🚀";
-      document.getElementById('cancelBtn').style.display = "none";
-  }
-
-  // عرض قائمة المنتجات مع زر التعديل والحذف
-  db.collection('products').onSnapshot(snapshot => {
-      const list = document.getElementById('productsList');
-      if (snapshot.empty) {
-          list.innerHTML = '<p>لا توجد منتجات مضافة بعد.</p>';
+  function renderProducts(products) {
+      const container = document.getElementById('productsContainer');
+      if (products.length === 0) {
+          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد.</p>';
           return;
       }
       let html = '';
-      snapshot.forEach(doc => {
-          const p = doc.data();
-          const safeName = p.name.replace(/'/g, "\\'");
-          const safeImg = p.img ? p.img.replace(/'/g, "\\'") : '';
-          
+      products.forEach((p) => {
+          const imgSrc = p.img || 'https://via.placeholder.com/150?text=لا+توجد+صورة';
           html += `
-              <div class="product-item">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                      <img src="${p.img}" alt="${p.name}">
-                      <div>
-                          <strong>${p.name}</strong><br>
-                          <small>${p.price} جنيه</small>
-                      </div>
+              <div class="product-card">
+                  <img src="${imgSrc}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=خطأ+بالصورة'">
+                  <div>
+                      <div class="product-title">${p.name}</div>
+                      <div class="product-price">${p.price} جنيه</div>
                   </div>
-                  <div class="action-btns">
-                      <button class="btn-edit" onclick="editProduct('${doc.id}', '${safeName}', ${p.price}, '${p.cat}', '${safeImg}')">تعديل 📝</button>
-                      <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
-                  </div>
+                  <button class="add-btn" onclick="addToCart('${p.id}')">إضافة للسلة 🛒</button>
               </div>
           `;
       });
-      list.innerHTML = html;
-  });
+      container.innerHTML = html;
+  }
 
-  // حذف المنتج
-  function deleteProduct(id) {
-      if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
-          db.collection('products').doc(id).delete();
+  function filterCategory(cat) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      if (cat === 'all') {
+          renderProducts(allProducts);
+      } else {
+          const filtered = allProducts.filter(p => p.cat === cat);
+          renderProducts(filtered);
       }
   }
-</script>
 
+  function addToCart(id) {
+      const prod = allProducts.find(p => p.id === id);
+      const exist = cart.find(item => item.id === id);
+      if (exist) {
+          exist.qty += 1;
+      } else {
+          cart.push({ ...prod, qty: 1 });
+      }
+      updateCartUI();
+      alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
+  }
+
+  function openCart() {
+      document.getElementById('cartModal').style.display = 'flex';
+      updateCartUI();
+  }
+
+  function closeCart() {
+      document.getElementById('cartModal').style.display = 'none';
+  }
+
+  function shareStore() {
+      let baseUrl = window.location.origin + window.location.pathname;
+      const storeUrl = `${baseUrl}?ref=${userMyCode}`;
+      const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واستخدم كود الخصم الخاص بي (${userMyCode}) للحصول على خصم 5% على طلبك الأول!\n\nرابط المتجر مباشر:\n${storeUrl}`;
+      
+      if (navigator.share) {
+          navigator.share({
+              title: 'ماركت نت',
+              text: shareText,
+              url: storeUrl
+          }).catch(() => {});
+      } else {
+          navigator.clipboard.writeText(storeUrl);
+          alert(`تم نسخ رابط الدعوة وكود الخصم (${userMyCode}) بنجاح! يمكنك إرساله لأصدقائك الآن.`);
+      }
+  }
+
+  function handlePhoneInput() {
+      const phone = document.getElementById('custPhone').value.trim();
+      if (phone.length >= 10) {
+          const last4 = phone.slice(-4);
+          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          const char = letters.charAt(Math.floor(Math.random() * letters.length));
+          userMyCode = last4 + char;
+          localStorage.setItem('marketnet_user_code', userMyCode);
+          document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
+      }
+  }
+
+  async function applyPromoCode() {
+      const codeInput = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const msg = document.getElementById('promoMsg');
+      const codeRegex = /^[0-9]{4}[A-Z]{1}$/;
+
+      if (!codeRegex.test(codeInput)) {
+          isDiscountApplied = false;
+          referrerCode = "";
+          msg.style.display = 'block';
+          msg.style.color = '#ef4444';
+          msg.innerText = '⚠️ الكود غير صحيح! يتكون الكود من 4 أرقام وحرف (مثال: 1234A)';
+          updateCartUI();
+          return;
+      }
+
+      isDiscountApplied = true;
+      referrerCode = codeInput;
+      msg.style.display = 'block';
+      msg.style.color = '#16a34a';
+      msg.innerText = `🎉 تم تطبيق كود الخصم بنجاح (خصم 5%)!`;
+      updateCartUI();
+  }
+
+  function updateCartUI() {
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCount').innerText = count;
+
+      const itemsList = document.getElementById('cartItemsList');
+      let subtotal = 0;
+      
+      if (cart.length === 0) {
+          itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
+          document.getElementById('subTotal').innerText = '0 جنيه';
+          document.getElementById('cartTotal').innerText = '0 جنيه';
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('tipRow').style.display = 'none';
+          document.getElementById('deliveryTotal').innerText = '20 جنيه';
+      } else {
+          let html = '';
+          cart.forEach((item) => {
+              const itemTotal = item.price * item.qty;
+              subtotal += itemTotal;
+              html += `
+                  <div class="cart-item">
+                      <div>
+                          <strong>${item.name}</strong><br>
+                          <small>${item.price} × ${item.qty} = ${itemTotal} جنيه</small>
+                      </div>
+                      <div>
+                          <button onclick="changeQty('${item.id}', -1)">-</button>
+                          <span style="margin: 0 5px;">${item.qty}</span>
+                          <button onclick="changeQty('${item.id}', 1)">+</button>
+                      </div>
+                  </div>
+              `;
+          });
+          itemsList.innerHTML = html;
+
+          let baseDelivery = 20;
+          if (subtotal >= 600) {
+              baseDelivery = 40;
+          } else if (subtotal >= 300) {
+              baseDelivery = 30;
+          } else {
+              baseDelivery = 20;
+          }
+
+          const zoneExtra = parseFloat(document.getElementById('distanceZone').value) || 0;
+          currentDeliveryFee = baseDelivery + zoneExtra;
+
+          const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+          let discountAmount = 0;
+
+          if (isDiscountApplied) {
+              discountAmount = Math.round(subtotal * 0.05);
+              document.getElementById('discountRow').style.display = 'flex';
+              document.getElementById('discountTotal').innerText = `-${discountAmount} جنيه`;
+          } else {
+              document.getElementById('discountRow').style.display = 'none';
+          }
+
+          if (tipFee > 0) {
+              document.getElementById('tipRow').style.display = 'flex';
+              document.getElementById('tipTotal').innerText = `${tipFee} جنيه`;
+          } else {
+              document.getElementById('tipRow').style.display = 'none';
+          }
+
+          const finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
+          document.getElementById('subTotal').innerText = subtotal + ' جنيه';
+          document.getElementById('deliveryTotal').innerText = currentDeliveryFee + ' جنيه';
+          document.getElementById('cartTotal').innerText = finalTotal + ' جنيه';
+      }
+  }
+
+  function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+          item.qty += delta;
+          if (item.qty <= 0) {
+              cart = cart.filter(i => i.id !== id);
+          }
+          updateCartUI();
+      }
+  }
+
+  function togglePaymentInfo() {
+      const method = document.getElementById('payMethod').value;
+      const notice = document.getElementById('paymentNotice');
+      if (method === 'فودافون كاش') {
+          notice.style.display = 'block';
+          notice.innerHTML = '📱 تحويل المبلغ على رقم فودافون كاش: <strong>01127491224</strong> وإرسال إيصال التحويل عبر الواتساب.';
+      } else if (method === 'إنستاباي InstaPay') {
+          notice.style.display = 'block';
+          notice.innerHTML = '💳 التحويل على عنوان الدفع اللحظي (InstaPay): <strong>marketnet@instapay</strong>';
+      } else {
+          notice.style.display = 'none';
+      }
+  }
+
+  async function sendOrderToWhatsApp(event) {
+      event.preventDefault();
+      if (cart.length === 0) {
+          alert('السلة فارغة!');
+          return;
+      }
+
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+      const payMethod = document.getElementById('payMethod').value;
+      const zoneSelect = document.getElementById('distanceZone');
+      const zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+
+      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
+      let finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
+
+      if (isDiscountApplied && referrerCode) {
+          try {
+              await db.collection('user_rewards').doc(referrerCode).set({
+                  pendingRewards: firebase.firestore.FieldValue.increment(1),
+                  lastReferredPhone: phone,
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+          } catch (e) {
+              console.log("Error saving reward:", e);
+          }
+      }
+
+      let orderText = `🛒 *طلب شراء جديد - ماركت نت*\n\n`;
+      orderText += `👤 *الاسم:* ${name}\n`;
+      orderText += `📞 *الهاتف:* ${phone}\n`;
+      orderText += `📍 *العنوان:* ${address}\n`;
+      orderText += `🚚 *طبيعة المنطقة:* ${zoneText}\n`;
+      orderText += `💳 *طريقة الدفع:* ${payMethod}\n`;
+      if (isDiscountApplied) {
+          orderText += `🎟️ *كود الخصم المستخدم:* ${referrerCode} (خصم 5%)\n`;
+      }
+      orderText += `\n📦 *تفاصيل المنتجات:*\n`;
+      
+      cart.forEach((item, index) => {
+          orderText += `${index + 1}. ${item.name} (${item.price}ج) × ${item.qty} = ${item.price * item.qty}ج\n`;
+      });
+
+      orderText += `\n------------------\n`;
+      orderText += `🏷️ إجمالي المنتجات: ${subtotal} جنيه\n`;
+      if (isDiscountApplied) {
+          orderText += `🎁 خصم الإحالة: -${discountAmount} جنيه\n`;
+      }
+      orderText += `🚀 التوصيل المحسوب: ${currentDeliveryFee} جنيه\n`;
+      if (tipFee > 0) {
+          orderText += `🚴 إكرامية الديلفري: ${tipFee} جنيه\n`;
+      }
+      orderText += `💰 *الإجمالي النهائي: ${finalTotal} جنيه*\n`;
+
+      const encodedMessage = encodeURIComponent(orderText);
+      const waURL = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`;
+      
+      window.open(waURL, '_blank');
+  }
+</script>
 </body>
 </html>
