@@ -15,7 +15,10 @@
         
         header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .logo { font-size: 20px; font-weight: 900; color: #38bdf8; }
-        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        
+        .share-btn { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; }
         .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
 
         .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
@@ -32,7 +35,6 @@
         .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
         .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
 
-        /* نافذة السلة والشراء */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
         .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -43,27 +45,29 @@
         .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
 
-        /* صندوق معلومات طريقة الدفع */
         .payment-info { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: #166534; display: none; }
 
-        /* زر الواتساب العائم */
         .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 1000; display: flex; justify-content: center; align-items: center; text-decoration: none; }
         .whatsapp-float:hover { background-color: #128c7e; }
         
         .summary-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
         
-        .promo-box { display: flex; gap: 8px; margin-bottom: 12px; }
+        .promo-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .user-code-badge { background: #f0f9ff; border: 1px dashed #0284c7; padding: 8px; border-radius: 8px; text-align: center; font-size: 13px; color: #0369a1; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">🛒 ماركت نت</div>
-    <button class="cart-icon-btn" onclick="openCart()">
-        السلة 🛍️
-        <span class="cart-count" id="cartCount">0</span>
-    </button>
+    <div class="header-actions">
+        <button class="share-btn" onclick="shareStore()">مشاركة 🔗</button>
+        <button class="cart-icon-btn" onclick="openCart()">
+            السلة 🛍️
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
 </header>
 
 <div class="categories">
@@ -89,10 +93,7 @@
     </div>
 </div>
 
-<!-- زر الواتساب العائم -->
-<a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">
-    💬
-</a>
+<a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
 
 <!-- نافذة السلة وإكمال الطلب -->
 <div class="modal" id="cartModal">
@@ -105,19 +106,26 @@
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
         
+        <!-- كود الخصم -->
         <div class="form-group">
-            <label>كود الخصم (أدخل رقم هاتفك للحصول على خصم 5%):</label>
+            <label>كود الخصم (مكون من 4 أرقام وحرف مثلاً: 1234A):</label>
             <div class="promo-box">
-                <input type="tel" id="promoCodeInput" placeholder="أدخل رقم الهاتف">
-                <button type="button" class="promo-btn" onclick="applyPromoCode()">تطبيق الخصم</button>
+                <input type="text" id="promoCodeInput" placeholder="مثال: 5678B" style="text-transform: uppercase;">
+                <button type="button" class="promo-btn" onclick="applyPromoCode()">تطبيق</button>
             </div>
             <small id="promoMsg" style="display:none; font-weight:bold;"></small>
         </div>
 
         <div class="form-group">
-            <label>إكرامية عامل التوصيل (اختياري):</label>
+            <label>اختر المنطقة/المسافة لتحديد رسوم التوصيل:</label>
+            <select id="distanceZone" onchange="updateDeliveryAndTip()">
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>إكرامية إضافية لعامل التوصيل (اختياري):</label>
             <select id="tipAmount" onchange="updateCartUI()">
-                <option value="0">بدون إكرامية 🚴</option>
+                <option value="0">بدون إكرامية إضافية 🚴</option>
                 <option value="5">5 جنيه 💙</option>
                 <option value="10">10 جنيه 💛</option>
                 <option value="20">20 جنيه ❤️</option>
@@ -131,12 +139,12 @@
             <span id="subTotal">0 جنيه</span>
         </div>
         <div class="summary-row" id="discountRow" style="color: #ef4444; display: none;">
-            <span>خصم (5%):</span>
+            <span>خصم كود الدعوة (5%):</span>
             <span id="discountTotal">-0 جنيه</span>
         </div>
         <div class="summary-row" style="color: #0284c7;">
             <span>خدمة التوصيل:</span>
-            <span>20 جنيه</span>
+            <span id="deliveryTotal">20 جنيه</span>
         </div>
         <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
             <span>إكرامية الديلفري:</span>
@@ -156,9 +164,14 @@
             </div>
             <div class="form-group">
                 <label>رقم الهاتف:</label>
-                <input type="tel" id="custPhone" required placeholder="01xxxxxxxx">
+                <input type="tel" id="custPhone" required placeholder="01xxxxxxxx" oninput="handlePhoneInput()">
             </div>
-            <div class="form-group">
+            
+            <div id="userGeneratedCodeBox" class="user-code-badge" style="display:none;">
+                🔑 كود الخصم الخاص بك لمشاركته مع أصدقائك: <strong id="myPromoCodeDisplay"></strong>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
                 <label>العنوان التفصيلي:</label>
                 <input type="text" id="custAddress" required placeholder="المنطقة، الشارع، رقم الشقة">
             </div>
@@ -179,8 +192,17 @@
 
 <script>
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
-  const DELIVERY_FEE = 20; // مصاريف التوصيل الثابتة
+  
+  let distanceZones = [
+      { id: "near", name: "منطقة قريبة (0 - 2 كم)", fee: 15, defaultTip: 0 },
+      { id: "mid", name: "منطقة متوسطة (2 - 5 كم)", fee: 25, defaultTip: 5 },
+      { id: "far", name: "منطقة بعيدة (أكثر من 5 كم)", fee: 40, defaultTip: 10 }
+  ];
+
+  let currentDeliveryFee = 20;
   let isDiscountApplied = false;
+  let referrerCode = "";
+  let userMyCode = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -198,6 +220,15 @@
 
   let allProducts = [];
   let cart = [];
+
+  function initZones() {
+      const zoneSelect = document.getElementById('distanceZone');
+      zoneSelect.innerHTML = '';
+      distanceZones.forEach((z) => {
+          zoneSelect.innerHTML += `<option value="${z.fee}" data-tip="${z.defaultTip}">${z.name} - توصيل ${z.fee} ج</option>`;
+      });
+      updateDeliveryAndTip();
+  }
 
   db.collection('products').onSnapshot((snapshot) => {
       allProducts = [];
@@ -253,23 +284,106 @@
       alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
   }
 
-  function applyPromoCode() {
-      const codeInput = document.getElementById('promoCodeInput').value.trim();
-      const msg = document.getElementById('promoMsg');
+  // مشاركة المتجر عبر واتساب أو ميزة المشاركة بالهاتف
+  function shareStore() {
+      const storeUrl = window.location.href;
+      const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واحصل على أفضل العروض والمنتجات بأعلى جودة وأفضل سعر!\n\nرابط المتجر:\n${storeUrl}`;
       
-      if (codeInput.length >= 10) {
-          isDiscountApplied = true;
-          msg.style.display = 'block';
-          msg.style.color = '#16a34a';
-          msg.innerText = '🎉 تم تطبيق خصم 5% بنجاح!';
-          // نقل الرقم إلى خانة الهاتف للسهولة
-          document.getElementById('custPhone').value = codeInput;
+      if (navigator.share) {
+          navigator.share({
+              title: 'ماركت نت',
+              text: shareText,
+              url: storeUrl
+          }).catch(() => {});
       } else {
+          const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+          window.open(waUrl, '_blank');
+      }
+  }
+
+  function handlePhoneInput() {
+      generateUserPromoCode();
+      if (isDiscountApplied) {
+          verifyPhoneDiscountEligibility();
+      }
+  }
+
+  function generateUserPromoCode() {
+      const phone = document.getElementById('custPhone').value.trim();
+      const codeBox = document.getElementById('userGeneratedCodeBox');
+      const codeDisplay = document.getElementById('myPromoCodeDisplay');
+
+      if (phone.length >= 10) {
+          const last4Digits = phone.slice(-4);
+          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          const randomChar = letters.charAt(Math.floor(Math.random() * letters.length));
+          userMyCode = last4Digits + randomChar;
+          codeDisplay.innerText = userMyCode;
+          codeBox.style.display = 'block';
+      } else {
+          codeBox.style.display = 'none';
+          userMyCode = "";
+      }
+  }
+
+  // التحقق من أن هذا الرقم لم يستفد من خصم الإحالة سابقاً
+  async function verifyPhoneDiscountEligibility() {
+      const phone = document.getElementById('custPhone').value.trim();
+      const msg = document.getElementById('promoMsg');
+
+      if (!phone || phone.length < 10) {
+          return true;
+      }
+
+      const docRef = db.collection('used_promo_phones').doc(phone);
+      const doc = await docRef.get();
+
+      if (doc.exists) {
           isDiscountApplied = false;
+          referrerCode = "";
           msg.style.display = 'block';
           msg.style.color = '#ef4444';
-          msg.innerText = '⚠️ يرجى إدخال رقم هاتف صحيح للحصول على الخصم.';
+          msg.innerText = '⚠️ هذا الرقم استخدم خصم كود الإحالة من قبل! الخصم متاح لمرة واحدة فقط لكل رقم جديد.';
+          updateCartUI();
+          return false;
       }
+      return true;
+  }
+
+  async function applyPromoCode() {
+      const codeInput = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const phone = document.getElementById('custPhone').value.trim();
+      const msg = document.getElementById('promoMsg');
+      
+      const codeRegex = /^[0-9]{4}[A-Z]{1}$/;
+
+      if (!codeRegex.test(codeInput)) {
+          isDiscountApplied = false;
+          referrerCode = "";
+          msg.style.display = 'block';
+          msg.style.color = '#ef4444';
+          msg.innerText = '⚠️ الكود غير صحيح! يجب أن يتكون من 4 أرقام وحرف (مثال: 1234A)';
+          updateCartUI();
+          return;
+      }
+
+      if (phone.length >= 10) {
+          const isEligible = await verifyPhoneDiscountEligibility();
+          if (!isEligible) return;
+      }
+
+      isDiscountApplied = true;
+      referrerCode = codeInput;
+      msg.style.display = 'block';
+      msg.style.color = '#16a34a';
+      msg.innerText = `🎉 تم تطبيق الخصم (5%) بواسطة كود الإحالة [${codeInput}]!`;
+      updateCartUI();
+  }
+
+  function updateDeliveryAndTip() {
+      const zoneSelect = document.getElementById('distanceZone');
+      const selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+      currentDeliveryFee = parseFloat(selectedOption.value) || 0;
       updateCartUI();
   }
 
@@ -325,7 +439,9 @@
               document.getElementById('tipRow').style.display = 'none';
           }
 
-          const finalTotal = subtotal - discountAmount + DELIVERY_FEE + tipFee;
+          document.getElementById('deliveryTotal').innerText = currentDeliveryFee + ' جنيه';
+
+          const finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
 
           document.getElementById('subTotal').innerText = subtotal + ' جنيه';
           document.getElementById('cartTotal').innerText = finalTotal + ' جنيه';
@@ -343,7 +459,10 @@
       updateCartUI();
   }
 
-  function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
+  function openCart() { 
+      initZones();
+      document.getElementById('cartModal').style.display = 'flex'; 
+  }
   function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
 
   function togglePaymentInfo() {
@@ -360,7 +479,7 @@
       }
   }
 
-  function sendOrderToWhatsApp(e) {
+  async function sendOrderToWhatsApp(e) {
       e.preventDefault();
       if (cart.length === 0) {
           alert("السلة فارغة! قم بإضافة منتجات أولاً.");
@@ -368,10 +487,18 @@
       }
 
       const name = document.getElementById('custName').value;
-      const phone = document.getElementById('custPhone').value;
+      const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value;
       const payment = document.getElementById('payMethod').value;
       const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+
+      if (isDiscountApplied) {
+          const isEligible = await verifyPhoneDiscountEligibility();
+          if (!isEligible) {
+              alert("تنبيه: تم إلغاء الخصم لأن هذا الرقم استخدم الخصم مسبقاً.");
+              return;
+          }
+      }
 
       let subtotal = 0;
       let itemsText = "";
@@ -382,9 +509,10 @@
       });
 
       let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
-      const finalTotal = subtotal - discountAmount + DELIVERY_FEE + tipFee;
+      const finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
 
-      db.collection('orders').add({
+      // حفظ الطلب في Firestore
+      await db.collection('orders').add({
           name: name,
           phone: phone,
           address: address,
@@ -392,11 +520,21 @@
           items: cart,
           subtotal: subtotal,
           discount: discountAmount,
-          deliveryFee: DELIVERY_FEE,
+          usedReferrerCode: referrerCode || null,
+          userOwnCode: userMyCode || null,
+          deliveryFee: currentDeliveryFee,
           tipFee: tipFee,
           total: finalTotal,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // تسجيل رقم الهاتف في سجل الأرقام المستفيدة لمنع الخصم مجدداً
+      if (isDiscountApplied) {
+          await db.collection('used_promo_phones').doc(phone).set({
+              usedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              codeUsed: referrerCode
+          });
+      }
 
       let message = `طلب جديد من متجر ماركت نت 🛒:\n\n` +
                       `👤 *الاسم:* ${name}\n` +
@@ -407,22 +545,27 @@
                       `💵 *إجمالي المنتجات:* ${subtotal} جنيه\n`;
 
       if (discountAmount > 0) {
-          message += `🎁 *الخصم (5%):* -${discountAmount} جنيه\n`;
+          message += `🎁 *خصم كود الإحالة (${referrerCode}):* -${discountAmount} جنيه\n`;
       }
 
-      message += `🛵 *مصاريف التوصيل:* ${DELIVERY_FEE} جنيه\n`;
+      message += `🛵 *مصاريف التوصيل:* ${currentDeliveryFee} جنيه\n`;
 
       if (tipFee > 0) {
           message += `🚴 *إكرامية الديلفري:* ${tipFee} جنيه\n`;
       }
 
-      message += `💰 *الإجمالي النهائي:* ${finalTotal} جنيه`;
+      message += `💰 *الإجمالي النهائي:* ${finalTotal} جنيه\n\n`;
+
+      if (userMyCode) {
+          message += `🔑 *كود الخصم الخاص بالعميل لمشاركته:* ${userMyCode}`;
+      }
 
       const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       
       cart = [];
       isDiscountApplied = false;
+      referrerCode = "";
       document.getElementById('promoCodeInput').value = '';
       document.getElementById('promoMsg').style.display = 'none';
       document.getElementById('tipAmount').value = '0';
