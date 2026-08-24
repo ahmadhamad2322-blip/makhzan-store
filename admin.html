@@ -3,116 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم ماركت نت</title>
+    <title>لوحة تحكم ماركت نت الشاملة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background: #f1f5f9; color: #0f172a; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        h2, h3 { margin-bottom: 15px; color: #0284c7; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; }
-        button { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button.danger { background: #ef4444; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: right; }
-        th { background: #f8fafc; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; color: white; }
-        .badge-active { background: #16a34a; }
-        .badge-blocked { background: #ef4444; }
-        #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; display:flex; justify-content:center; align-items:center; z-index:1000; }
-        .login-box { background:white; padding:30px; border-radius:12px; width:90%; max-width:400px; text-align:center; }
+        body { background: #0f172a; color: #f8fafc; padding: 20px; min-height: 100vh; }
+        
+        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #334155; }
+        .header-title h1 { color: #38bdf8; font-size: 26px; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+        
+        .card { background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .card h3 { margin-bottom: 18px; color: #38bdf8; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
+        
+        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: #0284c7; color: white; }
+        .btn-primary:hover { background: #0369a1; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 16px; text-align: right; border-bottom: 1px solid #334155; font-size: 15px; }
+        th { background: #0f172a; color: #38bdf8; font-weight: 700; }
+        tr:hover { background: rgba(56, 189, 248, 0.03); }
+
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .badge-pending { background: #f59e0b; color: #000; }
+        .badge-active { background: #16a34a; color: white; }
+        .badge-blocked { background: #ef4444; color: white; }
+
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
+
+        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
     </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول للحماية -->
+<!-- شاشة تسجيل الدخول -->
 <div id="loginOverlay">
     <div class="login-box">
-        <h3>تسجيل دخول لوحة التحكم 🔐</h3>
-        <div class="form-group" style="margin-top:15px;">
-            <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (01xxxxxxxxx)">
+        <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">تسجيل دخول لوحة التحكم والإدارة</p>
+        <div class="form-group">
+            <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
         </div>
-        <button style="width:100%;" onclick="attemptAdminLogin()">دخول</button>
-        <p id="loginMsg" style="color:#ef4444; margin-top:10px; font-size:13px; display:none;"></p>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="attemptAdminLogin()">طلب الدخول 🔑</button>
+        <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
     </div>
 </div>
 
-<div id="adminContent" style="display:none;">
-    <h2>🛠️ لوحة تحكم ماركت نت</h2>
-
-    <!-- قسم التحكم في المتواجدين والصلاحيات (Super Admin Only) -->
-    <div class="card" id="superAdminSection" style="display:none; border: 2px solid #0284c7;">
-        <h3>👑 إدارة المسؤولين والجلسات النشطة (خاص بالمالك)</h3>
-        <p style="font-size:13px; color:#64748b; margin-bottom:10px;">يمكنك طرد أي مستخدم أو حظر دخوله إلى لوحة التحكم.</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>رقم الهاتف</th>
-                    <th>عنوان IP</th>
-                    <th>آخر ظهور</th>
-                    <th>الحالة</th>
-                    <th>الإجراء</th>
-                </tr>
-            </thead>
-            <tbody id="sessionsTableBody">
-                <tr><td colspan="5">جاري جلب البيانات...</td></tr>
-            </tbody>
-        </table>
+<div id="adminContent" style="display: none;">
+    <div class="header-title">
+        <h1>🛠️ لوحة الإدارة والسيطرة</h1>
+        <div id="adminPhoneBadge" style="background: #334155; padding: 8px 15px; border-radius: 20px; font-size: 14px;"></div>
     </div>
 
-    <!-- قسم إضافة المنتجات -->
-    <div class="card">
-        <h3>➕ إضافة / تعديل منتج</h3>
-        <form onsubmit="saveProduct(event)">
-            <input type="hidden" id="prodId">
-            <div class="form-group">
-                <label>اسم المنتج:</label>
-                <input type="text" id="prodName" required>
-            </div>
-            <div class="form-group">
-                <label>السعر (جنيه):</label>
-                <input type="number" id="prodPrice" required>
-            </div>
-            <div class="form-group">
-                <label>القسم:</label>
-                <select id="prodCat" required>
-                    <option value="offers">🔥 العروض اليومية</option>
-                    <option value="poultry">🍗 طيور</option>
-                    <option value="frozen">🧊 مجمدات</option>
-                    <option value="cleaning">✨ منظفات</option>
-                    <option value="spices">🧂 عطارة</option>
-                    <option value="beauty">💄 مستحضرات تجميل</option>
-                    <option value="accessories">💍 اكسسوارات بنات</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>رابط الصورة:</label>
-                <input type="url" id="prodImg" placeholder="https://example.com/image.jpg">
-            </div>
-            <button type="submit">حفظ المنتج 💾</button>
-        </form>
-    </div>
+    <div class="dashboard-grid">
+        <!-- قسم طلبات الانضمام والسيطرة (للمالك فقط) -->
+        <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
+            <h3>👑 إدارة الصلاحيات وطلبات الانضمام</h3>
+            
+            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الهاتف</th>
+                        <th>عنوان IP</th>
+                        <th>الوقت</th>
+                        <th>الحالة</th>
+                        <th>القرار</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <tr><td colspan="5" style="text-align: center; color: #64748b;">لا توجد طلبات جديدة حالياً</td></tr>
+                </tbody>
+            </table>
 
-    <!-- قائمة المنتجات الحالية -->
-    <div class="card">
-        <h3>📦 قائمة المنتجات الحالية</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>الصورة</th>
-                    <th>الاسم</th>
-                    <th>السعر</th>
-                    <th>القسم</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody id="adminProductsTable"></tbody>
-        </table>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين والمُتحكمين:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الهاتف</th>
+                        <th>عنوان IP</th>
+                        <th>الحالة</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="activeUsersTableBody">
+                    <tr><td colspan="4" style="text-align: center; color: #64748b;">جاري جلب القائمة...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- إضافة وتعديل المنتجات -->
+        <div class="card">
+            <h3>➕ إضافة / تعديل منتج</h3>
+            <form onsubmit="saveProduct(event)">
+                <input type="hidden" id="prodId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>اسم المنتج:</label>
+                        <input type="text" id="prodName" required placeholder="مثال: دجاج بانييه">
+                    </div>
+                    <div class="form-group">
+                        <label>السعر (جنيه):</label>
+                        <input type="number" id="prodPrice" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>القسم:</label>
+                        <select id="prodCat" required>
+                            <option value="offers">🔥 العروض اليومية</option>
+                            <option value="poultry">🍗 طيور</option>
+                            <option value="frozen">🧊 مجمدات</option>
+                            <option value="cleaning">✨ منظفات</option>
+                            <option value="spices">🧂 عطارة</option>
+                            <option value="beauty">💄 مستحضرات تجميل</option>
+                            <option value="accessories">💍 اكسسوارات بنات</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>اختر صورة المنتج من الجهاز 📷:</label>
+                        <input type="file" id="prodImageFile" accept="image/*" onchange="previewFileImage(event)">
+                        <input type="hidden" id="prodBase64">
+                    </div>
+                </div>
+                <div id="imagePreviewContainer" style="margin-bottom: 15px; display: none;">
+                    <label style="color: #94a3b8; font-size: 13px;">معاينة الصورة:</label><br>
+                    <img id="imgPreview" class="img-preview" src="" alt="المعاينة">
+                </div>
+                <button type="submit" class="btn btn-success">حفظ المنتج 💾</button>
+            </form>
+        </div>
+
+        <!-- قائمة المنتجات الحالية -->
+        <div class="card">
+            <h3>📦 جميع المنتجات بالمتجر</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>اسم المنتج</th>
+                        <th>السعر</th>
+                        <th>القسم</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="adminProductsTable"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -129,12 +177,10 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // الأرقام المالكة للصلاحية المطلقة
   const OWNER_NUMBERS = ["01127491224", "01012517345"];
   let currentAdminPhone = "";
   let userIpAddress = "غير معروف";
 
-  // جلب الـ IP الخاص بالمسؤول
   fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => userIpAddress = data.ip)
@@ -146,108 +192,132 @@
 
       if (!phone) {
           msg.innerText = "يرجى إدخال رقم الهاتف";
+          msg.style.background = "#ef444422";
+          msg.style.color = "#ef4444";
           msg.style.display = "block";
           return;
       }
 
       currentAdminPhone = phone;
 
-      // التأكد مما إذا كان الرقم هو المالك أم أدمن فرعي مسموح له
       if (OWNER_NUMBERS.includes(phone)) {
           grantAccess(true);
       } else {
-          // الفحص في قاعدة البيانات إذا كان مسموحاً له
           const doc = await db.collection('admin_permissions').doc(phone).get();
-          if (doc.exists && doc.data().allowed === true) {
-              grantAccess(false);
+          if (doc.exists) {
+              const status = doc.data().status;
+              if (status === 'approved') {
+                  grantAccess(false);
+              } else if (status === 'blocked') {
+                  showLoginMsg("🚫 تم حظرك من دخول لوحة التحكم بواسطة المالك.", "#ef4444");
+              } else {
+                  showLoginMsg("⏳ طلبك قيد المراجعة من المالك، يرجى الانتظار...", "#f59e0b");
+              }
           } else {
-              msg.innerText = "🚫 ليس لديك صلاحية لدخول لوحة التحكم. تواصل مع المالك.";
-              msg.style.display = "block";
+              await db.collection('admin_permissions').doc(phone).set({
+                  phone: phone,
+                  ip: userIpAddress,
+                  status: 'pending',
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              showLoginMsg("📩 تم إرسال طلب الدخول للمالك! يرجى الانتظار حتى يتم قبولك.", "#38bdf8");
+              listenToPermissionChanges();
           }
       }
+  }
+
+  function showLoginMsg(text, color) {
+      const msg = document.getElementById('loginMsg');
+      msg.innerText = text;
+      msg.style.background = color + "22";
+      msg.style.color = color;
+      msg.style.display = "block";
+  }
+
+  function listenToPermissionChanges() {
+      db.collection('admin_permissions').doc(currentAdminPhone).onSnapshot(doc => {
+          if (doc.exists && doc.data().status === 'approved') {
+              grantAccess(false);
+          }
+      });
   }
 
   function grantAccess(isOwner) {
       document.getElementById('loginOverlay').style.display = 'none';
       document.getElementById('adminContent').style.display = 'block';
-
-      // تسجيل الجلسة النشطة
-      db.collection('active_sessions').doc(currentAdminPhone).set({
-          phone: currentAdminPhone,
-          ip: userIpAddress,
-          lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-          allowed: true
-      }, { merge: true });
-
-      // الاستماع للطرد الفوري
-      db.collection('admin_permissions').doc(currentAdminPhone).onSnapshot(doc => {
-          if (!isOwner && doc.exists && doc.data().allowed === false) {
-              alert("⚠️ تم إنهاء جلستك أو سحب الصلاحية منك بواسطة المالك.");
-              location.reload();
-          }
-      });
+      document.getElementById('adminPhoneBadge').innerText = `المسؤول الحالي: ${currentAdminPhone}`;
 
       if (isOwner) {
           document.getElementById('superAdminSection').style.display = 'block';
-          listenToSessions();
+          listenToAllRequestsAndUsers();
       }
 
       loadProducts();
   }
 
-  // الاستماع للمستخدمين المتواجدين (للمالك فقط)
-  function listenToSessions() {
-      db.collection('active_sessions').onSnapshot(snapshot => {
-          const tbody = document.getElementById('sessionsTableBody');
-          tbody.innerHTML = '';
+  function listenToAllRequestsAndUsers() {
+      db.collection('admin_permissions').onSnapshot(snapshot => {
+          const reqBody = document.getElementById('requestsTableBody');
+          const activeBody = document.getElementById('activeUsersTableBody');
+          
+          let reqHtml = '';
+          let activeHtml = '';
+
           snapshot.forEach(doc => {
               const data = doc.data();
-              const isOwner = OWNER_NUMBERS.includes(data.phone);
-              tbody.innerHTML += `
-                  <tr>
-                      <td>${data.phone} ${isOwner ? '👑' : ''}</td>
-                      <td>${data.ip || '---'}</td>
-                      <td>${data.lastActive ? new Date(data.lastActive.toDate()).toLocaleTimeString('ar-EG') : 'الآن'}</td>
-                      <td><span class="badge ${data.allowed !== false ? 'badge-active' : 'badge-blocked'}">${data.allowed !== false ? 'نشط' : 'محظور'}</span></td>
-                      <td>
-                          ${!isOwner ? `
-                              <button class="danger" onclick="toggleUserPermission('${data.phone}', false)">طرد وحظر 🚫</button>
-                              <button style="background:#16a34a;" onclick="toggleUserPermission('${data.phone}', true)">السماح 🛠️</button>
-                          ` : 'حساب مالك'}
-                      </td>
-                  </tr>
-              `;
+              if (OWNER_NUMBERS.includes(data.phone)) return;
+
+              if (data.status === 'pending') {
+                  reqHtml += `
+                      <tr>
+                          <td><strong>${data.phone}</strong></td>
+                          <td>${data.ip || '---'}</td>
+                          <td>${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('ar-EG') : 'الآن'}</td>
+                          <td><span class="badge badge-pending">قيد الانتظار</span></td>
+                          <td>
+                              <button class="btn btn-success" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'approved')">قبول ✅</button>
+                              <button class="btn btn-danger" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'blocked')">رفض ❌</button>
+                          </td>
+                      </tr>
+                  `;
+              } else {
+                  activeHtml += `
+                      <tr>
+                          <td><strong>${data.phone}</strong></td>
+                          <td>${data.ip || '---'}</td>
+                          <td><span class="badge ${data.status === 'approved' ? 'badge-active' : 'badge-blocked'}">${data.status === 'approved' ? 'معتمد' : 'محظور'}</span></td>
+                          <td>
+                              ${data.status === 'approved' 
+                                  ? `<button class="btn btn-danger" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
+                                  : `<button class="btn btn-success" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'approved')">إلغاء الحظر 🔓</button>`
+                              }
+                          </td>
+                      </tr>
+                  `;
+              }
           });
+
+          reqBody.innerHTML = reqHtml || '<tr><td colspan="5" style="text-align: center; color: #64748b;">لا توجد طلبات جديدة حالياً</td></tr>';
+          activeBody.innerHTML = activeHtml || '<tr><td colspan="4" style="text-align: center; color: #64748b;">لا يوجد مسؤولين أخرين</td></tr>';
       });
   }
 
-  async function toggleUserPermission(phone, allowStatus) {
-      await db.collection('admin_permissions').doc(phone).set({ allowed: allowStatus }, { merge: true });
-      await db.collection('active_sessions').doc(phone).set({ allowed: allowStatus }, { merge: true });
-      alert(allowStatus ? `تم منح الصلاحية لـ ${phone}` : `تم طرد وحظر ${phone}`);
+  async function setPermission(phone, status) {
+      await db.collection('admin_permissions').doc(phone).update({ status: status });
   }
 
-  // إدارة المنتجات
-  function loadProducts() {
-      db.collection('products').onSnapshot(snapshot => {
-          const tbody = document.getElementById('adminProductsTable');
-          tbody.innerHTML = '';
-          snapshot.forEach(doc => {
-              const p = doc.data();
-              tbody.innerHTML += `
-                  <tr>
-                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" width="40" height="40" style="object-fit:cover; border-radius:4px;"></td>
-                      <td>${p.name}</td>
-                      <td>${p.price} ج</td>
-                      <td>${p.cat}</td>
-                      <td>
-                          <button onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', '${p.img || ''}')">تعديل ✏️</button>
-                          <button class="danger" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
-                      </td>
-                  </tr>
-              `;
-          });
-      });
+  // تحويل صورة الجهاز إلى Base64
+  function previewFileImage(e) {
+      const file = e.target.files[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+              document.getElementById('prodBase64').value = evt.target.result;
+              document.getElementById('imgPreview').src = evt.target.result;
+              document.getElementById('imagePreviewContainer').style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+      }
   }
 
   async function saveProduct(e) {
@@ -257,7 +327,7 @@
           name: document.getElementById('prodName').value,
           price: parseFloat(document.getElementById('prodPrice').value),
           cat: document.getElementById('prodCat').value,
-          img: document.getElementById('prodImg').value
+          img: document.getElementById('prodBase64').value
       };
 
       if (id) {
@@ -267,7 +337,31 @@
       }
 
       document.getElementById('prodId').value = '';
+      document.getElementById('prodBase64').value = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
       e.target.reset();
+  }
+
+  function loadProducts() {
+      db.collection('products').onSnapshot(snapshot => {
+          const tbody = document.getElementById('adminProductsTable');
+          tbody.innerHTML = '';
+          snapshot.forEach(doc => {
+              const p = doc.data();
+              tbody.innerHTML += `
+                  <tr>
+                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview" style="width:45px; height:45px;"></td>
+                      <td><strong>${p.name}</strong></td>
+                      <td>${p.price} جنيه</td>
+                      <td>${p.cat}</td>
+                      <td>
+                          <button class="btn btn-primary" style="padding:6px 12px;" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', '${p.img || ''}')">تعديل ✏️</button>
+                          <button class="btn btn-danger" style="padding:6px 12px;" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                      </td>
+                  </tr>
+              `;
+          });
+      });
   }
 
   function editProduct(id, name, price, cat, img) {
@@ -275,11 +369,15 @@
       document.getElementById('prodName').value = name;
       document.getElementById('prodPrice').value = price;
       document.getElementById('prodCat').value = cat;
-      document.getElementById('prodImg').value = img;
+      document.getElementById('prodBase64').value = img;
+      if(img) {
+          document.getElementById('imgPreview').src = img;
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+      }
   }
 
   async function deleteProduct(id) {
-      if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
+      if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
           await db.collection('products').doc(id).delete();
       }
   }
