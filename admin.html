@@ -23,7 +23,7 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
         
         .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-primary { background: #0284c7; color: white; }
@@ -69,6 +69,22 @@
     </div>
 
     <div class="dashboard-grid">
+        <!-- التحكم بالعدادات العامة (الزوار والطلبات) -->
+        <div class="card" style="border: 1px solid #38bdf8;">
+            <h3>📊 التحكم في عدادات المتجر (الزوار والطلبات)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>عدد الزوار الحالي:</label>
+                    <input type="number" id="editVisitorsInput" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>عدد الطلبات المكتملة:</label>
+                    <input type="number" id="editOrdersInput" placeholder="0">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
+        </div>
+
         <!-- قسم طلبات الانضمام والسيطرة (للمالك فقط) -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
             <h3>👑 إدارة الصلاحيات وطلبات الانضمام</h3>
@@ -105,9 +121,9 @@
             </table>
         </div>
 
-        <!-- إضافة وتعديل المنتجات -->
+        <!-- إضافة وتعديل المنتجات المطور -->
         <div class="card">
-            <h3>➕ إضافة / تعديل منتج</h3>
+            <h3>➕ إضافة / تعديل منتج تفصيلي</h3>
             <form onsubmit="saveProduct(event)">
                 <input type="hidden" id="prodId">
                 <div class="form-grid">
@@ -117,7 +133,7 @@
                     </div>
                     <div class="form-group">
                         <label>السعر (جنيه):</label>
-                        <input type="number" id="prodPrice" required placeholder="0.00">
+                        <input type="number" id="prodPrice" step="0.5" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label>القسم:</label>
@@ -132,6 +148,32 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>القطع المتبقية في المخزن:</label>
+                        <input type="number" id="prodStock" placeholder="مثال: 15" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label>تقييم المنتج (بالنجوم):</label>
+                        <select id="prodRating">
+                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                            <option value="3">⭐⭐⭐ (3/5)</option>
+                            <option value="2">⭐⭐ (2/5)</option>
+                            <option value="1">⭐ (1/5)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>عرض الصورة (بكسل):</label>
+                        <input type="number" id="prodImgWidth" placeholder="تلقائي (100%)">
+                    </div>
+                    <div class="form-group">
+                        <label>ارتفاع الصورة (بكسل):</label>
+                        <input type="number" id="prodImgHeight" placeholder="مثال: 130">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>معلومات وتفاصيل المنتج الإضافية:</label>
+                        <textarea id="prodDesc" rows="3" placeholder="أدخل تفاصيل الوصف والوزن أو طريقة الاستخدام..."></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
                         <label>اختر صورة المنتج من الجهاز 📷:</label>
                         <input type="file" id="prodImageFile" accept="image/*" onchange="previewFileImage(event)">
                         <input type="hidden" id="prodBase64">
@@ -154,6 +196,8 @@
                         <th>الصورة</th>
                         <th>اسم المنتج</th>
                         <th>السعر</th>
+                        <th>المخزون</th>
+                        <th>التقييم</th>
                         <th>القسم</th>
                         <th>الإجراءات</th>
                     </tr>
@@ -253,6 +297,30 @@
       }
 
       loadProducts();
+      loadStoreStats();
+  }
+
+  // تحميل وتحديث إحصائيات العدادات
+  function loadStoreStats() {
+      db.collection('store_stats').doc('general').onSnapshot(doc => {
+          if (doc.exists) {
+              const data = doc.data();
+              document.getElementById('editVisitorsInput').value = data.visitors || 0;
+              document.getElementById('editOrdersInput').value = data.orders || 0;
+          }
+      });
+  }
+
+  function updateStoreStats() {
+      const visitors = parseInt(document.getElementById('editVisitorsInput').value) || 0;
+      const orders = parseInt(document.getElementById('editOrdersInput').value) || 0;
+      
+      db.collection('store_stats').doc('general').set({
+          visitors: visitors,
+          orders: orders
+      }, { merge: true }).then(() => {
+          alert('تم تحديث العدادات بنجاح في المتجر الحي!');
+      });
   }
 
   function listenToAllRequestsAndUsers() {
@@ -306,7 +374,6 @@
       await db.collection('admin_permissions').doc(phone).update({ status: status });
   }
 
-  // تحويل صورة الجهاز إلى Base64
   function previewFileImage(e) {
       const file = e.target.files[0];
       if (file) {
@@ -324,9 +391,14 @@
       e.preventDefault();
       const id = document.getElementById('prodId').value;
       const data = {
-          name: document.getElementById('prodName').value,
+          name: document.getElementById('prodName').value.trim(),
           price: parseFloat(document.getElementById('prodPrice').value),
           cat: document.getElementById('prodCat').value,
+          stock: parseInt(document.getElementById('prodStock').value) || 0,
+          rating: parseInt(document.getElementById('prodRating').value) || 5,
+          imgWidth: document.getElementById('prodImgWidth').value || "",
+          imgHeight: document.getElementById('prodImgHeight').value || "",
+          desc: document.getElementById('prodDesc').value.trim(),
           img: document.getElementById('prodBase64').value
       };
 
@@ -340,6 +412,7 @@
       document.getElementById('prodBase64').value = '';
       document.getElementById('imagePreviewContainer').style.display = 'none';
       e.target.reset();
+      alert('تم حفظ المنتج بنجاح!');
   }
 
   function loadProducts() {
@@ -348,14 +421,17 @@
           tbody.innerHTML = '';
           snapshot.forEach(doc => {
               const p = doc.data();
+              const stars = '⭐'.repeat(p.rating || 5);
               tbody.innerHTML += `
                   <tr>
                       <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview" style="width:45px; height:45px;"></td>
                       <td><strong>${p.name}</strong></td>
                       <td>${p.price} جنيه</td>
+                      <td>${p.stock !== undefined ? p.stock : 10} قطعة</td>
+                      <td>${stars}</td>
                       <td>${p.cat}</td>
                       <td>
-                          <button class="btn btn-primary" style="padding:6px 12px;" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', '${p.img || ''}')">تعديل ✏️</button>
+                          <button class="btn btn-primary" style="padding:6px 12px;" onclick="editProduct('${doc.id}')">تعديل ✏️</button>
                           <button class="btn btn-danger" style="padding:6px 12px;" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
                       </td>
                   </tr>
@@ -364,14 +440,24 @@
       });
   }
 
-  function editProduct(id, name, price, cat, img) {
+  async function editProduct(id) {
+      const doc = await db.collection('products').doc(id).get();
+      if (!doc.exists) return;
+      const p = doc.data();
+
       document.getElementById('prodId').value = id;
-      document.getElementById('prodName').value = name;
-      document.getElementById('prodPrice').value = price;
-      document.getElementById('prodCat').value = cat;
-      document.getElementById('prodBase64').value = img;
-      if(img) {
-          document.getElementById('imgPreview').src = img;
+      document.getElementById('prodName').value = p.name || '';
+      document.getElementById('prodPrice').value = p.price || '';
+      document.getElementById('prodCat').value = p.cat || 'offers';
+      document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : 10;
+      document.getElementById('prodRating').value = p.rating || 5;
+      document.getElementById('prodImgWidth').value = p.imgWidth || '';
+      document.getElementById('prodImgHeight').value = p.imgHeight || '';
+      document.getElementById('prodDesc').value = p.desc || '';
+      document.getElementById('prodBase64').value = p.img || '';
+
+      if (p.img) {
+          document.getElementById('imgPreview').src = p.img;
           document.getElementById('imagePreviewContainer').style.display = 'block';
       }
   }
