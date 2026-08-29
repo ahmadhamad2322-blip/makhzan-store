@@ -25,12 +25,13 @@
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; font-size: 14px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
         
-        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
         .btn-primary { background: #0284c7; color: white; }
         .btn-primary:hover { background: #0369a1; }
         .btn-success { background: #16a34a; color: white; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: black; }
+        .btn-whatsapp { background: #25D366; color: white; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 14px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
@@ -46,14 +47,12 @@
         .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
 
         .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
-        
         .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #0f172a; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #475569; }
         .cat-checkboxes label { color: white; display: flex; align-items: center; gap: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول الذكية -->
 <div id="loginOverlay">
     <div class="login-box">
         <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
@@ -63,16 +62,17 @@
             <div class="form-group">
                 <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
             </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="checkUserStatus()">تسجيل / دخول 🔑</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="checkUserStatus()">دخول / تسجيل 🔑</button>
         </div>
 
         <div id="stepOTP" style="display: none;">
-            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">مرحباً بك لأول مرة! أدخل رمز التأكيد المرسل:</p>
+            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">تسجيل لأول مرة! اضغط الزر لإرسال الكود للواتساب، ثم أدخله هنا للتأكيد:</p>
+            <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 12px;">إرسال الكود عبر WhatsApp 💬</a>
+            
             <div class="form-group">
-                <input type="text" id="otpInput" placeholder="أدخل كود التحقق المكون من 4 أرقام">
+                <input type="text" id="otpInput" placeholder="أدخل كود التحقق">
             </div>
-            <button class="btn btn-success" style="width: 100%; margin-bottom: 8px;" onclick="verifyOTP()">تأكيد وإرسال للمالك 📩</button>
-            <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="openWhatsAppAgain()">فتح WhatsApp للتأكيد 💬</button>
+            <button class="btn btn-success" style="width: 100%;" onclick="verifyOTP()">تأكيد الكود وإرسال الطلب 📩</button>
         </div>
 
         <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
@@ -86,7 +86,6 @@
     </div>
 
     <div class="dashboard-grid">
-        <!-- العدادات العامة -->
         <div class="card" style="border: 1px solid #38bdf8;">
             <h3>📊 التحكم في عدادات المتجر (الزوار والطلبات)</h3>
             <div class="form-grid">
@@ -102,23 +101,22 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
-        <!-- قسم المالك -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
             <h3>👑 إدارة الصلاحيات وتحديد أقسام النشر لكل مسؤول</h3>
             
-            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة (حدد الخانات المسموحة):</h4>
+            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة:</h4>
             <table>
                 <thead>
                     <tr>
                         <th>الهاتف</th>
-                        <th>اختر الأقسام التي يحق له النشر فيها</th>
+                        <th>اختر الأقسام المسموحة</th>
                         <th>القرار</th>
                     </tr>
                 </thead>
                 <tbody id="requestsTableBody"></tbody>
             </table>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وخانات النشر المتاحة لهم:</h4>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين:</h4>
             <table>
                 <thead>
                     <tr>
@@ -131,8 +129,7 @@
                 <tbody id="activeUsersTableBody"></tbody>
             </table>
 
-            <!-- طلبات الحذف المعلقة -->
-            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات معلقة لحذف منتجات (تتطلب موافقتك):</h4>
+            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات حذف المنتجات المعلقة:</h4>
             <table>
                 <thead>
                     <tr>
@@ -145,7 +142,6 @@
             </table>
         </div>
 
-        <!-- إضافة وتعديل المنتجات -->
         <div class="card">
             <h3>➕ إضافة / تعديل منتج تفصيلي</h3>
             <form onsubmit="saveProduct(event)">
@@ -202,7 +198,6 @@
             </form>
         </div>
 
-        <!-- قائمة المنتجات الحالية -->
         <div class="card">
             <h3>📦 المنتجات المتاحة بالمتجر</h3>
             <table>
@@ -258,14 +253,17 @@
       .catch(() => {});
 
   async function checkUserStatus() {
-      const phone = document.getElementById('adminPhoneInput').value.trim();
+      let phone = document.getElementById('adminPhoneInput').value.trim();
       if (!phone) {
           showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
           return;
       }
+      
+      // تنظيف رقم الهاتف
+      phone = phone.replace(/\s+/g, '');
       currentAdminPhone = phone;
 
-      // 1. إذا كان مالك الموقع يدخل مباشرة
+      // 1. دخول المالك مباشرة دون كود
       if (OWNER_NUMBERS.includes(currentAdminPhone)) {
           isSuperOwner = true;
           currentAdminCategories = ["all"];
@@ -273,24 +271,28 @@
           return;
       }
 
-      // 2. التحقق من وجود الحساب سابقاً
-      const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
+      // 2. التحقق من حالة المستخدم في Firestore
+      try {
+          const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
 
-      if (doc.exists) {
-          const data = doc.data();
-          if (data.status === 'approved') {
-              // مسجل ومقبول من قبل -> يدخل مباشرة بدون كود
-              currentAdminCategories = data.allowedCategories || ["all"];
-              grantAccess(false);
-          } else if (data.status === 'blocked') {
-              // محظور أو مطرود -> يرفض تماماً ولا يُرسل كود
-              showLoginMsg("🚫 تم حظرك وطردك من لوحة التحكم بواسطة المالك.", "#ef4444");
+          if (doc.exists) {
+              const data = doc.data();
+              if (data.status === 'approved') {
+                  // مقبول سابقاً -> يدخل فوراً بدون طلب كود في كل مرة
+                  currentAdminCategories = data.allowedCategories || ["all"];
+                  grantAccess(false);
+              } else if (data.status === 'blocked') {
+                  // محظور/مطرود -> يمنع تماماً
+                  showLoginMsg("🚫 تم حظرك وطردك من لوحة التحكم بواسطة المالك.", "#ef4444");
+              } else {
+                  showLoginMsg("⏳ طلبك قيد المراجعة والقبول من المالك...", "#f59e0b");
+              }
           } else {
-              showLoginMsg("⏳ طلبك قيد المراجعة والقبول من المالك، يرجى الانتظار...", "#f59e0b");
+              // 3. أول مرة يسجل -> توليد الكود وفتح خيار الواتساب
+              sendWhatsAppOTP();
           }
-      } else {
-          // 3. أول مرة يسجل بها -> إرسال كود الواتساب
-          sendWhatsAppOTP();
+      } catch (e) {
+          showLoginMsg("حدث خطأ في الاتصال، حاول مجدداً", "#ef4444");
       }
   }
 
@@ -299,19 +301,19 @@
       document.getElementById('stepPhone').style.display = 'none';
       document.getElementById('stepOTP').style.display = 'block';
 
-      openWhatsAppAgain();
-      showLoginMsg(`مرحباً بك لأول مرة! كود التأكيد هو (${generatedOTP}). أرسله على الواتساب وأدخله أدناه.`, "#38bdf8");
-  }
+      const waMsg = encodeURIComponent(`كود التحقق الخاص بي للدخول إلى لوحة التحكم هو: ${generatedOTP}`);
+      const waUrl = `https://wa.me/2${currentAdminPhone}?text=${waMsg}`;
+      
+      const waBtn = document.getElementById('waSendBtn');
+      waBtn.href = waUrl;
 
-  function openWhatsAppAgain() {
-      const message = encodeURIComponent(`طلب تسجيل جديد في لوحة التحكم - كود التحقق: ${generatedOTP}`);
-      window.open(`https://wa.me/2${currentAdminPhone}?text=${message}`, '_blank');
+      showLoginMsg(`كودك هو: (${generatedOTP}). اضغط على زر WhatsApp لإرساله ثم أدخله أدناه للتأكيد.`, "#38bdf8");
   }
 
   async function verifyOTP() {
       const input = document.getElementById('otpInput').value.trim();
       if (input !== generatedOTP && input !== "9999") { 
-          showLoginMsg("❌ رمز التحقق غير صحيح!", "#ef4444");
+          showLoginMsg("❌ كود التحقق غير صحيح!", "#ef4444");
           return;
       }
 
@@ -324,7 +326,7 @@
       });
 
       document.getElementById('stepOTP').style.display = 'none';
-      showLoginMsg("📩 تم تأكيد الكود وإرسال الطلب للمالك! انتظر تفعيله وتحديد أقسامك.", "#38bdf8");
+      showLoginMsg("📩 تم تأكيد الكود وإرسال الطلب للمالك! بانتظار الموافقة وتحديد أقسامك.", "#38bdf8");
   }
 
   function showLoginMsg(text, color) {
@@ -475,7 +477,7 @@
       const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
 
       if (!isAllowed) {
-          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}). الرجاء اختيار قسم من الخانات المسموحة لك.`);
+          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}).`);
           return;
       }
 
@@ -556,7 +558,7 @@
               status: 'pending',
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          alert('📩 تم إرسال طلب الحذف إلى المالك! لن يتم مسح المنتج إلا بعد تأكيد المالك.');
+          alert('📩 تم إرسال طلب الحذف إلى المالك!');
       }
   }
 
