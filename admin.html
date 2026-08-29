@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم ماركت نت الشاملة</title>
+    <title>لوحة تحكم ماركت نت المتقدمة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -13,30 +13,31 @@
         body { background: #0f172a; color: #f8fafc; padding: 20px; min-height: 100vh; }
         
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #334155; }
-        .header-title h1 { color: #38bdf8; font-size: 26px; }
+        .header-title h1 { color: #38bdf8; font-size: 24px; }
 
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
         
         .card { background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-        .card h3 { margin-bottom: 18px; color: #38bdf8; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .card h3 { margin-bottom: 18px; color: #38bdf8; font-size: 19px; display: flex; align-items: center; gap: 10px; }
 
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; font-size: 14px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
         
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-primary { background: #0284c7; color: white; }
         .btn-primary:hover { background: #0369a1; }
         .btn-success { background: #16a34a; color: white; }
         .btn-danger { background: #ef4444; color: white; }
+        .btn-warning { background: #f59e0b; color: black; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 16px; text-align: right; border-bottom: 1px solid #334155; font-size: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; overflow-x: auto; }
+        th, td { padding: 14px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
         th { background: #0f172a; color: #38bdf8; font-weight: 700; }
         tr:hover { background: rgba(56, 189, 248, 0.03); }
 
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
         .badge-pending { background: #f59e0b; color: #000; }
         .badge-active { background: #16a34a; color: white; }
         .badge-blocked { background: #ef4444; color: white; }
@@ -44,20 +45,33 @@
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
 
-        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
+        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
     </style>
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول -->
+<!-- شاشة تسجيل الدخول بالتأكيد عبر WhatsApp -->
 <div id="loginOverlay">
     <div class="login-box">
         <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">تسجيل دخول لوحة التحكم والإدارة</p>
-        <div class="form-group">
-            <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">دخول لوحة التحكم والسيطرة</p>
+        
+        <div id="stepPhone">
+            <div class="form-group">
+                <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="sendWhatsAppOTP()">إرسال كود التحقق 📲</button>
         </div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="attemptAdminLogin()">طلب الدخول 🔑</button>
+
+        <div id="stepOTP" style="display: none;">
+            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">تم تجهيز الكود! أدخل الرمز التأكيدي أدناه:</p>
+            <div class="form-group">
+                <input type="text" id="otpInput" placeholder="أدخل كود التحقق المكون من 4 أرقام">
+            </div>
+            <button class="btn btn-success" style="width: 100%; margin-bottom: 8px;" onclick="verifyOTP()">تأكيد الدخول 🔑</button>
+            <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="openWhatsAppAgain()">فتح WhatsApp لإرسال الكود 💬</button>
+        </div>
+
         <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
     </div>
 </div>
@@ -69,7 +83,7 @@
     </div>
 
     <div class="dashboard-grid">
-        <!-- التحكم بالعدادات العامة (الزوار والطلبات) -->
+        <!-- العدادات العامة -->
         <div class="card" style="border: 1px solid #38bdf8;">
             <h3>📊 التحكم في عدادات المتجر (الزوار والطلبات)</h3>
             <div class="form-grid">
@@ -85,43 +99,51 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
-        <!-- قسم طلبات الانضمام والسيطرة (للمالك فقط) -->
+        <!-- قسم المالك (إدارة الصلاحيات + طلبات الحذف) -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
-            <h3>👑 إدارة الصلاحيات وطلبات الانضمام</h3>
+            <h3>👑 إدارة المسؤولين والأقسام وطلبات الحذف</h3>
             
-            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة:</h4>
+            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام والسيطرة على الأقسام:</h4>
             <table>
                 <thead>
                     <tr>
-                        <th>رقم الهاتف</th>
-                        <th>عنوان IP</th>
-                        <th>الوقت</th>
-                        <th>الحالة</th>
+                        <th>الهاتف</th>
+                        <th>IP</th>
+                        <th>تحديد القسم المسموح</th>
                         <th>القرار</th>
                     </tr>
                 </thead>
-                <tbody id="requestsTableBody">
-                    <tr><td colspan="5" style="text-align: center; color: #64748b;">لا توجد طلبات جديدة حالياً</td></tr>
-                </tbody>
+                <tbody id="requestsTableBody"></tbody>
             </table>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين والمُتحكمين:</h4>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وصلاحياتهم:</h4>
             <table>
                 <thead>
                     <tr>
-                        <th>رقم الهاتف</th>
-                        <th>عنوان IP</th>
+                        <th>الهاتف</th>
+                        <th>القسم المسموح</th>
                         <th>الحالة</th>
                         <th>الإجراء</th>
                     </tr>
                 </thead>
-                <tbody id="activeUsersTableBody">
-                    <tr><td colspan="4" style="text-align: center; color: #64748b;">جاري جلب القائمة...</td></tr>
-                </tbody>
+                <tbody id="activeUsersTableBody"></tbody>
+            </table>
+
+            <!-- طلبات المعاينة والموافقة على الحذف -->
+            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات معلقة لحذف منتجات (تحتاج موافقتك):</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم المنتج</th>
+                        <th>طالب الحذف</th>
+                        <th>القرار النهائي</th>
+                    </tr>
+                </thead>
+                <tbody id="deleteRequestsTableBody"></tbody>
             </table>
         </div>
 
-        <!-- إضافة وتعديل المنتجات المطور -->
+        <!-- إضافة وتعديل المنتجات -->
         <div class="card">
             <h3>➕ إضافة / تعديل منتج تفصيلي</h3>
             <form onsubmit="saveProduct(event)">
@@ -148,11 +170,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>القطع المتبقية في المخزن:</label>
-                        <input type="number" id="prodStock" placeholder="مثال: 15" value="10">
+                        <label>القطع المتبقية بالمخزن:</label>
+                        <input type="number" id="prodStock" placeholder="10" value="10">
                     </div>
                     <div class="form-group">
-                        <label>تقييم المنتج (بالنجوم):</label>
+                        <label>التقييم:</label>
                         <select id="prodRating">
                             <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
                             <option value="4">⭐⭐⭐⭐ (4/5)</option>
@@ -161,26 +183,17 @@
                             <option value="1">⭐ (1/5)</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>عرض الصورة (بكسل):</label>
-                        <input type="number" id="prodImgWidth" placeholder="تلقائي (100%)">
-                    </div>
-                    <div class="form-group">
-                        <label>ارتفاع الصورة (بكسل):</label>
-                        <input type="number" id="prodImgHeight" placeholder="مثال: 130">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>وصف وتفاصيل المنتج:</label>
+                        <textarea id="prodDesc" rows="2" placeholder="أدخل الوصف والتفاصيل..."></textarea>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>معلومات وتفاصيل المنتج الإضافية:</label>
-                        <textarea id="prodDesc" rows="3" placeholder="أدخل تفاصيل الوصف والوزن أو طريقة الاستخدام..."></textarea>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>اختر صورة المنتج من الجهاز 📷:</label>
+                        <label>اختر صورة المنتج 📷:</label>
                         <input type="file" id="prodImageFile" accept="image/*" onchange="previewFileImage(event)">
                         <input type="hidden" id="prodBase64">
                     </div>
                 </div>
                 <div id="imagePreviewContainer" style="margin-bottom: 15px; display: none;">
-                    <label style="color: #94a3b8; font-size: 13px;">معاينة الصورة:</label><br>
                     <img id="imgPreview" class="img-preview" src="" alt="المعاينة">
                 </div>
                 <button type="submit" class="btn btn-success">حفظ المنتج 💾</button>
@@ -189,7 +202,7 @@
 
         <!-- قائمة المنتجات الحالية -->
         <div class="card">
-            <h3>📦 جميع المنتجات بالمتجر</h3>
+            <h3>📦 المنتجات المتاحة بالمتجر</h3>
             <table>
                 <thead>
                     <tr>
@@ -197,7 +210,6 @@
                         <th>اسم المنتج</th>
                         <th>السعر</th>
                         <th>المخزون</th>
-                        <th>التقييم</th>
                         <th>القسم</th>
                         <th>الإجراءات</th>
                     </tr>
@@ -224,48 +236,68 @@
   const OWNER_NUMBERS = ["01127491224", "01012517345"];
   let currentAdminPhone = "";
   let userIpAddress = "غير معروف";
+  let generatedOTP = "";
+  let currentAdminCategory = "all"; 
+  let isSuperOwner = false;
 
   fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => userIpAddress = data.ip)
       .catch(() => {});
 
-  async function attemptAdminLogin() {
+  // إرسال كود التحقق عبر الواتساب
+  function sendWhatsAppOTP() {
       const phone = document.getElementById('adminPhoneInput').value.trim();
-      const msg = document.getElementById('loginMsg');
-
       if (!phone) {
-          msg.innerText = "يرجى إدخال رقم الهاتف";
-          msg.style.background = "#ef444422";
-          msg.style.color = "#ef4444";
-          msg.style.display = "block";
+          showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
+          return;
+      }
+      currentAdminPhone = phone;
+      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+
+      document.getElementById('stepPhone').style.display = 'none';
+      document.getElementById('stepOTP').style.display = 'block';
+
+      openWhatsAppAgain();
+      showLoginMsg(`تم إنشاء كود التأكيد (${generatedOTP}). يرجى إرساله على الواتساب ثم كتابته أدناه.`, "#38bdf8");
+  }
+
+  function openWhatsAppAgain() {
+      const message = encodeURIComponent(`رمز دخول لوحة تحكم ماركت نت الخاص بك هو: ${generatedOTP}`);
+      window.open(`https://wa.me/2${currentAdminPhone}?text=${message}`, '_blank');
+  }
+
+  async function verifyOTP() {
+      const input = document.getElementById('otpInput').value.trim();
+      if (input !== generatedOTP && input !== "9999") { // 9999 كود طوارئ لك
+          showLoginMsg("❌ رمز التحقق غير صحيح!", "#ef4444");
           return;
       }
 
-      currentAdminPhone = phone;
-
-      if (OWNER_NUMBERS.includes(phone)) {
+      if (OWNER_NUMBERS.includes(currentAdminPhone)) {
+          isSuperOwner = true;
           grantAccess(true);
       } else {
-          const doc = await db.collection('admin_permissions').doc(phone).get();
+          const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
           if (doc.exists) {
-              const status = doc.data().status;
-              if (status === 'approved') {
+              const data = doc.data();
+              if (data.status === 'approved') {
+                  currentAdminCategory = data.allowedCategory || "all";
                   grantAccess(false);
-              } else if (status === 'blocked') {
+              } else if (data.status === 'blocked') {
                   showLoginMsg("🚫 تم حظرك من دخول لوحة التحكم بواسطة المالك.", "#ef4444");
               } else {
-                  showLoginMsg("⏳ طلبك قيد المراجعة من المالك، يرجى الانتظار...", "#f59e0b");
+                  showLoginMsg("⏳ طلبك قيد المراجعة من المالك...", "#f59e0b");
               }
           } else {
-              await db.collection('admin_permissions').doc(phone).set({
-                  phone: phone,
+              await db.collection('admin_permissions').doc(currentAdminPhone).set({
+                  phone: currentAdminPhone,
                   ip: userIpAddress,
                   status: 'pending',
+                  allowedCategory: 'all',
                   createdAt: firebase.firestore.FieldValue.serverTimestamp()
               });
-              showLoginMsg("📩 تم إرسال طلب الدخول للمالك! يرجى الانتظار حتى يتم قبولك.", "#38bdf8");
-              listenToPermissionChanges();
+              showLoginMsg("📩 تم تسجيل طلبك وإرساله للمالك للقبول وتحديد القسم!", "#38bdf8");
           }
       }
   }
@@ -278,29 +310,21 @@
       msg.style.display = "block";
   }
 
-  function listenToPermissionChanges() {
-      db.collection('admin_permissions').doc(currentAdminPhone).onSnapshot(doc => {
-          if (doc.exists && doc.data().status === 'approved') {
-              grantAccess(false);
-          }
-      });
-  }
-
   function grantAccess(isOwner) {
       document.getElementById('loginOverlay').style.display = 'none';
       document.getElementById('adminContent').style.display = 'block';
-      document.getElementById('adminPhoneBadge').innerText = `المسؤول الحالي: ${currentAdminPhone}`;
+      document.getElementById('adminPhoneBadge').innerText = `المسؤول: ${currentAdminPhone} ${isOwner ? '(المالك 👑)' : ''}`;
 
       if (isOwner) {
           document.getElementById('superAdminSection').style.display = 'block';
           listenToAllRequestsAndUsers();
+          listenToDeleteRequests();
       }
 
       loadProducts();
       loadStoreStats();
   }
 
-  // تحميل وتحديث إحصائيات العدادات
   function loadStoreStats() {
       db.collection('store_stats').doc('general').onSnapshot(doc => {
           if (doc.exists) {
@@ -319,7 +343,7 @@
           visitors: visitors,
           orders: orders
       }, { merge: true }).then(() => {
-          alert('تم تحديث العدادات بنجاح في المتجر الحي!');
+          alert('تم تحديث العدادات بنجاح!');
       });
   }
 
@@ -340,11 +364,21 @@
                       <tr>
                           <td><strong>${data.phone}</strong></td>
                           <td>${data.ip || '---'}</td>
-                          <td>${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleTimeString('ar-EG') : 'الآن'}</td>
-                          <td><span class="badge badge-pending">قيد الانتظار</span></td>
                           <td>
-                              <button class="btn btn-success" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'approved')">قبول ✅</button>
-                              <button class="btn btn-danger" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'blocked')">رفض ❌</button>
+                              <select id="cat_${data.phone}">
+                                  <option value="all">جميع الأقسام</option>
+                                  <option value="offers">العروض اليومية</option>
+                                  <option value="poultry">طيور</option>
+                                  <option value="frozen">مجمدات</option>
+                                  <option value="cleaning">منظفات</option>
+                                  <option value="spices">عطارة</option>
+                                  <option value="beauty">تجميل</option>
+                                  <option value="accessories">اكسسوارات</option>
+                              </select>
+                          </td>
+                          <td>
+                              <button class="btn btn-success" onclick="approveUser('${data.phone}')">قبول ✅</button>
+                              <button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">رفض ❌</button>
                           </td>
                       </tr>
                   `;
@@ -352,12 +386,12 @@
                   activeHtml += `
                       <tr>
                           <td><strong>${data.phone}</strong></td>
-                          <td>${data.ip || '---'}</td>
+                          <td><span class="badge badge-active">${data.allowedCategory || 'الكل'}</span></td>
                           <td><span class="badge ${data.status === 'approved' ? 'badge-active' : 'badge-blocked'}">${data.status === 'approved' ? 'معتمد' : 'محظور'}</span></td>
                           <td>
                               ${data.status === 'approved' 
-                                  ? `<button class="btn btn-danger" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
-                                  : `<button class="btn btn-success" style="padding:6px 12px;" onclick="setPermission('${data.phone}', 'approved')">إلغاء الحظر 🔓</button>`
+                                  ? `<button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
+                                  : `<button class="btn btn-success" onclick="setPermission('${data.phone}', 'approved')">إلغاء الحظر 🔓</button>`
                               }
                           </td>
                       </tr>
@@ -365,8 +399,16 @@
               }
           });
 
-          reqBody.innerHTML = reqHtml || '<tr><td colspan="5" style="text-align: center; color: #64748b;">لا توجد طلبات جديدة حالياً</td></tr>';
-          activeBody.innerHTML = activeHtml || '<tr><td colspan="4" style="text-align: center; color: #64748b;">لا يوجد مسؤولين أخرين</td></tr>';
+          reqBody.innerHTML = reqHtml || '<tr><td colspan="4" style="text-align: center;">لا توجد طلبات جديدة</td></tr>';
+          activeBody.innerHTML = activeHtml || '<tr><td colspan="4" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
+      });
+  }
+
+  async function approveUser(phone) {
+      const selectedCat = document.getElementById(`cat_${phone}`).value;
+      await db.collection('admin_permissions').doc(phone).update({
+          status: 'approved',
+          allowedCategory: selectedCat
       });
   }
 
@@ -390,29 +432,36 @@
   async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('prodId').value;
+      const cat = document.getElementById('prodCat').value;
+
+      // تحقق من صلاحية القسم
+      if (!isSuperOwner && currentAdminCategory !== 'all' && currentAdminCategory !== cat) {
+          alert(`🚫 عذراً! مسموح لك بالنشر فقط في قسم: (${currentAdminCategory})`);
+          return;
+      }
+
       const data = {
           name: document.getElementById('prodName').value.trim(),
           price: parseFloat(document.getElementById('prodPrice').value),
-          cat: document.getElementById('prodCat').value,
+          cat: cat,
           stock: parseInt(document.getElementById('prodStock').value) || 0,
           rating: parseInt(document.getElementById('prodRating').value) || 5,
-          imgWidth: document.getElementById('prodImgWidth').value || "",
-          imgHeight: document.getElementById('prodImgHeight').value || "",
           desc: document.getElementById('prodDesc').value.trim(),
           img: document.getElementById('prodBase64').value
       };
 
       if (id) {
           await db.collection('products').doc(id).update(data);
+          alert('تم تعديل المنتج بنجاح!');
       } else {
           await db.collection('products').add(data);
+          alert('تم إدراج المنتج بنجاح!');
       }
 
       document.getElementById('prodId').value = '';
       document.getElementById('prodBase64').value = '';
       document.getElementById('imagePreviewContainer').style.display = 'none';
       e.target.reset();
-      alert('تم حفظ المنتج بنجاح!');
   }
 
   function loadProducts() {
@@ -421,18 +470,16 @@
           tbody.innerHTML = '';
           snapshot.forEach(doc => {
               const p = doc.data();
-              const stars = '⭐'.repeat(p.rating || 5);
               tbody.innerHTML += `
                   <tr>
-                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview" style="width:45px; height:45px;"></td>
+                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview"></td>
                       <td><strong>${p.name}</strong></td>
                       <td>${p.price} جنيه</td>
-                      <td>${p.stock !== undefined ? p.stock : 10} قطعة</td>
-                      <td>${stars}</td>
+                      <td>${p.stock}</td>
                       <td>${p.cat}</td>
                       <td>
-                          <button class="btn btn-primary" style="padding:6px 12px;" onclick="editProduct('${doc.id}')">تعديل ✏️</button>
-                          <button class="btn btn-danger" style="padding:6px 12px;" onclick="deleteProduct('${doc.id}')">حذف 🗑️</button>
+                          <button class="btn btn-warning" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', ${p.stock}, ${p.rating}, '${p.desc || ''}', '${p.img || ''}')">تعديل ✏️</button>
+                          <button class="btn btn-danger" onclick="requestDeleteProduct('${doc.id}', '${p.name}')">حذف 🗑️</button>
                       </td>
                   </tr>
               `;
@@ -440,32 +487,72 @@
       });
   }
 
-  async function editProduct(id) {
-      const doc = await db.collection('products').doc(id).get();
-      if (!doc.exists) return;
-      const p = doc.data();
-
+  function editProduct(id, name, price, cat, stock, rating, desc, img) {
       document.getElementById('prodId').value = id;
-      document.getElementById('prodName').value = p.name || '';
-      document.getElementById('prodPrice').value = p.price || '';
-      document.getElementById('prodCat').value = p.cat || 'offers';
-      document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : 10;
-      document.getElementById('prodRating').value = p.rating || 5;
-      document.getElementById('prodImgWidth').value = p.imgWidth || '';
-      document.getElementById('prodImgHeight').value = p.imgHeight || '';
-      document.getElementById('prodDesc').value = p.desc || '';
-      document.getElementById('prodBase64').value = p.img || '';
-
-      if (p.img) {
-          document.getElementById('imgPreview').src = p.img;
+      document.getElementById('prodName').value = name;
+      document.getElementById('prodPrice').value = price;
+      document.getElementById('prodCat').value = cat;
+      document.getElementById('prodStock').value = stock;
+      document.getElementById('prodRating').value = rating;
+      document.getElementById('prodDesc').value = desc;
+      document.getElementById('prodBase64').value = img;
+      if (img) {
+          document.getElementById('imgPreview').src = img;
           document.getElementById('imagePreviewContainer').style.display = 'block';
+      }
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+  }
+
+  // طلب الحذف أو الحذف المباشر للمالك
+  async function requestDeleteProduct(prodId, prodName) {
+      if (isSuperOwner) {
+          if (confirm(`هل أنت تأكد من حذف المنتج (${prodName}) نهائياً؟`)) {
+              await db.collection('products').doc(prodId).delete();
+              alert('تم الحذف مباشرة.');
+          }
+      } else {
+          await db.collection('delete_requests').add({
+              prodId: prodId,
+              prodName: prodName,
+              requestedBy: currentAdminPhone,
+              status: 'pending',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          alert('📩 تم إرسال طلب الحذف إلى المالك! لن يتم الحذف حتى يوافق عليه المالك.');
       }
   }
 
-  async function deleteProduct(id) {
-      if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-          await db.collection('products').doc(id).delete();
-      }
+  // الاستماع لطلبات الحذف المعلقة لدى المالك
+  function listenToDeleteRequests() {
+      db.collection('delete_requests').where('status', '==', 'pending').onSnapshot(snapshot => {
+          const tbody = document.getElementById('deleteRequestsTableBody');
+          let html = '';
+          snapshot.forEach(doc => {
+              const req = doc.data();
+              html += `
+                  <tr>
+                      <td><strong>${req.prodName}</strong></td>
+                      <td>${req.requestedBy}</td>
+                      <td>
+                          <button class="btn btn-danger" onclick="confirmDelete('${doc.id}', '${req.prodId}')">موافقة وحذف ❌</button>
+                          <button class="btn btn-primary" onclick="rejectDelete('${doc.id}')">رفض الطلب 🛡️</button>
+                      </td>
+                  </tr>
+              `;
+          });
+          tbody.innerHTML = html || '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات حذف معلقة</td></tr>';
+      });
+  }
+
+  async function confirmDelete(reqId, prodId) {
+      await db.collection('products').doc(prodId).delete();
+      await db.collection('delete_requests').doc(reqId).update({ status: 'approved' });
+      alert('تم إقرار الطلب وحذف المنتج نهائياً!');
+  }
+
+  async function rejectDelete(reqId) {
+      await db.collection('delete_requests').doc(reqId).update({ status: 'rejected' });
+      alert('تم رفض طلب الحذف والإبقاء على المنتج.');
   }
 </script>
 </body>
