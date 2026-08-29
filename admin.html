@@ -32,7 +32,7 @@
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: black; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 14px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
         th { background: #0f172a; color: #38bdf8; font-weight: 700; }
         tr:hover { background: rgba(56, 189, 248, 0.03); }
@@ -46,6 +46,9 @@
         .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
 
         .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
+        
+        .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #0f172a; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #475569; }
+        .cat-checkboxes label { color: white; display: flex; align-items: center; gap: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -99,29 +102,28 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
-        <!-- قسم المالك (إدارة الصلاحيات + طلبات الحذف) -->
+        <!-- قسم المالك (تحديد خانات النشر للمسؤولين + موافقة الحذف) -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
-            <h3>👑 إدارة المسؤولين والأقسام وطلبات الحذف</h3>
+            <h3>👑 إدارة الصلاحيات وتحديد أقسام النشر لكل مسؤول</h3>
             
-            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام والسيطرة على الأقسام:</h4>
+            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة (حدد الخانات المسموحة):</h4>
             <table>
                 <thead>
                     <tr>
                         <th>الهاتف</th>
-                        <th>IP</th>
-                        <th>تحديد القسم المسموح</th>
+                        <th>اختر الأقسام التي يحق له النشر فيها</th>
                         <th>القرار</th>
                     </tr>
                 </thead>
                 <tbody id="requestsTableBody"></tbody>
             </table>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وصلاحياتهم:</h4>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وخانات النشر المتاحة لهم:</h4>
             <table>
                 <thead>
                     <tr>
                         <th>الهاتف</th>
-                        <th>القسم المسموح</th>
+                        <th>الأقسام المسموحة</th>
                         <th>الحالة</th>
                         <th>الإجراء</th>
                     </tr>
@@ -129,8 +131,8 @@
                 <tbody id="activeUsersTableBody"></tbody>
             </table>
 
-            <!-- طلبات المعاينة والموافقة على الحذف -->
-            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات معلقة لحذف منتجات (تحتاج موافقتك):</h4>
+            <!-- طلبات الحذف المعلقة -->
+            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات معلقة لحذف منتجات (تتطلب موافقتك):</h4>
             <table>
                 <thead>
                     <tr>
@@ -158,7 +160,7 @@
                         <input type="number" id="prodPrice" step="0.5" required placeholder="0.00">
                     </div>
                     <div class="form-group">
-                        <label>القسم:</label>
+                        <label>القسم / الخانة:</label>
                         <select id="prodCat" required>
                             <option value="offers">🔥 العروض اليومية</option>
                             <option value="poultry">🍗 طيور</option>
@@ -237,15 +239,24 @@
   let currentAdminPhone = "";
   let userIpAddress = "غير معروف";
   let generatedOTP = "";
-  let currentAdminCategory = "all"; 
+  let currentAdminCategories = ["all"]; 
   let isSuperOwner = false;
+
+  const CATEGORY_NAMES = {
+      offers: "🔥 العروض اليومية",
+      poultry: "🍗 طيور",
+      frozen: "🧊 مجمدات",
+      cleaning: "✨ منظفات",
+      spices: "🧂 عطارة",
+      beauty: "💄 مستحضرات تجميل",
+      accessories: "💍 اكسسوارات بنات"
+  };
 
   fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => userIpAddress = data.ip)
       .catch(() => {});
 
-  // إرسال كود التحقق عبر الواتساب
   function sendWhatsAppOTP() {
       const phone = document.getElementById('adminPhoneInput').value.trim();
       if (!phone) {
@@ -259,7 +270,7 @@
       document.getElementById('stepOTP').style.display = 'block';
 
       openWhatsAppAgain();
-      showLoginMsg(`تم إنشاء كود التأكيد (${generatedOTP}). يرجى إرساله على الواتساب ثم كتابته أدناه.`, "#38bdf8");
+      showLoginMsg(`تم إرسال كود التحقق (${generatedOTP}). يرجى إرساله على الواتساب ثم إدخاله.`, "#38bdf8");
   }
 
   function openWhatsAppAgain() {
@@ -269,20 +280,21 @@
 
   async function verifyOTP() {
       const input = document.getElementById('otpInput').value.trim();
-      if (input !== generatedOTP && input !== "9999") { // 9999 كود طوارئ لك
+      if (input !== generatedOTP && input !== "9999") { 
           showLoginMsg("❌ رمز التحقق غير صحيح!", "#ef4444");
           return;
       }
 
       if (OWNER_NUMBERS.includes(currentAdminPhone)) {
           isSuperOwner = true;
+          currentAdminCategories = ["all"];
           grantAccess(true);
       } else {
           const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
           if (doc.exists) {
               const data = doc.data();
               if (data.status === 'approved') {
-                  currentAdminCategory = data.allowedCategory || "all";
+                  currentAdminCategories = data.allowedCategories || ["all"];
                   grantAccess(false);
               } else if (data.status === 'blocked') {
                   showLoginMsg("🚫 تم حظرك من دخول لوحة التحكم بواسطة المالك.", "#ef4444");
@@ -294,10 +306,10 @@
                   phone: currentAdminPhone,
                   ip: userIpAddress,
                   status: 'pending',
-                  allowedCategory: 'all',
+                  allowedCategories: [],
                   createdAt: firebase.firestore.FieldValue.serverTimestamp()
               });
-              showLoginMsg("📩 تم تسجيل طلبك وإرساله للمالك للقبول وتحديد القسم!", "#38bdf8");
+              showLoginMsg("📩 تم تسجيل طلبك وإرساله للمالك لتحديد خانات النشر والموافقة!", "#38bdf8");
           }
       }
   }
@@ -363,30 +375,30 @@
                   reqHtml += `
                       <tr>
                           <td><strong>${data.phone}</strong></td>
-                          <td>${data.ip || '---'}</td>
                           <td>
-                              <select id="cat_${data.phone}">
-                                  <option value="all">جميع الأقسام</option>
-                                  <option value="offers">العروض اليومية</option>
-                                  <option value="poultry">طيور</option>
-                                  <option value="frozen">مجمدات</option>
-                                  <option value="cleaning">منظفات</option>
-                                  <option value="spices">عطارة</option>
-                                  <option value="beauty">تجميل</option>
-                                  <option value="accessories">اكسسوارات</option>
-                              </select>
+                              <div class="cat-checkboxes" id="cats_${data.phone}">
+                                  <label><input type="checkbox" value="all" onchange="toggleAllCats('${data.phone}', this)"> 🔥 الكل</label>
+                                  <label><input type="checkbox" value="offers" class="chk_${data.phone}"> العروض</label>
+                                  <label><input type="checkbox" value="poultry" class="chk_${data.phone}"> طيور</label>
+                                  <label><input type="checkbox" value="frozen" class="chk_${data.phone}"> مجمدات</label>
+                                  <label><input type="checkbox" value="cleaning" class="chk_${data.phone}"> منظفات</label>
+                                  <label><input type="checkbox" value="spices" class="chk_${data.phone}"> عطارة</label>
+                                  <label><input type="checkbox" value="beauty" class="chk_${data.phone}"> تجميل</label>
+                                  <label><input type="checkbox" value="accessories" class="chk_${data.phone}"> اكسسوارات</label>
+                              </div>
                           </td>
                           <td>
-                              <button class="btn btn-success" onclick="approveUser('${data.phone}')">قبول ✅</button>
+                              <button class="btn btn-success" onclick="approveUser('${data.phone}')">قبول وتفعيل ✅</button>
                               <button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">رفض ❌</button>
                           </td>
                       </tr>
                   `;
               } else {
+                  const allowedList = (data.allowedCategories || []).map(c => CATEGORY_NAMES[c] || c).join(' | ');
                   activeHtml += `
                       <tr>
                           <td><strong>${data.phone}</strong></td>
-                          <td><span class="badge badge-active">${data.allowedCategory || 'الكل'}</span></td>
+                          <td><span class="badge badge-active">${allowedList || 'لم تُحدد'}</span></td>
                           <td><span class="badge ${data.status === 'approved' ? 'badge-active' : 'badge-blocked'}">${data.status === 'approved' ? 'معتمد' : 'محظور'}</span></td>
                           <td>
                               ${data.status === 'approved' 
@@ -399,16 +411,29 @@
               }
           });
 
-          reqBody.innerHTML = reqHtml || '<tr><td colspan="4" style="text-align: center;">لا توجد طلبات جديدة</td></tr>';
+          reqBody.innerHTML = reqHtml || '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات جديدة حالياً</td></tr>';
           activeBody.innerHTML = activeHtml || '<tr><td colspan="4" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
       });
   }
 
+  function toggleAllCats(phone, mainChk) {
+      const checkboxes = document.querySelectorAll(`.chk_${phone}`);
+      checkboxes.forEach(c => c.checked = mainChk.checked);
+  }
+
   async function approveUser(phone) {
-      const selectedCat = document.getElementById(`cat_${phone}`).value;
+      const selected = [];
+      const checkboxes = document.querySelectorAll(`#cats_${phone} input[type="checkbox"]:checked`);
+      checkboxes.forEach(c => selected.push(c.value));
+
+      if (selected.length === 0) {
+          alert('يرجى تحديد قسم واحد على الأقل للمسؤول قبل القبول!');
+          return;
+      }
+
       await db.collection('admin_permissions').doc(phone).update({
           status: 'approved',
-          allowedCategory: selectedCat
+          allowedCategories: selected
       });
   }
 
@@ -434,9 +459,11 @@
       const id = document.getElementById('prodId').value;
       const cat = document.getElementById('prodCat').value;
 
-      // تحقق من صلاحية القسم
-      if (!isSuperOwner && currentAdminCategory !== 'all' && currentAdminCategory !== cat) {
-          alert(`🚫 عذراً! مسموح لك بالنشر فقط في قسم: (${currentAdminCategory})`);
+      // التأكد من صلاحية الوصول للخانة
+      const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
+
+      if (!isAllowed) {
+          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}). الرجاء اختيار قسم من الخانات المسموحة لك.`);
           return;
       }
 
@@ -476,7 +503,7 @@
                       <td><strong>${p.name}</strong></td>
                       <td>${p.price} جنيه</td>
                       <td>${p.stock}</td>
-                      <td>${p.cat}</td>
+                      <td>${CATEGORY_NAMES[p.cat] || p.cat}</td>
                       <td>
                           <button class="btn btn-warning" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', ${p.stock}, ${p.rating}, '${p.desc || ''}', '${p.img || ''}')">تعديل ✏️</button>
                           <button class="btn btn-danger" onclick="requestDeleteProduct('${doc.id}', '${p.name}')">حذف 🗑️</button>
@@ -503,7 +530,6 @@
       window.scrollTo({ top: 300, behavior: 'smooth' });
   }
 
-  // طلب الحذف أو الحذف المباشر للمالك
   async function requestDeleteProduct(prodId, prodName) {
       if (isSuperOwner) {
           if (confirm(`هل أنت تأكد من حذف المنتج (${prodName}) نهائياً؟`)) {
@@ -518,11 +544,10 @@
               status: 'pending',
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          alert('📩 تم إرسال طلب الحذف إلى المالك! لن يتم الحذف حتى يوافق عليه المالك.');
+          alert('📩 تم إرسال طلب الحذف إلى المالك! لن يتم مسح المنتج إلا بعد تأكيد المالك.');
       }
   }
 
-  // الاستماع لطلبات الحذف المعلقة لدى المالك
   function listenToDeleteRequests() {
       db.collection('delete_requests').where('status', '==', 'pending').onSnapshot(snapshot => {
           const tbody = document.getElementById('deleteRequestsTableBody');
@@ -535,7 +560,7 @@
                       <td>${req.requestedBy}</td>
                       <td>
                           <button class="btn btn-danger" onclick="confirmDelete('${doc.id}', '${req.prodId}')">موافقة وحذف ❌</button>
-                          <button class="btn btn-primary" onclick="rejectDelete('${doc.id}')">رفض الطلب 🛡️</button>
+                          <button class="btn btn-primary" onclick="rejectDelete('${doc.id}')">رفض 🛡️</button>
                       </td>
                   </tr>
               `;
