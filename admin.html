@@ -53,7 +53,7 @@
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول بالتأكيد عبر WhatsApp -->
+<!-- شاشة تسجيل الدخول الذكية -->
 <div id="loginOverlay">
     <div class="login-box">
         <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
@@ -63,16 +63,16 @@
             <div class="form-group">
                 <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
             </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="sendWhatsAppOTP()">إرسال كود التحقق 📲</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="checkUserStatus()">تسجيل / دخول 🔑</button>
         </div>
 
         <div id="stepOTP" style="display: none;">
-            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">تم تجهيز الكود! أدخل الرمز التأكيدي أدناه:</p>
+            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">مرحباً بك لأول مرة! أدخل رمز التأكيد المرسل:</p>
             <div class="form-group">
                 <input type="text" id="otpInput" placeholder="أدخل كود التحقق المكون من 4 أرقام">
             </div>
-            <button class="btn btn-success" style="width: 100%; margin-bottom: 8px;" onclick="verifyOTP()">تأكيد الدخول 🔑</button>
-            <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="openWhatsAppAgain()">فتح WhatsApp لإرسال الكود 💬</button>
+            <button class="btn btn-success" style="width: 100%; margin-bottom: 8px;" onclick="verifyOTP()">تأكيد وإرسال للمالك 📩</button>
+            <button class="btn btn-primary" style="width: 100%; background: #25D366;" onclick="openWhatsAppAgain()">فتح WhatsApp للتأكيد 💬</button>
         </div>
 
         <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
@@ -102,7 +102,7 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
-        <!-- قسم المالك (تحديد خانات النشر للمسؤولين + موافقة الحذف) -->
+        <!-- قسم المالك -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
             <h3>👑 إدارة الصلاحيات وتحديد أقسام النشر لكل مسؤول</h3>
             
@@ -257,24 +257,54 @@
       .then(data => userIpAddress = data.ip)
       .catch(() => {});
 
-  function sendWhatsAppOTP() {
+  async function checkUserStatus() {
       const phone = document.getElementById('adminPhoneInput').value.trim();
       if (!phone) {
           showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
           return;
       }
       currentAdminPhone = phone;
-      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
 
+      // 1. إذا كان مالك الموقع يدخل مباشرة
+      if (OWNER_NUMBERS.includes(currentAdminPhone)) {
+          isSuperOwner = true;
+          currentAdminCategories = ["all"];
+          grantAccess(true);
+          return;
+      }
+
+      // 2. التحقق من وجود الحساب سابقاً
+      const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
+
+      if (doc.exists) {
+          const data = doc.data();
+          if (data.status === 'approved') {
+              // مسجل ومقبول من قبل -> يدخل مباشرة بدون كود
+              currentAdminCategories = data.allowedCategories || ["all"];
+              grantAccess(false);
+          } else if (data.status === 'blocked') {
+              // محظور أو مطرود -> يرفض تماماً ولا يُرسل كود
+              showLoginMsg("🚫 تم حظرك وطردك من لوحة التحكم بواسطة المالك.", "#ef4444");
+          } else {
+              showLoginMsg("⏳ طلبك قيد المراجعة والقبول من المالك، يرجى الانتظار...", "#f59e0b");
+          }
+      } else {
+          // 3. أول مرة يسجل بها -> إرسال كود الواتساب
+          sendWhatsAppOTP();
+      }
+  }
+
+  function sendWhatsAppOTP() {
+      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
       document.getElementById('stepPhone').style.display = 'none';
       document.getElementById('stepOTP').style.display = 'block';
 
       openWhatsAppAgain();
-      showLoginMsg(`تم إرسال كود التحقق (${generatedOTP}). يرجى إرساله على الواتساب ثم إدخاله.`, "#38bdf8");
+      showLoginMsg(`مرحباً بك لأول مرة! كود التأكيد هو (${generatedOTP}). أرسله على الواتساب وأدخله أدناه.`, "#38bdf8");
   }
 
   function openWhatsAppAgain() {
-      const message = encodeURIComponent(`رمز دخول لوحة تحكم ماركت نت الخاص بك هو: ${generatedOTP}`);
+      const message = encodeURIComponent(`طلب تسجيل جديد في لوحة التحكم - كود التحقق: ${generatedOTP}`);
       window.open(`https://wa.me/2${currentAdminPhone}?text=${message}`, '_blank');
   }
 
@@ -285,33 +315,16 @@
           return;
       }
 
-      if (OWNER_NUMBERS.includes(currentAdminPhone)) {
-          isSuperOwner = true;
-          currentAdminCategories = ["all"];
-          grantAccess(true);
-      } else {
-          const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
-          if (doc.exists) {
-              const data = doc.data();
-              if (data.status === 'approved') {
-                  currentAdminCategories = data.allowedCategories || ["all"];
-                  grantAccess(false);
-              } else if (data.status === 'blocked') {
-                  showLoginMsg("🚫 تم حظرك من دخول لوحة التحكم بواسطة المالك.", "#ef4444");
-              } else {
-                  showLoginMsg("⏳ طلبك قيد المراجعة من المالك...", "#f59e0b");
-              }
-          } else {
-              await db.collection('admin_permissions').doc(currentAdminPhone).set({
-                  phone: currentAdminPhone,
-                  ip: userIpAddress,
-                  status: 'pending',
-                  allowedCategories: [],
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-              showLoginMsg("📩 تم تسجيل طلبك وإرساله للمالك لتحديد خانات النشر والموافقة!", "#38bdf8");
-          }
-      }
+      await db.collection('admin_permissions').doc(currentAdminPhone).set({
+          phone: currentAdminPhone,
+          ip: userIpAddress,
+          status: 'pending',
+          allowedCategories: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById('stepOTP').style.display = 'none';
+      showLoginMsg("📩 تم تأكيد الكود وإرسال الطلب للمالك! انتظر تفعيله وتحديد أقسامك.", "#38bdf8");
   }
 
   function showLoginMsg(text, color) {
@@ -459,7 +472,6 @@
       const id = document.getElementById('prodId').value;
       const cat = document.getElementById('prodCat').value;
 
-      // التأكد من صلاحية الوصول للخانة
       const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
 
       if (!isAllowed) {
