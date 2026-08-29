@@ -56,7 +56,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">دخول لوحة التحكم والسيطرة</p>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">تسجيل الدخول للوحة التحكم</p>
         
         <div id="stepPhone">
             <div class="form-group">
@@ -66,13 +66,13 @@
         </div>
 
         <div id="stepOTP" style="display: none;">
-            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">تسجيل لأول مرة! اضغط الزر لإرسال الكود للواتساب، ثم أدخله هنا للتأكيد:</p>
-            <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 12px;">إرسال الكود عبر WhatsApp 💬</a>
+            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">أهلاً بك! تم إنشاء رقم معرف (ID) فريد لك. اضغط لإرساله للمالك ثم اضغط تأكيد:</p>
+            <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 12px;">إرسال رقم الـ ID للواتساب 💬</a>
             
             <div class="form-group">
-                <input type="text" id="otpInput" placeholder="أدخل كود التحقق">
+                <input type="text" id="otpInput" placeholder="أدخل رقم الـ ID للـتأكيد">
             </div>
-            <button class="btn btn-success" style="width: 100%;" onclick="verifyOTP()">تأكيد الكود وإرسال الطلب 📩</button>
+            <button class="btn btn-success" style="width: 100%;" onclick="verifyOTP()">تأكيد وإرسال الطلب للمالك 📩</button>
         </div>
 
         <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
@@ -101,28 +101,31 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
+        <!-- قسم التحكم الخاص بالمالك فقط -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
-            <h3>👑 إدارة الصلاحيات وتحديد أقسام النشر لكل مسؤول</h3>
+            <h3>👑 لوحة المالك: التحكم في صلاحيات وأقسام المسجلين</h3>
             
-            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة:</h4>
+            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة (حدد الأقسام المسموحة):</h4>
             <table>
                 <thead>
                     <tr>
-                        <th>الهاتف</th>
-                        <th>اختر الأقسام المسموحة</th>
+                        <th>رقم الهاتف</th>
+                        <th>رقم الـ ID</th>
+                        <th>اختر الأقسام المسموح بالنشر فيها</th>
                         <th>القرار</th>
                     </tr>
                 </thead>
                 <tbody id="requestsTableBody"></tbody>
             </table>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين:</h4>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وتعديل أقسامهم:</h4>
             <table>
                 <thead>
                     <tr>
-                        <th>الهاتف</th>
-                        <th>الأقسام المسموحة</th>
-                        <th>الحالة</th>
+                        <th>رقم الهاتف</th>
+                        <th>رقم الـ ID</th>
+                        <th>الأقسام المتاحة</th>
+                        <th>تغيير الأقسام</th>
                         <th>الإجراء</th>
                     </tr>
                 </thead>
@@ -142,6 +145,7 @@
             </table>
         </div>
 
+        <!-- إضافة وتعديل المنتجات -->
         <div class="card">
             <h3>➕ إضافة / تعديل منتج تفصيلي</h3>
             <form onsubmit="saveProduct(event)">
@@ -232,8 +236,7 @@
 
   const OWNER_NUMBERS = ["01127491224", "01012517345"];
   let currentAdminPhone = "";
-  let userIpAddress = "غير معروف";
-  let generatedOTP = "";
+  let generatedID = "";
   let currentAdminCategories = ["all"]; 
   let isSuperOwner = false;
 
@@ -247,11 +250,6 @@
       accessories: "💍 اكسسوارات بنات"
   };
 
-  fetch('https://api.ipify.org?format=json')
-      .then(res => res.json())
-      .then(data => userIpAddress = data.ip)
-      .catch(() => {});
-
   async function checkUserStatus() {
       let phone = document.getElementById('adminPhoneInput').value.trim();
       if (!phone) {
@@ -259,11 +257,10 @@
           return;
       }
       
-      // تنظيف رقم الهاتف
       phone = phone.replace(/\s+/g, '');
       currentAdminPhone = phone;
 
-      // 1. دخول المالك مباشرة دون كود
+      // 1. المالك يدخل فوراً
       if (OWNER_NUMBERS.includes(currentAdminPhone)) {
           isSuperOwner = true;
           currentAdminCategories = ["all"];
@@ -271,62 +268,61 @@
           return;
       }
 
-      // 2. التحقق من حالة المستخدم في Firestore
+      // 2. فحص السجل السابق للمستخدم
       try {
           const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
 
           if (doc.exists) {
               const data = doc.data();
               if (data.status === 'approved') {
-                  // مقبول سابقاً -> يدخل فوراً بدون طلب كود في كل مرة
+                  // مقبول مسبقاً -> دخول مباشر
                   currentAdminCategories = data.allowedCategories || ["all"];
                   grantAccess(false);
               } else if (data.status === 'blocked') {
-                  // محظور/مطرود -> يمنع تماماً
                   showLoginMsg("🚫 تم حظرك وطردك من لوحة التحكم بواسطة المالك.", "#ef4444");
               } else {
-                  showLoginMsg("⏳ طلبك قيد المراجعة والقبول من المالك...", "#f59e0b");
+                  showLoginMsg("⏳ طلبك قيد المراجعة والموافقة من المالك...", "#f59e0b");
               }
           } else {
-              // 3. أول مرة يسجل -> توليد الكود وفتح خيار الواتساب
-              sendWhatsAppOTP();
+              // 3. أول مرة يسجل -> توليد ID فريد وإرساله
+              sendUniqueUserID();
           }
       } catch (e) {
-          showLoginMsg("حدث خطأ في الاتصال، حاول مجدداً", "#ef4444");
+          showLoginMsg("حدث خطأ في الاتصال، حاول مرة أخرى", "#ef4444");
       }
   }
 
-  function sendWhatsAppOTP() {
-      generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+  function sendUniqueUserID() {
+      generatedID = "ID-" + Math.floor(1000 + Math.random() * 9000);
       document.getElementById('stepPhone').style.display = 'none';
       document.getElementById('stepOTP').style.display = 'block';
 
-      const waMsg = encodeURIComponent(`كود التحقق الخاص بي للدخول إلى لوحة التحكم هو: ${generatedOTP}`);
-      const waUrl = `https://wa.me/2${currentAdminPhone}?text=${waMsg}`;
+      const waMsg = encodeURIComponent(`طلب تسجيل مسؤول جديد\nرقم الهاتف: ${currentAdminPhone}\nرقم المعرف الخااص بي (ID): ${generatedID}`);
+      const waUrl = `https://wa.me/2${OWNER_NUMBERS[0]}?text=${waMsg}`;
       
       const waBtn = document.getElementById('waSendBtn');
       waBtn.href = waUrl;
 
-      showLoginMsg(`كودك هو: (${generatedOTP}). اضغط على زر WhatsApp لإرساله ثم أدخله أدناه للتأكيد.`, "#38bdf8");
+      showLoginMsg(`رقم الـ ID الخاص بك هو: (${generatedID}). اضغط على زر WhatsApp لإرساله للمالك ثم أدخله أدناه للتأكيد.`, "#38bdf8");
   }
 
   async function verifyOTP() {
       const input = document.getElementById('otpInput').value.trim();
-      if (input !== generatedOTP && input !== "9999") { 
-          showLoginMsg("❌ كود التحقق غير صحيح!", "#ef4444");
+      if (input.toUpperCase() !== generatedID.toUpperCase() && input !== "9999") { 
+          showLoginMsg("❌ رقم الـ ID غير صحيح!", "#ef4444");
           return;
       }
 
       await db.collection('admin_permissions').doc(currentAdminPhone).set({
           phone: currentAdminPhone,
-          ip: userIpAddress,
+          userId: generatedID,
           status: 'pending',
           allowedCategories: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       document.getElementById('stepOTP').style.display = 'none';
-      showLoginMsg("📩 تم تأكيد الكود وإرسال الطلب للمالك! بانتظار الموافقة وتحديد أقسامك.", "#38bdf8");
+      showLoginMsg("📩 تم إرسال الطلب ورقم الـ ID للمالك! بانتظار تفعيل حسابك وتحديد الأقسام.", "#38bdf8");
   }
 
   function showLoginMsg(text, color) {
@@ -390,6 +386,7 @@
                   reqHtml += `
                       <tr>
                           <td><strong>${data.phone}</strong></td>
+                          <td><span class="badge badge-pending">${data.userId || 'بدون ID'}</span></td>
                           <td>
                               <div class="cat-checkboxes" id="cats_${data.phone}">
                                   <label><input type="checkbox" value="all" onchange="toggleAllCats('${data.phone}', this)"> 🔥 الكل</label>
@@ -413,8 +410,20 @@
                   activeHtml += `
                       <tr>
                           <td><strong>${data.phone}</strong></td>
+                          <td><span class="badge badge-active">${data.userId || 'معتمد'}</span></td>
                           <td><span class="badge badge-active">${allowedList || 'لم تُحدد'}</span></td>
-                          <td><span class="badge ${data.status === 'approved' ? 'badge-active' : 'badge-blocked'}">${data.status === 'approved' ? 'معتمد' : 'محظور'}</span></td>
+                          <td>
+                              <div class="cat-checkboxes" id="edit_cats_${data.phone}">
+                                  <label><input type="checkbox" value="offers" class="echk_${data.phone}"> العروض</label>
+                                  <label><input type="checkbox" value="poultry" class="echk_${data.phone}"> طيور</label>
+                                  <label><input type="checkbox" value="frozen" class="echk_${data.phone}"> مجمدات</label>
+                                  <label><input type="checkbox" value="cleaning" class="echk_${data.phone}"> منظفات</label>
+                                  <label><input type="checkbox" value="spices" class="echk_${data.phone}"> عطارة</label>
+                                  <label><input type="checkbox" value="beauty" class="echk_${data.phone}"> تجميل</label>
+                                  <label><input type="checkbox" value="accessories" class="echk_${data.phone}"> اكسسوارات</label>
+                              </div>
+                              <button class="btn btn-primary" style="margin-top: 5px; width: 100%; font-size: 11px;" onclick="updateUserCats('${data.phone}')">حفظ الأقسام 🔄</button>
+                          </td>
                           <td>
                               ${data.status === 'approved' 
                                   ? `<button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
@@ -426,8 +435,8 @@
               }
           });
 
-          reqBody.innerHTML = reqHtml || '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات جديدة حالياً</td></tr>';
-          activeBody.innerHTML = activeHtml || '<tr><td colspan="4" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
+          reqBody.innerHTML = reqHtml || '<tr><td colspan="4" style="text-align: center;">لا توجد طلبات جديدة حالياً</td></tr>';
+          activeBody.innerHTML = activeHtml || '<tr><td colspan="5" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
       });
   }
 
@@ -450,6 +459,22 @@
           status: 'approved',
           allowedCategories: selected
       });
+  }
+
+  async function updateUserCats(phone) {
+      const selected = [];
+      const checkboxes = document.querySelectorAll(`#edit_cats_${phone} input[type="checkbox"]:checked`);
+      checkboxes.forEach(c => selected.push(c.value));
+
+      if (selected.length === 0) {
+          alert('اختر قسم واحد على الأقل!');
+          return;
+      }
+
+      await db.collection('admin_permissions').doc(phone).update({
+          allowedCategories: selected
+      });
+      alert('تم تحديث الأقسام المصرح بها لهذا المسؤول بنجاح!');
   }
 
   async function setPermission(phone, status) {
@@ -477,7 +502,7 @@
       const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
 
       if (!isAllowed) {
-          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}).`);
+          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}). يمكنك فقط النشر في الأقسام المحددة لك.`);
           return;
       }
 
