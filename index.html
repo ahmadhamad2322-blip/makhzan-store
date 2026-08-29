@@ -33,7 +33,6 @@
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
 
-        /* بنر الطلبات الخاصّة */
         .custom-order-banner { background: #fff; border: 2px dashed #0284c7; border-radius: 16px; padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08); flex-wrap: wrap; }
         .custom-order-text { flex: 1; min-width: 240px; }
         .custom-order-text h3 { color: #0f172a; font-size: 17px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
@@ -43,7 +42,6 @@
 
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
         .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
-        /* لعرض الصورة كاملة دون قص */
         .product-img { width: 100%; height: 140px; object-fit: contain; border-radius: 8px; margin-bottom: 10px; background: #f8fafc; cursor: pointer; }
         .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; cursor: pointer; }
         .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
@@ -69,7 +67,6 @@
         .promo-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
 
-        /* تنسيقات نافذة تفاصيل المنتج */
         .details-img-container { width: 100%; height: 220px; background: #f8fafc; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
         .details-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
@@ -99,6 +96,7 @@
 <div class="categories">
     <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
     <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('grocery')">🛒 بقالة</button>
     <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
     <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
     <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
@@ -113,7 +111,6 @@
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
-    <!-- بنر طلب طلبات خاصة غير متوفرة بالموقع -->
     <div class="custom-order-banner">
         <div class="custom-order-text">
             <h3>📝 محتاجة منتج مش موجود في المتجر؟</h3>
@@ -132,7 +129,6 @@
 
 <a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
 
-<!-- نافذة تفاصيل المنتج -->
 <div class="modal" id="detailsModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -171,7 +167,6 @@
     </div>
 </div>
 
-<!-- نافذة السلة وإكمال الطلب -->
 <div class="modal" id="cartModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -182,7 +177,6 @@
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
         
-        <!-- كود الخصم -->
         <div class="form-group">
             <label>كود الخصم أو الإحالة:</label>
             <div class="promo-box">
@@ -380,7 +374,6 @@
           closeDetailsModal();
       };
 
-      // إعداد العداد التنازلي للتخفيضات والعروض
       if (activeTimerInterval) clearInterval(activeTimerInterval);
       const timerBox = document.getElementById('detailsTimerBox');
       
