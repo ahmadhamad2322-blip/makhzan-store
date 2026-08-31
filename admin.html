@@ -32,6 +32,8 @@
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: black; }
         .btn-whatsapp { background: #25D366; color: white; }
+        .btn-pin { background: #8b5cf6; color: white; }
+        .btn-unpin { background: #64748b; color: white; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 14px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
@@ -42,6 +44,7 @@
         .badge-pending { background: #f59e0b; color: #000; }
         .badge-active { background: #16a34a; color: white; }
         .badge-blocked { background: #ef4444; color: white; }
+        .badge-pinned { background: #8b5cf6; color: white; }
 
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
@@ -49,6 +52,7 @@
         .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
         .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #0f172a; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #475569; }
         .cat-checkboxes label { color: white; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .checkbox-container { display: flex; align-items: center; gap: 10px; color: #f59e0b; font-weight: bold; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -163,6 +167,7 @@
                         <label>القسم / الخانة:</label>
                         <select id="prodCat" required>
                             <option value="offers">🔥 العروض اليومية</option>
+                            <option value="grocery">🛒 بقالة</option>
                             <option value="poultry">🍗 طيور</option>
                             <option value="frozen">🧊 مجمدات</option>
                             <option value="cleaning">✨ منظفات</option>
@@ -186,6 +191,11 @@
                         </select>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="prodPinned"> 📌 تثبيت هذا المنتج في أعلى المتجر (الحد الأقصى 20 منتج)
+                        </label>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
                         <label>وصف وتفاصيل المنتج:</label>
                         <textarea id="prodDesc" rows="2" placeholder="أدخل الوصف والتفاصيل..."></textarea>
                     </div>
@@ -203,7 +213,7 @@
         </div>
 
         <div class="card">
-            <h3>📦 المنتجات المتاحة بالمتجر</h3>
+            <h3>📦 المنتجات المتاحة بالمتجر <span id="pinnedCountBadge" style="font-size: 13px; color: #8b5cf6; margin-right: auto;">(المثبتة: 0/20)</span></h3>
             <table>
                 <thead>
                     <tr>
@@ -212,6 +222,7 @@
                         <th>السعر</th>
                         <th>المخزون</th>
                         <th>القسم</th>
+                        <th>الحالة / التثبيت</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -239,9 +250,11 @@
   let generatedID = "";
   let currentAdminCategories = ["all"]; 
   let isSuperOwner = false;
+  let currentPinnedCount = 0;
 
   const CATEGORY_NAMES = {
       offers: "🔥 العروض اليومية",
+      grocery: "🛒 بقالة",
       poultry: "🍗 طيور",
       frozen: "🧊 مجمدات",
       cleaning: "✨ منظفات",
@@ -260,7 +273,6 @@
       phone = phone.replace(/\s+/g, '');
       currentAdminPhone = phone;
 
-      // 1. المالك يدخل فوراً
       if (OWNER_NUMBERS.includes(currentAdminPhone)) {
           isSuperOwner = true;
           currentAdminCategories = ["all"];
@@ -268,14 +280,12 @@
           return;
       }
 
-      // 2. فحص السجل السابق للمستخدم
       try {
           const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
 
           if (doc.exists) {
               const data = doc.data();
               if (data.status === 'approved') {
-                  // مقبول مسبقاً -> دخول مباشر
                   currentAdminCategories = data.allowedCategories || ["all"];
                   grantAccess(false);
               } else if (data.status === 'blocked') {
@@ -284,7 +294,6 @@
                   showLoginMsg("⏳ طلبك قيد المراجعة والموافقة من المالك...", "#f59e0b");
               }
           } else {
-              // 3. أول مرة يسجل -> توليد ID فريد وإرساله
               sendUniqueUserID();
           }
       } catch (e) {
@@ -370,6 +379,161 @@
       });
   }
 
+  function previewFileImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+          document.getElementById('prodBase64').value = evt.target.result;
+          document.getElementById('imgPreview').src = evt.target.result;
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+  }
+
+  async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodId').value;
+      const isPinned = document.getElementById('prodPinned').checked;
+
+      if (isPinned && !id && currentPinnedCount >= 20) {
+          alert('⚠️ يمكنك تثبيت 20 منتج كحد أقصى فقط!');
+          return;
+      }
+
+      const prodData = {
+          name: document.getElementById('prodName').value,
+          price: parseFloat(document.getElementById('prodPrice').value),
+          category: document.getElementById('prodCat').value,
+          stock: parseInt(document.getElementById('prodStock').value) || 0,
+          rating: document.getElementById('prodRating').value,
+          description: document.getElementById('prodDesc').value,
+          image: document.getElementById('prodBase64').value,
+          isPinned: isPinned,
+          pinnedAt: isPinned ? (firebase.firestore.FieldValue.serverTimestamp()) : null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+          if (id) {
+              await db.collection('products').doc(id).update(prodData);
+              alert('تم تعديل المنتج بنجاح!');
+          } else {
+              prodData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+              await db.collection('products').add(prodData);
+              alert('تم إضافة المنتج بنجاح!');
+          }
+          resetProductForm();
+      } catch(err) {
+          alert('حدث خطأ أثناء حفظ المنتج: ' + err.message);
+      }
+  }
+
+  function resetProductForm() {
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodCat').value = 'offers';
+      document.getElementById('prodStock').value = '10';
+      document.getElementById('prodRating').value = '5';
+      document.getElementById('prodDesc').value = '';
+      document.getElementById('prodBase64').value = '';
+      document.getElementById('prodImageFile').value = '';
+      document.getElementById('prodPinned').checked = false;
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+  }
+
+  function togglePinProduct(id, currentStatus) {
+      if (!currentStatus && currentPinnedCount >= 20) {
+          alert('⚠️ وصلت للحد الأقصى للمنتجات المثبتة (20 منتج)');
+          return;
+      }
+      db.collection('products').doc(id).update({
+          isPinned: !currentStatus,
+          pinnedAt: !currentStatus ? firebase.firestore.FieldValue.serverTimestamp() : null
+      });
+  }
+
+  function editProduct(id, dataStr) {
+      const data = JSON.parse(decodeURIComponent(dataStr));
+      document.getElementById('prodId').value = id;
+      document.getElementById('prodName').value = data.name || '';
+      document.getElementById('prodPrice').value = data.price || 0;
+      document.getElementById('prodCat').value = data.category || 'offers';
+      document.getElementById('prodStock').value = data.stock || 0;
+      document.getElementById('prodRating').value = data.rating || '5';
+      document.getElementById('prodDesc').value = data.description || '';
+      document.getElementById('prodBase64').value = data.image || '';
+      document.getElementById('prodPinned').checked = !!data.isPinned;
+      
+      if (data.image) {
+          document.getElementById('imgPreview').src = data.image;
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+      }
+      window.scrollTo({ top: 400, behavior: 'smooth' });
+  }
+
+  function deleteProduct(id) {
+      if (confirm('هل أنت تأكد من طلب حذف أو مسح هذا المنتج؟')) {
+          if (isSuperOwner) {
+              db.collection('products').doc(id).delete();
+          } else {
+              db.collection('delete_requests').add({
+                  productId: id,
+                  requestedBy: currentAdminPhone,
+                  status: 'pending',
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
+              }).then(() => alert('تم إرسال طلب الحذف للمالك للبت فيه!'));
+          }
+      }
+  }
+
+  function loadProducts() {
+      db.collection('products').onSnapshot(snapshot => {
+          const tbody = document.getElementById('adminProductsTable');
+          tbody.innerHTML = '';
+          currentPinnedCount = 0;
+
+          let products = [];
+          snapshot.forEach(doc => {
+              const p = doc.data();
+              p.id = doc.id;
+              if (p.isPinned) currentPinnedCount++;
+              products.push(p);
+          });
+
+          document.getElementById('pinnedCountBadge').innerText = `(المثبتة: ${currentPinnedCount}/20)`;
+
+          // الترتيب: المنتجات المثبتة أولاً ثم باقي المنتجات
+          products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+
+          products.forEach(p => {
+              const dataStr = encodeURIComponent(JSON.stringify(p));
+              const isPinned = p.isPinned || false;
+              
+              tbody.innerHTML += `
+                  <tr>
+                      <td><img src="${p.image || ''}" class="img-preview" alt=""></td>
+                      <td><strong>${p.name}</strong></td>
+                      <td>${p.price} جنيه</td>
+                      <td>${p.stock}</td>
+                      <td>${CATEGORY_NAMES[p.category] || p.category}</td>
+                      <td>
+                          ${isPinned ? '<span class="badge badge-pinned">📌 مثبت في الأعلى</span>' : '<span style="color:#64748b;">عادي</span>'}
+                      </td>
+                      <td>
+                          <button class="btn btn-warning" onclick="editProduct('${p.id}', '${dataStr}')">تعديل ✏️</button>
+                          <button class="btn ${isPinned ? 'btn-unpin' : 'btn-pin'}" onclick="togglePinProduct('${p.id}', ${isPinned})">
+                              ${isPinned ? 'إلغاء التثبيت 📍' : 'تثبيت 📌'}
+                          </button>
+                          <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>
+                      </td>
+                  </tr>
+              `;
+          });
+      });
+  }
+
   function listenToAllRequestsAndUsers() {
       db.collection('admin_permissions').onSnapshot(snapshot => {
           const reqBody = document.getElementById('requestsTableBody');
@@ -391,6 +555,7 @@
                               <div class="cat-checkboxes" id="cats_${data.phone}">
                                   <label><input type="checkbox" value="all" onchange="toggleAllCats('${data.phone}', this)"> 🔥 الكل</label>
                                   <label><input type="checkbox" value="offers" class="chk_${data.phone}"> العروض</label>
+                                  <label><input type="checkbox" value="grocery" class="chk_${data.phone}"> بقالة</label>
                                   <label><input type="checkbox" value="poultry" class="chk_${data.phone}"> طيور</label>
                                   <label><input type="checkbox" value="frozen" class="chk_${data.phone}"> مجمدات</label>
                                   <label><input type="checkbox" value="cleaning" class="chk_${data.phone}"> منظفات</label>
@@ -415,6 +580,7 @@
                           <td>
                               <div class="cat-checkboxes" id="edit_cats_${data.phone}">
                                   <label><input type="checkbox" value="offers" class="echk_${data.phone}"> العروض</label>
+                                  <label><input type="checkbox" value="grocery" class="echk_${data.phone}"> بقالة</label>
                                   <label><input type="checkbox" value="poultry" class="echk_${data.phone}"> طيور</label>
                                   <label><input type="checkbox" value="frozen" class="echk_${data.phone}"> مجمدات</label>
                                   <label><input type="checkbox" value="cleaning" class="echk_${data.phone}"> منظفات</label>
@@ -422,201 +588,76 @@
                                   <label><input type="checkbox" value="beauty" class="echk_${data.phone}"> تجميل</label>
                                   <label><input type="checkbox" value="accessories" class="echk_${data.phone}"> اكسسوارات</label>
                               </div>
-                              <button class="btn btn-primary" style="margin-top: 5px; width: 100%; font-size: 11px;" onclick="updateUserCats('${data.phone}')">حفظ الأقسام 🔄</button>
                           </td>
                           <td>
-                              ${data.status === 'approved' 
-                                  ? `<button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
-                                  : `<button class="btn btn-success" onclick="setPermission('${data.phone}', 'approved')">إلغاء الحظر 🔓</button>`
-                              }
+                              <button class="btn btn-primary" onclick="updateUserCats('${data.phone}')">حفظ 🔄</button>
+                              <button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر 🚫</button>
                           </td>
                       </tr>
                   `;
               }
           });
-
-          reqBody.innerHTML = reqHtml || '<tr><td colspan="4" style="text-align: center;">لا توجد طلبات جديدة حالياً</td></tr>';
-          activeBody.innerHTML = activeHtml || '<tr><td colspan="5" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
+          reqBody.innerHTML = reqHtml;
+          activeBody.innerHTML = activeHtml;
       });
   }
 
-  function toggleAllCats(phone, mainChk) {
-      const checkboxes = document.querySelectorAll(`.chk_${phone}`);
-      checkboxes.forEach(c => c.checked = mainChk.checked);
+  function toggleAllCats(phone, el) {
+      const chks = document.querySelectorAll(`.chk_${phone}`);
+      chks.forEach(c => c.checked = el.checked);
   }
 
-  async function approveUser(phone) {
-      const selected = [];
-      const checkboxes = document.querySelectorAll(`#cats_${phone} input[type="checkbox"]:checked`);
-      checkboxes.forEach(c => selected.push(c.value));
-
-      if (selected.length === 0) {
-          alert('يرجى تحديد قسم واحد على الأقل للمسؤول قبل القبول!');
-          return;
-      }
-
-      await db.collection('admin_permissions').doc(phone).update({
+  function approveUser(phone) {
+      const selected = Array.from(document.querySelectorAll(`.chk_${phone}:checked`)).map(c => c.value);
+      db.collection('admin_permissions').doc(phone).update({
           status: 'approved',
+          allowedCategories: selected.length ? selected : ['all']
+      });
+  }
+
+  function updateUserCats(phone) {
+      const selected = Array.from(document.querySelectorAll(`.echk_${phone}:checked`)).map(c => c.value);
+      db.collection('admin_permissions').doc(phone).update({
           allowedCategories: selected
       });
   }
 
-  async function updateUserCats(phone) {
-      const selected = [];
-      const checkboxes = document.querySelectorAll(`#edit_cats_${phone} input[type="checkbox"]:checked`);
-      checkboxes.forEach(c => selected.push(c.value));
-
-      if (selected.length === 0) {
-          alert('اختر قسم واحد على الأقل!');
-          return;
-      }
-
-      await db.collection('admin_permissions').doc(phone).update({
-          allowedCategories: selected
-      });
-      alert('تم تحديث الأقسام المصرح بها لهذا المسؤول بنجاح!');
-  }
-
-  async function setPermission(phone, status) {
-      await db.collection('admin_permissions').doc(phone).update({ status: status });
-  }
-
-  function previewFileImage(e) {
-      const file = e.target.files[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-              document.getElementById('prodBase64').value = evt.target.result;
-              document.getElementById('imgPreview').src = evt.target.result;
-              document.getElementById('imagePreviewContainer').style.display = 'block';
-          };
-          reader.readAsDataURL(file);
-      }
-  }
-
-  async function saveProduct(e) {
-      e.preventDefault();
-      const id = document.getElementById('prodId').value;
-      const cat = document.getElementById('prodCat').value;
-
-      const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
-
-      if (!isAllowed) {
-          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}). يمكنك فقط النشر في الأقسام المحددة لك.`);
-          return;
-      }
-
-      const data = {
-          name: document.getElementById('prodName').value.trim(),
-          price: parseFloat(document.getElementById('prodPrice').value),
-          cat: cat,
-          stock: parseInt(document.getElementById('prodStock').value) || 0,
-          rating: parseInt(document.getElementById('prodRating').value) || 5,
-          desc: document.getElementById('prodDesc').value.trim(),
-          img: document.getElementById('prodBase64').value
-      };
-
-      if (id) {
-          await db.collection('products').doc(id).update(data);
-          alert('تم تعديل المنتج بنجاح!');
-      } else {
-          await db.collection('products').add(data);
-          alert('تم إدراج المنتج بنجاح!');
-      }
-
-      document.getElementById('prodId').value = '';
-      document.getElementById('prodBase64').value = '';
-      document.getElementById('imagePreviewContainer').style.display = 'none';
-      e.target.reset();
-  }
-
-  function loadProducts() {
-      db.collection('products').onSnapshot(snapshot => {
-          const tbody = document.getElementById('adminProductsTable');
-          tbody.innerHTML = '';
-          snapshot.forEach(doc => {
-              const p = doc.data();
-              tbody.innerHTML += `
-                  <tr>
-                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview"></td>
-                      <td><strong>${p.name}</strong></td>
-                      <td>${p.price} جنيه</td>
-                      <td>${p.stock}</td>
-                      <td>${CATEGORY_NAMES[p.cat] || p.cat}</td>
-                      <td>
-                          <button class="btn btn-warning" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', ${p.stock}, ${p.rating}, '${p.desc || ''}', '${p.img || ''}')">تعديل ✏️</button>
-                          <button class="btn btn-danger" onclick="requestDeleteProduct('${doc.id}', '${p.name}')">حذف 🗑️</button>
-                      </td>
-                  </tr>
-              `;
-          });
-      });
-  }
-
-  function editProduct(id, name, price, cat, stock, rating, desc, img) {
-      document.getElementById('prodId').value = id;
-      document.getElementById('prodName').value = name;
-      document.getElementById('prodPrice').value = price;
-      document.getElementById('prodCat').value = cat;
-      document.getElementById('prodStock').value = stock;
-      document.getElementById('prodRating').value = rating;
-      document.getElementById('prodDesc').value = desc;
-      document.getElementById('prodBase64').value = img;
-      if (img) {
-          document.getElementById('imgPreview').src = img;
-          document.getElementById('imagePreviewContainer').style.display = 'block';
-      }
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-  }
-
-  async function requestDeleteProduct(prodId, prodName) {
-      if (isSuperOwner) {
-          if (confirm(`هل أنت تأكد من حذف المنتج (${prodName}) نهائياً؟`)) {
-              await db.collection('products').doc(prodId).delete();
-              alert('تم الحذف مباشرة.');
-          }
-      } else {
-          await db.collection('delete_requests').add({
-              prodId: prodId,
-              prodName: prodName,
-              requestedBy: currentAdminPhone,
-              status: 'pending',
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert('📩 تم إرسال طلب الحذف إلى المالك!');
-      }
+  function setPermission(phone, status) {
+      db.collection('admin_permissions').doc(phone).update({ status: status });
   }
 
   function listenToDeleteRequests() {
       db.collection('delete_requests').where('status', '==', 'pending').onSnapshot(snapshot => {
           const tbody = document.getElementById('deleteRequestsTableBody');
-          let html = '';
-          snapshot.forEach(doc => {
+          tbody.innerHTML = '';
+          snapshot.forEach(async doc => {
               const req = doc.data();
-              html += `
+              let pName = "منتج غير معروف";
+              const pDoc = await db.collection('products').doc(req.productId).get();
+              if (pDoc.exists) pName = pDoc.data().name;
+
+              tbody.innerHTML += `
                   <tr>
-                      <td><strong>${req.prodName}</strong></td>
+                      <td>${pName}</td>
                       <td>${req.requestedBy}</td>
                       <td>
-                          <button class="btn btn-danger" onclick="confirmDelete('${doc.id}', '${req.prodId}')">موافقة وحذف ❌</button>
-                          <button class="btn btn-primary" onclick="rejectDelete('${doc.id}')">رفض 🛡️</button>
+                          <button class="btn btn-danger" onclick="confirmDelete('${doc.id}', '${req.productId}')">تأكيد الحذف 🗑️</button>
+                          <button class="btn btn-warning" onclick="rejectDelete('${doc.id}')">إلغاء ❌</button>
                       </td>
                   </tr>
               `;
           });
-          tbody.innerHTML = html || '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات حذف معلقة</td></tr>';
       });
   }
 
-  async function confirmDelete(reqId, prodId) {
-      await db.collection('products').doc(prodId).delete();
-      await db.collection('delete_requests').doc(reqId).update({ status: 'approved' });
-      alert('تم إقرار الطلب وحذف المنتج نهائياً!');
+  function confirmDelete(reqId, prodId) {
+      db.collection('products').doc(prodId).delete().then(() => {
+          db.collection('delete_requests').doc(reqId).delete();
+      });
   }
 
-  async function rejectDelete(reqId) {
-      await db.collection('delete_requests').doc(reqId).update({ status: 'rejected' });
-      alert('تم رفض طلب الحذف والإبقاء على المنتج.');
+  function rejectDelete(reqId) {
+      db.collection('delete_requests').doc(reqId).delete();
   }
 </script>
 </body>
