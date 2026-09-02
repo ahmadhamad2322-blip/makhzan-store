@@ -22,7 +22,7 @@
         .stats-bar { background: #1e293b; color: #94a3b8; padding: 8px 15px; text-align: center; font-size: 12px; display: flex; justify-content: center; gap: 20px; }
         .stats-num { color: #38bdf8; font-weight: bold; }
 
-        /* مربع البحث العائم */
+        /* مربع بحث عائم */
         .floating-search { position: sticky; top: 65px; z-index: 90; padding: 10px 15px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(5px); }
         .search-box { max-width: 600px; margin: 0 auto; position: relative; }
         .search-box input { width: 100%; padding: 10px 40px 10px 15px; border-radius: 25px; border: 2px solid #38bdf8; outline: none; font-size: 14px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
@@ -34,7 +34,7 @@
         .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active, .cat-btn:hover { background: #0284c7; color: white; border-color: #0284c7; }
 
-        /* منتجان بجانب بعضهما دائماً */
+        /* المنتجات (2 في كل صف) */
         .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) {
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
@@ -43,7 +43,6 @@
         .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .product-card:hover { transform: translateY(-3px); }
         
-        /* عرض الصورة بالكامل بدون قص */
         .product-img-wrap { width: 100%; height: 150px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 5px; border-bottom: 1px solid #f1f5f9; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
@@ -148,11 +147,11 @@
         <div class="modal-detail-item"><span>الوزن / الحجم:</span><strong id="mWeight"></strong></div>
         <div class="modal-detail-item"><span>الكمية المتبقية:</span><strong id="mStock"></strong></div>
         <div class="modal-detail-item"><span>التقييم:</span><span id="mRating"></span></div>
-        <div class="modal-detail-item"><span>تكلفة التوصيل التقريبية:</span><strong id="mDelivery"></strong></div>
+        <div class="modal-detail-item"><span>تكلفة التوصيل:</span><strong id="mDelivery">15 جنيه</strong></div>
         
         <p id="mDesc" style="font-size: 13px; color: #64748b; margin: 12px 0; line-height: 1.5;"></p>
 
-        <button id="mAddBtn" class="add-cart-btn" style="padding: 10px; font-size: 14px;" onclick="">إضافة للسلة 🛒</button>
+        <button id="mAddBtn" class="add-cart-btn" style="padding: 10px; font-size: 14px;">إضافة للسلة 🛒</button>
     </div>
 </div>
 
@@ -276,7 +275,8 @@
       }
 
       filtered.forEach(p => {
-          const isOutOfStock = p.stock <= 0;
+          const stockNum = (p.stock !== undefined && p.stock !== null) ? parseInt(p.stock) : 10;
+          const isOutOfStock = stockNum <= 0;
 
           grid.innerHTML += `
               <div class="product-card" onclick="openModal('${p.id}')">
@@ -287,7 +287,7 @@
                       <div class="product-title">${p.name}</div>
                       <div class="product-meta">
                           <span class="product-price">${p.price} ج.م</span>
-                          <span class="product-stock">${isOutOfStock ? '❌ نافذ' : 'المتبقي: ' + p.stock}</span>
+                          <span class="product-stock">${isOutOfStock ? '❌ غير متوفر' : 'متوفر: ' + stockNum}</span>
                       </div>
                       <button class="add-cart-btn" ${isOutOfStock ? 'disabled' : ''} onclick="event.stopPropagation(); addToCart('${p.id}')">
                           ${isOutOfStock ? 'غير متوفر' : 'إضافة للسلة 🛒'}
@@ -310,23 +310,27 @@
       renderProducts(document.getElementById('searchInput').value);
   }
 
-  /* فتح نافذة التفاصيل عند النقر على المنتج */
+  /* فتح تفاصيل المنتج ومعالجة المخزون بدقة */
   function openModal(prodId) {
       const p = allProducts.find(item => item.id === prodId);
       if (!p) return;
 
+      const stockNum = (p.stock !== undefined && p.stock !== null) ? parseInt(p.stock) : 10;
+      const isOutOfStock = stockNum <= 0;
+
       document.getElementById('mImg').src = p.img || 'https://via.placeholder.com/200';
       document.getElementById('mTitle').innerText = p.name;
       document.getElementById('mPrice').innerText = p.price + ' جنيه';
-      document.getElementById('mWeight').innerText = p.weight || 'حسب الطلب / غير محدد';
-      document.getElementById('mStock').innerText = p.stock > 0 ? `${p.stock} قطعة` : 'نفذت الكمية';
+      document.getElementById('mWeight').innerText = p.weight || 'حسب الطلب';
+      document.getElementById('mStock').innerText = !isOutOfStock ? `${stockNum} قطعة متاحة` : 'غير متوفر حالياً';
       document.getElementById('mRating').innerText = '⭐'.repeat(p.rating || 5);
-      document.getElementById('mDelivery').innerText = (p.deliveryPrice || 15) + ' جنيه';
-      document.getElementById('mDesc').innerText = p.desc || 'لا يوجد وصف تفصيلي إضافي للمنتج.';
+      document.getElementById('mDesc').innerText = p.desc || 'لا يوجد وصف إضافي للمنتج.';
 
       const btn = document.getElementById('mAddBtn');
-      btn.disabled = p.stock <= 0;
-      btn.innerText = p.stock > 0 ? 'إضافة للسلة 🛒' : 'غير متوفر بالمخزن';
+      btn.disabled = isOutOfStock;
+      btn.innerText = !isOutOfStock ? 'إضافة للسلة 🛒' : 'غير متوفر بالمخزن';
+      
+      // إعادة ربط الزر بالمنتج الحالي حصراً
       btn.onclick = function() {
           addToCart(p.id);
           closeModal();
@@ -343,12 +347,19 @@
       const product = allProducts.find(p => p.id === prodId);
       if (!product) return;
 
+      const stockNum = (product.stock !== undefined && product.stock !== null) ? parseInt(product.stock) : 10;
+
+      if (stockNum <= 0) {
+          alert('عذراً، هذا المنتج غير متوفر حالياً في المخزن!');
+          return;
+      }
+
       const existing = cart.find(item => item.id === prodId);
       if (existing) {
-          if (existing.qty < product.stock) {
+          if (existing.qty < stockNum) {
               existing.qty++;
           } else {
-              alert('عذراً، تم الوصول للحد الأقصى المتاح بالمخزن!');
+              alert('وصلت للحد الأقصى للكمية المتاحة بالمتجر!');
           }
       } else {
           cart.push({ ...product, qty: 1 });
@@ -362,11 +373,12 @@
       if (!item) return;
 
       const product = allProducts.find(p => p.id === prodId);
+      const stockNum = (product.stock !== undefined && product.stock !== null) ? parseInt(product.stock) : 10;
 
       item.qty += delta;
-      if (item.qty > product.stock) {
-          item.qty = product.stock;
-          alert('هذه هي الكمية المتاحة بالكامل.');
+      if (item.qty > stockNum) {
+          item.qty = stockNum;
+          alert('هذه هي اقصى كمية متاحة.');
       }
 
       if (item.qty <= 0) {
@@ -418,10 +430,10 @@
 
       if (method === 'instapay') {
           infoBox.style.display = 'block';
-          infoBox.innerText = '📲 حول على حساب انستا باي: 01127491224';
+          infoBox.innerText = '📲 تحويل انستا باي على الرقم: 01127491224';
       } else if (method === 'vodafone') {
           infoBox.style.display = 'block';
-          infoBox.innerText = '📱 حول على رقم فودافون كاش: 01012517345';
+          infoBox.innerText = '📱 تحويل فودافون كاش على الرقم: 01012517345';
       } else {
           infoBox.style.display = 'none';
       }
@@ -434,7 +446,7 @@
 
   async function submitOrder() {
       if (cart.length === 0) {
-          alert('سلة التسوق فارغة!');
+          alert('السلة فارغة!');
           return;
       }
 
@@ -445,7 +457,7 @@
       const deliveryFee = parseFloat(document.getElementById('deliveryOption').value) || 0;
 
       if (!name || !phone || !address) {
-          alert('يرجى ملء كافة البيانات المطلوبة!');
+          alert('يرجى كتابة جميع البيانات!');
           return;
       }
 
