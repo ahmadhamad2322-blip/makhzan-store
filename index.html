@@ -22,7 +22,6 @@
             --border-color: #e2e8f0;
             --success: #16a34a;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
 
@@ -72,8 +71,9 @@
         .product-desc { font-size: 12px; color: #64748b; margin-bottom: 8px; height: 36px; overflow: hidden; }
         .product-price { color: #16a34a; font-weight: 900; font-size: 18px; margin-bottom: 10px; }
         .add-btn { background: #0284c7; color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .add-btn:hover { background: #0369a1; }
 
-        /* 🔍 زر البحث العائم النافذة */
+        /* زر البحث العائم النافذة */
         .floating-search-btn {
             position: fixed;
             bottom: 25px;
@@ -118,7 +118,7 @@
         .search-input-field { width: 100%; padding: 14px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 16px; outline: none; }
         .search-input-field:focus { border-color: var(--primary); }
 
-        /* 🛍️ نافذة السلة */
+        /* نافذة السلة */
         .cart-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -174,12 +174,12 @@
     </header>
 
     <div class="categories">
-        <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
-        <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
-        <button class="cat-btn" onclick="filterCategory('grocery')">🛒 بقالة</button>
-        <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
-        <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
-        <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
+        <button class="cat-btn active" onclick="filterCategory('offers', event)">🔥 العروض اليومية</button>
+        <button class="cat-btn" onclick="filterCategory('all', event)">🏠 الكل</button>
+        <button class="cat-btn" onclick="filterCategory('grocery', event)">🛒 بقالة</button>
+        <button class="cat-btn" onclick="filterCategory('poultry', event)">🍗 طيور</button>
+        <button class="cat-btn" onclick="filterCategory('frozen', event)">🧊 مجمدات</button>
+        <button class="cat-btn" onclick="filterCategory('cleaning', event)">✨ منظفات</button>
     </div>
 
     <div class="container">
@@ -194,7 +194,7 @@
         </div>
     </div>
 
-    <!-- 🔍 زر البحث العائم -->
+    <!-- زر البحث العائم -->
     <button class="floating-search-btn" onclick="toggleSearch(true)">🔍</button>
 
     <!-- نافذة البحث العائمة -->
@@ -209,7 +209,7 @@
         </div>
     </div>
 
-    <!-- 🛍️ نافذة السلة -->
+    <!-- نافذة السلة -->
     <div class="cart-modal" id="cartModal">
         <div class="cart-content">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -289,7 +289,7 @@
       document.getElementById('adminApp').style.display = tab === 'admin' ? 'block' : 'none';
   }
 
-  // مزامنة المنتجات من داتابيز
+  // مزامنة المنتجات من قواعد البيانات
   db.collection('products').onSnapshot((snapshot) => {
       allProducts = [];
       snapshot.forEach((doc) => allProducts.push({ id: doc.id, ...doc.data() }));
@@ -316,14 +316,14 @@
       `).join('');
   }
 
-  function filterCategory(cat) {
+  function filterCategory(cat, evt) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      if (evt && evt.target) evt.target.classList.add('active');
       renderProducts();
   }
 
-  /* 🛒 وظائف السلة المكتملة */
+  /* وظائف السلة المكتملة */
   function addToCart(id) {
       const product = allProducts.find(p => p.id === id);
       if (!product) return;
@@ -390,7 +390,7 @@
       window.open(`https://wa.me/201127491224?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
-  /* 🔍 وظائف البحث العائم */
+  /* وظائف البحث العائم */
   function toggleSearch(show) {
       document.getElementById('searchModal').style.display = show ? 'flex' : 'none';
       if (show) document.getElementById('floatingSearchInput').focus();
@@ -405,7 +405,7 @@
       }
       const matches = allProducts.filter(p => p.name.toLowerCase().includes(q));
       resContainer.innerHTML = matches.map(p => `
-          <div style="display:flex; justify-between; align-items:center; padding: 10px; border-bottom: 1px solid #e2e8f0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px; border-bottom: 1px solid #e2e8f0;">
               <div>
                   <strong>${p.name}</strong> - <span style="color:var(--success);">${p.price} ج</span>
               </div>
