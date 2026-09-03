@@ -98,6 +98,8 @@
         .checkout-form label { font-size: 12px; font-weight: bold; color: #475569; display: block; margin: 8px 0 2px 0; }
         .checkout-form input, .checkout-form select, .checkout-form textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; }
         
+        .delivery-fixed-box { background: #e0f2fe; color: #0284c7; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; border: 1px dashed #0284c7; margin-bottom: 8px; }
+
         .tip-buttons { display: flex; gap: 5px; margin-top: 4px; }
         .tip-btn { flex: 1; padding: 6px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
         .tip-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
@@ -199,16 +201,13 @@
         </div>
 
         <div class="cart-summary-line"><span>المشتريات:</span><span id="subTotalAmount">0 جنيه</span></div>
-        <div class="cart-summary-line"><span>التوصيل:</span><span id="deliveryFeeDisplay">15 جنيه</span></div>
+        <div class="cart-summary-line"><span>التوصيل:</span><span id="deliveryFeeDisplay">30 جنيه</span></div>
         <div class="cart-summary-line"><span>إكرامية الدليفري:</span><span id="tipFeeDisplay">0 جنيه</span></div>
 
         <div class="checkout-form">
-            <!-- خيارات التوصيل التي تحكم بها صاحب المتجر من الأدمن -->
-            <label>خدمة التوصيل المتاحة:</label>
-            <select id="deliveryOption" onchange="updateCartUI()">
-                <!-- سيتم تحميل السعر تلقائياً من الإعدادات التي تحكمت بها في لوحة الأدمن -->
-                <option value="15">توصيل المتجر (15 جنيه)</option>
-            </select>
+            <!-- سعر التوصيل الموحد والأوتوماتيكي -->
+            <label>خدمة التوصيل:</label>
+            <div class="delivery-fixed-box">🚚 التوصيل أوتوماتيك لجميع الطلبات (30 جنيه)</div>
 
             <label>تقدير لـ عامل التوصيل (إكرامية اختيارية):</label>
             <div class="tip-buttons">
@@ -263,20 +262,18 @@
   let cart = [];
   let currentCategory = 'all';
   let driverTip = 0;
-  let adminDeliveryFee = 15; // السعر الافتراضي للتوصيل المحمل من الأدمن
+  const adminDeliveryFee = 30; // سعر التوصيل الأوتوماتيكي الموحد 30 جنيه
   let searchTimeout = null;
 
-  // قيم مرجعية ديناميكية للعدادات (تتحرك باستمرار فوق الرقم 5)
   let liveVisitors = 17;
   let liveOrders = 10;
 
   window.onload = function() {
-      loadDeliverySettings();
       loadProductsOnce();
       startDynamicStatsCounter();
+      updateCartUI();
   };
 
-  /* تحسين أداء السرعة ومنع التهنيج (جلب البيانات مرة واحدة مع خيار الكاش) */
   function loadProductsOnce() {
       db.collection('products').get().then(snapshot => {
           allProducts = [];
@@ -287,35 +284,20 @@
       }).catch(err => console.error("Error loading products:", err));
   }
 
-  /* تحميل سعر التوصيل المحدد بواسطة المسؤول من Firestore */
-  function loadDeliverySettings() {
-      db.collection('store_stats').doc('general').get().then(doc => {
-          if (doc.exists && doc.data().deliveryFee !== undefined) {
-              adminDeliveryFee = parseFloat(doc.data().deliveryFee);
-              const select = document.getElementById('deliveryOption');
-              select.innerHTML = `<option value="${adminDeliveryFee}">توصيل المتجر (${adminDeliveryFee} جنيه)</option>`;
-              updateCartUI();
-          }
-      });
-  }
-
-  /* المحاكي المباشر لعدادات الزوار والطلبات (تتغير تلقائياً ولا تقل عن 5 أبداً) */
   function startDynamicStatsCounter() {
       const visitorsEl = document.getElementById('visitorsCount');
       const ordersEl = document.getElementById('ordersCount');
 
       setInterval(() => {
-          // تغيير الزوار بين 12 و 35 (مثال: 1.7، 10، إلخ.)
           const visitorChange = Math.floor(Math.random() * 5) - 2; 
           liveVisitors = Math.max(7, liveVisitors + visitorChange); 
           visitorsEl.innerText = liveVisitors;
 
-          // تغيير الطلبات بشكل متصاعد ومنتظم لا يقل عن 5
           if (Math.random() > 0.6) {
               liveOrders += Math.floor(Math.random() * 2);
           }
           ordersEl.innerText = liveOrders;
-      }, 4000); // يتحدث كل 4 ثوانٍ بسلاسة
+      }, 4000);
   }
 
   function renderProducts(query = '') {
@@ -335,7 +317,6 @@
           return;
       }
 
-      // إعداد واستعراض الكروت بطريقة خفيفة على ذاكرة الهاتف
       let htmlBuffer = '';
       filtered.forEach(p => {
           const stockNum = (p.stock !== undefined && p.stock !== null) ? parseInt(p.stock) : 10;
@@ -362,7 +343,6 @@
       grid.innerHTML = htmlBuffer;
   }
 
-  /* تقنية Debounce لتسريع البحث وعدم تهنيج الشاشة أثناء الكتابة */
   function debounceSearch() {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
@@ -465,15 +445,12 @@
       const container = document.getElementById('cartItemsContainer');
       const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
       const subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      
-      const delSelect = document.getElementById('deliveryOption');
-      const deliveryFee = delSelect ? parseFloat(delSelect.value) : adminDeliveryFee;
 
-      const grandTotal = subTotal + deliveryFee + driverTip;
+      const grandTotal = subTotal + adminDeliveryFee + driverTip;
 
       document.getElementById('cartCount').innerText = totalCount;
       document.getElementById('subTotalAmount').innerText = subTotal + ' جنيه';
-      document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + ' جنيه';
+      document.getElementById('deliveryFeeDisplay').innerText = adminDeliveryFee + ' جنيه';
       document.getElementById('tipFeeDisplay').innerText = driverTip + ' جنيه';
       document.getElementById('cartTotalAmount').innerText = grandTotal + ' جنيه';
 
@@ -507,13 +484,11 @@
       document.getElementById('overlay').classList.toggle('active');
   }
 
-  /* طلب منتج خاص غير موجود في المتجر */
   function requestCustomItem() {
       const msg = encodeURIComponent("مرحباً، أبحث عن منتج غير موجود في قائمة المتجر وأود استفساركم عنه 🛒:");
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${msg}`, '_blank');
   }
 
-  /* إرسال الطلب عبر الواتساب */
   function submitOrder() {
       if (cart.length === 0) {
           alert('السلة فارغة! يرجى إضافة منتجات أولاً.');
@@ -524,7 +499,6 @@
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
       const payMethod = document.getElementById('payMethod').value;
-      const deliveryFee = parseFloat(document.getElementById('deliveryOption').value);
 
       if (!name || !phone || !address) {
           alert('يرجى ملء كافة البيانات المطلوبة (الاسم، الهاتف، العنوان)');
@@ -545,17 +519,16 @@
           orderText += `${idx + 1}. ${item.name} (العدد: ${item.qty}) - ${itemTotal} ج.م\n`;
       });
 
-      const grandTotal = subTotal + deliveryFee + driverTip;
+      const grandTotal = subTotal + adminDeliveryFee + driverTip;
 
       orderText += `\n💰 *المشتريات:* ${subTotal} ج.م`;
-      orderText += `\n🚚 *التوصيل:* ${deliveryFee} ج.م`;
+      orderText += `\n🚚 *التوصيل:* ${adminDeliveryFee} ج.م`;
       if (driverTip > 0) {
           orderText += `\n🪙 *إكرامية العامل:* ${driverTip} ج.م`;
       }
       orderText += `\n💵 *الإجمالي النهائي:* ${grandTotal} ج.م\n\n`;
       orderText += `✨ شكراً لزيارتكم متجرنا ونتمنى لرؤيتكم مجدداً! ❤️`;
 
-      // زيادة عداد الطلبات بالمتجر
       db.collection('store_stats').doc('general').set({
           orders: firebase.firestore.FieldValue.increment(1)
       }, { merge: true });
