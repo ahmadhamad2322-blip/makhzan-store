@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ماركت نت 🛒 - المتجر ولائحة التحكم</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,8 +13,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background: #f8fafc; color: #0f172a; padding-bottom: 80px; }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: #f8fafc; color: #0f172a; padding-bottom: 80px; -webkit-font-smoothing: antialiased; }
 
         .app-nav { background: #0284c7; color: white; display: flex; justify-content: center; gap: 15px; padding: 8px; font-size: 13px; font-weight: bold; }
         .app-nav button { background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; border-radius: 12px; cursor: pointer; }
@@ -30,15 +30,20 @@
         .stats-bar { background: #1e293b; color: #94a3b8; padding: 8px 15px; text-align: center; font-size: 12px; display: flex; justify-content: center; gap: 20px; }
         .stats-num { color: #38bdf8; font-weight: bold; }
 
-        .floating-search { position: sticky; top: 65px; z-index: 90; padding: 10px 15px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(5px); }
+        .floating-search { position: sticky; top: 65px; z-index: 90; padding: 10px 15px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
         .search-box { max-width: 600px; margin: 0 auto; position: relative; }
         .search-box input { width: 100%; padding: 10px 40px 10px 15px; border-radius: 25px; border: 2px solid #38bdf8; outline: none; font-size: 14px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .search-box .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #0284c7; }
 
-        .categories-container { max-width: 1200px; margin: 10px auto; padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .categories-container { max-width: 1200px; margin: 10px auto; padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .categories-container::-webkit-scrollbar { display: none; }
-        .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; }
+        .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
         .cat-btn.active, .cat-btn:hover { background: #0284c7; color: white; border-color: #0284c7; }
+
+        .sub-categories-container { max-width: 1200px; margin: 5px auto 10px; padding: 0 15px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .sub-categories-container::-webkit-scrollbar { display: none; }
+        .sub-cat-btn { background: #e0f2fe; border: 1px solid #bae6fd; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 11px; color: #0284c7; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+        .sub-cat-btn.active { background: #0284c7; color: white; }
 
         .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; } }
@@ -46,13 +51,13 @@
         .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
         .pinned-tag { position: absolute; top: 8px; right: 8px; background: #6366f1; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; z-index: 2; }
         
-        .product-img-wrap { width: 100%; height: 150px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 5px; border-bottom: 1px solid #f1f5f9; }
+        .product-img-wrap { width: 100%; height: 140px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 8px; border-bottom: 1px solid #f1f5f9; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
         .product-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
-        .product-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: #0f172a; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 36px; line-height: 1.3; }
         .product-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; margin-bottom: 8px; }
-        .product-price { font-size: 15px; font-weight: 900; color: #16a34a; }
+        .product-price { font-size: 14px; font-weight: 900; color: #16a34a; }
         .product-stock { font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 10px; color: #475569; }
 
         .add-cart-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; }
@@ -68,11 +73,11 @@
         .modal.active { display: flex; }
         .modal-content { background: white; border-radius: 16px; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative; }
         .modal-close { position: absolute; left: 15px; top: 15px; background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; }
-        .modal-img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; background: #fafafa; border-radius: 8px; }
+        .modal-img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; background: #fafafa; border-radius: 8px; }
         .modal-detail-item { font-size: 13px; margin-bottom: 8px; color: #475569; display: flex; justify-content: space-between; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
 
-        .cart-drawer { position: fixed; top: 0; left: -400px; width: 100%; max-width: 380px; height: 100%; background: white; z-index: 1000; box-shadow: 4px 0 25px rgba(0,0,0,0.15); transition: 0.3s ease; display: flex; flex-direction: column; }
-        .cart-drawer.open { left: 0; }
+        .cart-drawer { position: fixed; top: 0; right: -400px; width: 100%; max-width: 380px; height: 100%; background: white; z-index: 1000; box-shadow: -4px 0 25px rgba(0,0,0,0.15); transition: 0.3s ease; display: flex; flex-direction: column; }
+        .cart-drawer.open { right: 0; }
         .cart-header { background: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .close-cart { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
         .cart-items { padding: 12px; flex-grow: 1; overflow-y: auto; }
@@ -82,17 +87,17 @@
         .cart-item-title { font-size: 13px; font-weight: bold; }
         .cart-item-price { font-size: 12px; color: #16a34a; font-weight: bold; }
         .qty-controls { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-        .qty-btn { background: #e2e8f0; border: none; width: 20px; height: 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .qty-btn { background: #e2e8f0; border: none; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .cart-footer { padding: 15px; border-top: 1px solid #e2e8f0; background: #f8fafc; overflow-y: auto; max-height: 55vh; }
         .cart-summary-line { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; color: #475569; }
         .cart-total { display: flex; justify-content: space-between; font-weight: 900; font-size: 15px; margin: 10px 0; border-top: 1px solid #cbd5e1; padding-top: 8px; color: #0f172a; }
         .checkout-form label { font-size: 12px; font-weight: bold; color: #475569; display: block; margin: 8px 0 2px 0; }
-        .checkout-form input, .checkout-form select, .checkout-form textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; }
+        .checkout-form input, .checkout-form select, .checkout-form textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; -webkit-appearance: none; }
         .delivery-fixed-box { background: #e0f2fe; color: #0284c7; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; border: 1px dashed #0284c7; margin-bottom: 8px; }
         .tip-buttons { display: flex; gap: 5px; margin-top: 4px; }
         .tip-btn { flex: 1; padding: 6px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
         .tip-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
-        .send-order-btn { background: #25D366; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; }
+        .send-order-btn { background: #25D366; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .overlay.active { display: block; }
 
@@ -154,14 +159,24 @@
 
     <div class="categories-container">
         <button class="cat-btn active" onclick="filterCategory('all', this)">🔥 الكل</button>
+        <button class="cat-btn" onclick="filterCategory('grocery', this)">🧺 بقالة ومشروبات</button>
         <button class="cat-btn" onclick="filterCategory('offers', this)">🔥 العروض اليومية</button>
-        <button class="cat-btn" onclick="filterCategory('grocery', this)">🧺 بقالة</button>
         <button class="cat-btn" onclick="filterCategory('poultry', this)">🍗 طيور</button>
         <button class="cat-btn" onclick="filterCategory('frozen', this)">🧊 مجمدات</button>
         <button class="cat-btn" onclick="filterCategory('cleaning', this)">✨ منظفات</button>
         <button class="cat-btn" onclick="filterCategory('spices', this)">🧂 عطارة</button>
         <button class="cat-btn" onclick="filterCategory('beauty', this)">💄 مستحضرات تجميل</button>
-        <button class="cat-btn" onclick="filterCategory('accessories', this)">💍 اكسسوارات بنات</button>
+        <button class="cat-btn" onclick="filterCategory('accessories', this)">💍 اكسسوارات</button>
+    </div>
+
+    <div class="sub-categories-container" id="subCategories" style="display:none;">
+        <button class="sub-cat-btn active" onclick="filterSubCategory('all', this)">الكل في البقالة</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('زيت', this)">🛢️ زيوت وسمن</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('سكر', this)">🍚 سكر وأرز</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('شاي', this)">☕ شاي ومشروبات</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('مكرونة', this)">🍝 مكرونة</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('غازية', this)">🥤 مياه غازية</button>
+        <button class="sub-cat-btn" onclick="filterSubCategory('معلبات', this)">🥫 معلبات</button>
     </div>
 
     <div class="custom-request-card">
@@ -291,7 +306,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>اسم المنتج:</label>
-                        <input type="text" id="prodName" required placeholder="مثال: دجاج بانييه">
+                        <input type="text" id="prodName" required placeholder="مثال: زيت عافية 800 مل">
                     </div>
                     <div class="form-group">
                         <label>السعر (جنيه):</label>
@@ -303,7 +318,7 @@
                     </div>
                     <div class="form-group">
                         <label>المخزون المتوفر:</label>
-                        <input type="number" id="prodStock" value="15" required>
+                        <input type="number" id="prodStock" value="20" required>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>صورة المنتج 📷:</label>
@@ -354,23 +369,50 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  // تفعيل الكاش المحلي لسرعة فائقة ومتوافقة مع Android/iOS
+  db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: true });
+  db.enablePersistence({synchronizeTabs: true}).catch(() => {});
+
   const OWNER_WHATSAPP = "201127491224";
   const OWNER_NUMBERS = ["01127491224", "01012517345"];
 
   const CATEGORY_NAMES = {
+      grocery: "🧺 بقالة ومشروبات",
       offers: "🔥 العروض اليومية",
-      grocery: "🧺 بقالة",
       poultry: "🍗 طيور",
       frozen: "🧊 مجمدات",
       cleaning: "✨ منظفات",
       spices: "🧂 عطارة",
       beauty: "💄 مستحضرات تجميل",
-      accessories: "💍 اكسسوارات بنات"
+      accessories: "💍 اكسسوارات"
   };
+
+  // منتجات البقالة المجهزة مسبقاً باحترافية وأحجام واسعار متناسبة
+  const defaultGroceryProducts = [
+      { id: "g1", name: "زيت عافية ذرة 800 مل", price: 95, cat: "grocery", stock: 25, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300", desc: "زيت ذرة عافية نقي 800 مل" },
+      { id: "g2", name: "زيت هلا عباد الشمس 750 مل", price: 75, cat: "grocery", stock: 30, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300", desc: "زيت عباد شمس خفيف صحي" },
+      { id: "g3", name: "زيت خليط ممتاز 700 مل", price: 60, cat: "grocery", stock: 40, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300", desc: "زيت طعام وخليط للقلي والطهي" },
+      { id: "g4", name: "سمن روابي طعم القشطة 700 جم", price: 90, cat: "grocery", stock: 20, img: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=300", desc: "سمن روابي بطعم وريحة القشطة" },
+      { id: "g5", name: "سمن کریستال أبيض 1.5 كجم", price: 185, cat: "grocery", stock: 15, img: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=300", desc: "سمن كريستال أبيض ممتاز" },
+      { id: "g6", name: "سكر الأسرة ناعم 1 كجم", price: 38, cat: "grocery", stock: 50, img: "https://images.unsplash.com/photo-1581441363689-1f3c3c414635?w=300", desc: "سكر أبيض فاخر نقي 1 كيلوجرام" },
+      { id: "g7", name: "أرز المطبخ فاخر 1 كجم", price: 32, cat: "grocery", stock: 40, img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300", desc: "أرز مصري درجة أولى كسر أقل من 3%" },
+      { id: "g8", name: "شاي العروسة ناعم 250 جم", price: 65, cat: "grocery", stock: 60, img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=300", desc: "شاي العروسة أسود فاخر 250 جرام" },
+      { id: "g9", name: "شاي ليبتون أحمر 100 فتلة", price: 110, cat: "grocery", stock: 25, img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=300", desc: "باكت شاي ليبتون 100 خيط" },
+      { id: "g10", name: "مكرونة الملكة أنواع 400 جم", price: 15, cat: "grocery", stock: 100, img: "https://images.unsplash.com/photo-1621996346565-e3def6164286?w=300", desc: "مكرونة الملكة (قلم / شعرية / خواتم / اسباجيتي)" },
+      { id: "g11", name: "مكرونة حواء 1 كجم", price: 35, cat: "grocery", stock: 45, img: "https://images.unsplash.com/photo-1621996346565-e3def6164286?w=300", desc: "مكرونة حواء فاخرة كيس 1 كيلو" },
+      { id: "g12", name: "بيبسي كانز 330 مل", price: 15, cat: "grocery", stock: 80, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300", desc: "مشروب غازي بيبسي كانز حجم كبير" },
+      { id: "g13", name: "كوكاكولا زجاجة 1.5 لتر", price: 25, cat: "grocery", stock: 35, img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300", desc: "كوكاكولا عائلية 1.5 لتر" },
+      { id: "g14", name: "سفن أب كانز 330 مل", price: 15, cat: "grocery", stock: 60, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300", desc: "مشروب غازي سفن أب منعش" },
+      { id: "g15", name: "صلصة طماطم فاخرة 300 جم", price: 20, cat: "grocery", stock: 40, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "برطمان صلصة طماطم مركزة" },
+      { id: "g16", name: "تونة مفتتة 140 جم", price: 35, cat: "grocery", stock: 50, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "علبة تونة سهلة الفتح" },
+      { id: "g17", name: "تونة قطع فاخرة 185 جم", price: 65, cat: "grocery", stock: 30, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "تونة قطع في زيت عباد الشمس" },
+      { id: "g18", name: "فول مدمس علبة 400 جم", price: 18, cat: "grocery", stock: 60, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "علبة فول مدمس جاهز للأكل" }
+  ];
 
   let allProducts = [];
   let cart = [];
   let currentCategory = 'all';
+  let currentSubCategory = 'all';
   let driverTip = 0;
   const adminDeliveryFee = 30;
   let searchTimeout = null;
@@ -400,30 +442,30 @@
 
   function listenToProducts() {
       db.collection('products').onSnapshot(snapshot => {
-          allProducts = [];
+          let dbProducts = [];
           snapshot.forEach(doc => {
               const data = doc.data();
-              
-              const pName = data.name || data.title || data.prodName || 'منتج بدون اسم';
-              const pPrice = parseFloat(data.price || data.prodPrice || 0);
-              const pCat = data.category || data.cat || data.prodCat || 'grocery';
-              const pStock = data.stock !== undefined ? parseInt(data.stock) : (data.prodStock !== undefined ? parseInt(data.prodStock) : 10);
-              const pImg = data.image || data.img || data.prodBase64 || data.imageUrl || 'https://via.placeholder.com/200';
-              const pDesc = data.description || data.desc || '';
-              const pPinned = data.isPinned || false;
-
-              allProducts.push({
+              dbProducts.push({
                   id: doc.id,
-                  name: pName,
-                  price: pPrice,
-                  cat: pCat,
-                  stock: pStock,
-                  img: pImg,
-                  desc: pDesc,
-                  isPinned: pPinned
+                  name: data.name || data.title || data.prodName || 'منتج بدون اسم',
+                  price: parseFloat(data.price || data.prodPrice || 0),
+                  cat: data.category || data.cat || data.prodCat || 'grocery',
+                  stock: data.stock !== undefined ? parseInt(data.stock) : 10,
+                  img: data.image || data.img || data.prodBase64 || 'https://via.placeholder.com/200',
+                  desc: data.description || data.desc || '',
+                  isPinned: data.isPinned || false
               });
           });
 
+          // دمج منتجات البقالة الافتراضية مع المنتجات المضافة في قاعدة البيانات
+          let combined = [...defaultGroceryProducts];
+          dbProducts.forEach(dbP => {
+              const idx = combined.findIndex(item => item.id === dbP.id);
+              if (idx !== -1) combined[idx] = dbP;
+              else combined.push(dbP);
+          });
+
+          allProducts = combined;
           allProducts.sort((a, b) => (b.isPinned === true ? 1 : 0) - (a.isPinned === true ? 1 : 0));
 
           isDataLoaded = true;
@@ -431,6 +473,7 @@
           renderAdminProductsTable(allProducts);
       }, err => {
           console.error("Error fetching products:", err);
+          allProducts = defaultGroceryProducts;
           isDataLoaded = true;
           renderProducts();
       });
@@ -473,11 +516,11 @@
       let filtered = allProducts;
 
       if (currentCategory !== 'all') {
-          filtered = filtered.filter(p => {
-              const prodCategory = (p.cat || '').trim().toLowerCase();
-              const targetCategory = currentCategory.trim().toLowerCase();
-              return prodCategory === targetCategory;
-          });
+          filtered = filtered.filter(p => (p.cat || '').trim().toLowerCase() === currentCategory.trim().toLowerCase());
+      }
+
+      if (currentCategory === 'grocery' && currentSubCategory !== 'all') {
+          filtered = filtered.filter(p => p.name.includes(currentSubCategory));
       }
 
       const searchQuery = (query || document.getElementById('searchInput').value || '').trim().toLowerCase();
@@ -519,12 +562,28 @@
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
           renderProducts(document.getElementById('searchInput').value);
-      }, 200);
+      }, 150);
   }
 
   function filterCategory(cat, btn) {
       currentCategory = cat;
+      currentSubCategory = 'all';
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const subCatBox = document.getElementById('subCategories');
+      if (cat === 'grocery') {
+          subCatBox.style.display = 'flex';
+      } else {
+          subCatBox.style.display = 'none';
+      }
+
+      renderProducts();
+  }
+
+  function filterSubCategory(subCat, btn) {
+      currentSubCategory = subCat;
+      document.querySelectorAll('.sub-cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderProducts();
   }
@@ -537,7 +596,7 @@
       document.getElementById('mTitle').innerText = p.name;
       document.getElementById('mPrice').innerText = p.price + " جنيه";
       document.getElementById('mStock').innerText = p.stock > 0 ? p.stock + " قطعة" : "غير متوفر";
-      document.getElementById('mDesc').innerText = p.desc || "منتج عالي الجودة متوفر بمتجرنا.";
+      document.getElementById('mDesc').innerText = p.desc || "منتج عالي الجودة متاح الآن في ماركت نت.";
 
       const addBtn = document.getElementById('mAddBtn');
       addBtn.disabled = p.stock <= 0;
@@ -640,7 +699,7 @@
       const address = document.getElementById('custAddress').value.trim();
       const payMethod = document.getElementById('payMethod').value;
 
-      if (!name || !phone || !address) return alert("يرجى ملء كافة البيانات المطلوبة!");
+      if (!name || !phone || !address) return alert("يرجى ملء كافة البيانات المطلوب إدخالها!");
 
       let text = `🛒 *طلب جديد من ماركت نت*\n\n`;
       text += `👤 *العميل:* ${name}\n📱 *الهاتف:* ${phone}\n📍 *العنوان:* ${address}\n💳 *طريقة الدفع:* ${payMethod}\n\n📦 *المشتريات:*\n`;
