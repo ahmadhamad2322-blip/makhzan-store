@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ماركت نت 🛒 - المتجر ولائحة التحكم</title>
     
-    <!-- تحسين الأداء للخطوط والمكتبات -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -15,14 +14,12 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background: #f8fafc; color: #0f172a; padding-bottom: 80px; text-rendering: optimizeSpeed; }
+        body { background: #f8fafc; color: #0f172a; padding-bottom: 80px; }
 
-        /* Navigation Switcher */
         .app-nav { background: #0284c7; color: white; display: flex; justify-content: center; gap: 15px; padding: 8px; font-size: 13px; font-weight: bold; }
         .app-nav button { background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 12px; border-radius: 12px; cursor: pointer; }
         .app-nav button.active { background: white; color: #0284c7; }
 
-        /* Header & Core Layout */
         header { background: #0f172a; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
@@ -31,7 +28,7 @@
         .cart-badge { background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; }
 
         .stats-bar { background: #1e293b; color: #94a3b8; padding: 8px 15px; text-align: center; font-size: 12px; display: flex; justify-content: center; gap: 20px; }
-        .stats-num { color: #38bdf8; font-weight: bold; transition: all 0.5s ease; }
+        .stats-num { color: #38bdf8; font-weight: bold; }
 
         .floating-search { position: sticky; top: 65px; z-index: 90; padding: 10px 15px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(5px); }
         .search-box { max-width: 600px; margin: 0 auto; position: relative; }
@@ -40,14 +37,13 @@
 
         .categories-container { max-width: 1200px; margin: 10px auto; padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .categories-container::-webkit-scrollbar { display: none; }
-        .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; }
         .cat-btn.active, .cat-btn:hover { background: #0284c7; color: white; border-color: #0284c7; }
 
-        .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; contain: content; }
+        .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; } }
 
-        .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.03); position: relative; }
-        .product-card:hover { transform: translateY(-3px); }
+        .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
         .pinned-tag { position: absolute; top: 8px; right: 8px; background: #6366f1; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; z-index: 2; }
         
         .product-img-wrap { width: 100%; height: 150px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 5px; border-bottom: 1px solid #f1f5f9; }
@@ -59,17 +55,15 @@
         .product-price { font-size: 15px; font-weight: 900; color: #16a34a; }
         .product-stock { font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 10px; color: #475569; }
 
-        .add-cart-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; transition: 0.2s; }
-        .add-cart-btn:hover { background: #0369a1; }
+        .add-cart-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; }
         .add-cart-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
         .custom-request-card { max-width: 1200px; margin: 15px auto; padding: 0 10px; }
-        .custom-request-box { background: linear-gradient(135deg, #0284c7, #0f172a); color: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
+        .custom-request-box { background: linear-gradient(135deg, #0284c7, #0f172a); color: white; padding: 15px; border-radius: 12px; text-align: center; }
         .custom-request-box h3 { font-size: 15px; margin-bottom: 5px; }
         .custom-request-box p { font-size: 12px; opacity: 0.9; margin-bottom: 10px; }
         .whatsapp-req-btn { background: #25D366; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* Modal & Cart Overlay */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1100; display: none; align-items: center; justify-content: center; padding: 15px; }
         .modal.active { display: flex; }
         .modal-content { background: white; border-radius: 16px; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 20px; position: relative; }
@@ -98,12 +92,10 @@
         .tip-buttons { display: flex; gap: 5px; margin-top: 4px; }
         .tip-btn { flex: 1; padding: 6px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; text-align: center; }
         .tip-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
-        .cart-welcome-msg { background: #f0fdf4; border: 1px dashed #22c55e; color: #15803d; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; font-weight: bold; margin-bottom: 10px; }
         .send-order-btn { background: #25D366; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .overlay.active { display: block; }
 
-        /* Admin Styles */
         #adminView { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
         .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
         .header-title h1 { color: #0284c7; font-size: 24px; font-weight: 800; }
@@ -112,12 +104,11 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 700; color: #334155; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
-        .btn { padding: 8px 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+        .btn { padding: 8px 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: #0284c7; color: white; }
         .btn-success { background: #16a34a; color: white; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: white; }
-        .btn-whatsapp { background: #25D366; color: white; }
         .btn-pin { background: #6366f1; color: white; }
         .btn-pinned { background: #4338ca; color: #fef08a; border: 1px solid #facc15; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -126,6 +117,9 @@
         .img-preview { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .login-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0284c7; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 30px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -136,7 +130,6 @@
     <button id="navAdminBtn" onclick="switchView('admin')">🛠️ لوحة التحكم</button>
 </div>
 
-<!-- ================= STORE VIEW ================= -->
 <div id="storeView">
     <header>
         <div class="header-container">
@@ -148,7 +141,7 @@
     </header>
 
     <div class="stats-bar">
-        <div>👀 المتواجدون الآن: <span class="stats-num" id="visitorsCount">17</span></div>
+        <div>👀 المتواجدون الآن: <span class="stats-num" id="visitorsCount">13</span></div>
         <div>📦 الطلبات اليوم: <span class="stats-num" id="ordersCount">10</span></div>
     </div>
 
@@ -180,11 +173,13 @@
     </div>
 
     <div class="products-grid" id="productsGrid">
-        <p style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b;">جاري تحميل المنتجات...</p>
+        <div style="grid-column: 1/-1; text-align: center;">
+            <div class="spinner"></div>
+            <p style="color: #64748b;">جاري جلب المنتجات...</p>
+        </div>
     </div>
 </div>
 
-<!-- Modal Product Details -->
 <div class="modal" id="productModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal()">✕</button>
@@ -197,7 +192,6 @@
     </div>
 </div>
 
-<!-- Cart Drawer -->
 <div class="overlay" id="overlay" onclick="toggleCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="cart-header">
@@ -208,7 +202,6 @@
         <p style="text-align: center; color: #94a3b8; margin-top: 40px;">السلة فارغة حالياً</p>
     </div>
     <div class="cart-footer">
-        <div class="cart-welcome-msg">✨ شكراً لزيارتك متجرنا! نتمنى لك تجربة تسوق ممتعة 💚</div>
         <div class="cart-summary-line"><span>المشتريات:</span><span id="subTotalAmount">0 جنيه</span></div>
         <div class="cart-summary-line"><span>التوصيل:</span><span id="deliveryFeeDisplay">30 جنيه</span></div>
         <div class="cart-summary-line"><span>إكرامية الدليفري:</span><span id="tipFeeDisplay">0 جنيه</span></div>
@@ -247,7 +240,6 @@
     </div>
 </div>
 
-<!-- ================= ADMIN VIEW ================= -->
 <div id="adminView">
     <div id="loginOverlay">
         <div class="login-box">
@@ -261,7 +253,7 @@
             </div>
             <div id="stepOTP" style="display: none;">
                 <p style="color: #d97706; font-size: 12px; margin-bottom: 10px;">اضغط لإرسال المعرف للمالك ثم أدخله للتحقق:</p>
-                <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 10px; justify-content: center;">إرسال رقم ה-ID للواتساب 💬</a>
+                <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 10px; justify-content: center; background:#25D366; color:white;">إرسال رقم الـ ID للواتساب 💬</a>
                 <div class="form-group">
                     <input type="text" id="otpInput" placeholder="أدخل رقم المعرف">
                 </div>
@@ -350,7 +342,6 @@
 </div>
 
 <script>
-  // Firebase Integration Core
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
@@ -383,8 +374,9 @@
   let driverTip = 0;
   const adminDeliveryFee = 30;
   let searchTimeout = null;
+  let isDataLoaded = false;
 
-  let liveVisitors = 17;
+  let liveVisitors = 13;
   let liveOrders = 10;
 
   let currentAdminPhone = "";
@@ -406,30 +398,42 @@
       document.getElementById('navAdminBtn').classList.toggle('active', view === 'admin');
   }
 
-  // --- Realtime Firestore Sync ---
   function listenToProducts() {
       db.collection('products').onSnapshot(snapshot => {
           allProducts = [];
           snapshot.forEach(doc => {
               const data = doc.data();
+              
+              const pName = data.name || data.title || data.prodName || 'منتج بدون اسم';
+              const pPrice = parseFloat(data.price || data.prodPrice || 0);
+              const pCat = data.category || data.cat || data.prodCat || 'grocery';
+              const pStock = data.stock !== undefined ? parseInt(data.stock) : (data.prodStock !== undefined ? parseInt(data.prodStock) : 10);
+              const pImg = data.image || data.img || data.prodBase64 || data.imageUrl || 'https://via.placeholder.com/200';
+              const pDesc = data.description || data.desc || '';
+              const pPinned = data.isPinned || false;
+
               allProducts.push({
                   id: doc.id,
-                  name: data.name || 'منتج',
-                  price: parseFloat(data.price) || 0,
-                  cat: data.category || data.cat || 'grocery',
-                  stock: data.stock !== undefined ? parseInt(data.stock) : 10,
-                  img: data.image || data.img || 'https://via.placeholder.com/200',
-                  desc: data.description || data.desc || '',
-                  isPinned: data.isPinned || false
+                  name: pName,
+                  price: pPrice,
+                  cat: pCat,
+                  stock: pStock,
+                  img: pImg,
+                  desc: pDesc,
+                  isPinned: pPinned
               });
           });
 
-          // Sort Pinned items to the top
           allProducts.sort((a, b) => (b.isPinned === true ? 1 : 0) - (a.isPinned === true ? 1 : 0));
 
+          isDataLoaded = true;
           renderProducts();
           renderAdminProductsTable(allProducts);
-      }, err => console.error("Error reading realtime products:", err));
+      }, err => {
+          console.error("Error fetching products:", err);
+          isDataLoaded = true;
+          renderProducts();
+      });
   }
 
   function listenToStoreStats() {
@@ -454,21 +458,35 @@
       }, 4000);
   }
 
-  // --- Store Rendering & Features ---
   function renderProducts(query = '') {
       const grid = document.getElementById('productsGrid');
-      grid.innerHTML = '';
 
-      let filtered = currentCategory === 'all' 
-          ? allProducts 
-          : allProducts.filter(p => p.cat === currentCategory);
+      if (!isDataLoaded) {
+          grid.innerHTML = `
+              <div style="grid-column: 1/-1; text-align: center;">
+                  <div class="spinner"></div>
+                  <p style="color: #64748b;">جاري جلب المنتجات...</p>
+              </div>`;
+          return;
+      }
 
-      if (query.trim() !== '') {
-          filtered = filtered.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+      let filtered = allProducts;
+
+      if (currentCategory !== 'all') {
+          filtered = filtered.filter(p => {
+              const prodCategory = (p.cat || '').trim().toLowerCase();
+              const targetCategory = currentCategory.trim().toLowerCase();
+              return prodCategory === targetCategory;
+          });
+      }
+
+      const searchQuery = (query || document.getElementById('searchInput').value || '').trim().toLowerCase();
+      if (searchQuery !== '') {
+          filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery));
       }
 
       if (filtered.length === 0) {
-          grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b;">لا توجد منتجات مطابقة.</p>';
+          grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b; font-weight: bold;">لا توجد منتجات مطابقة.</p>';
           return;
       }
 
@@ -501,14 +519,14 @@
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
           renderProducts(document.getElementById('searchInput').value);
-      }, 250);
+      }, 200);
   }
 
   function filterCategory(cat, btn) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderProducts(document.getElementById('searchInput').value);
+      renderProducts();
   }
 
   function openModal(prodId) {
@@ -640,7 +658,6 @@
 
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(text)}`, '_blank');
       
-      // Update Live Orders Count in DB
       db.collection('settings').doc('stats').set({ orders: liveOrders + 1 }, { merge: true });
       
       cart = [];
@@ -653,7 +670,6 @@
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${msg}`, '_blank');
   }
 
-  // --- ADMIN FUNCTIONS ---
   async function checkUserStatus() {
       let phone = document.getElementById('adminPhoneInput').value.trim();
       if (!phone) return showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
@@ -753,7 +769,7 @@
       const image = document.getElementById('prodBase64').value || 'https://via.placeholder.com/200';
       const description = `منتج ${name} ذو جودة ممتازة متاح الآن بقسم ${CATEGORY_NAMES[category] || category}.`;
 
-      const prodData = { name, price, category, stock, image, description, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+      const prodData = { name, price, category, cat: category, stock, image, description, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
 
       if (id) {
           await db.collection('products').doc(id).update(prodData);
@@ -762,7 +778,7 @@
           await db.collection('products').add(prodData);
       }
 
-      alert('تم حفظ المنتج في قاعدة البيانات والتزامن مع المتجر!');
+      alert('تم حفظ المنتج بنجاح!');
       resetForm();
   }
 
