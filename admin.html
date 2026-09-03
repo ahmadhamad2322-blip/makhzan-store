@@ -10,63 +10,66 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background: #0f172a; color: #f8fafc; padding: 20px; min-height: 100vh; }
+        body { background: #f8fafc; color: #1e293b; padding: 25px; min-height: 100vh; }
         
-        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #334155; }
-        .header-title h1 { color: #38bdf8; font-size: 24px; }
+        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+        .header-title h1 { color: #0284c7; font-size: 28px; font-weight: 800; }
 
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 25px; width: 100%; }
         
-        .card { background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-        .card h3 { margin-bottom: 18px; color: #38bdf8; font-size: 19px; display: flex; align-items: center; gap: 10px; }
+        .card { background: #ffffff; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
+        .card h3 { margin-bottom: 20px; color: #0369a1; font-size: 22px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #94a3b8; font-size: 14px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #475569; border-radius: 10px; color: white; font-size: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #334155; font-size: 16px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 15px; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 12px; color: #0f172a; font-size: 16px; outline: none; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0284c7; background: #fff; }
         
-        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
+        .btn { padding: 14px 24px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
         .btn-primary { background: #0284c7; color: white; }
         .btn-primary:hover { background: #0369a1; }
+        .btn-ai { background: #8b5cf6; color: white; }
+        .btn-ai:hover { background: #7c3aed; }
         .btn-success { background: #16a34a; color: white; }
         .btn-danger { background: #ef4444; color: white; }
-        .btn-warning { background: #f59e0b; color: black; }
         .btn-whatsapp { background: #25D366; color: white; }
 
+        .search-box { width: 100%; padding: 16px; font-size: 16px; border: 2px solid #0284c7; border-radius: 12px; margin-bottom: 20px; background: #fff; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 14px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
-        th { background: #0f172a; color: #38bdf8; font-weight: 700; }
-        tr:hover { background: rgba(56, 189, 248, 0.03); }
+        th, td { padding: 16px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 15px; }
+        th { background: #f1f5f9; color: #0284c7; font-weight: 700; }
+        tr:hover { background: #f8fafc; }
 
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .badge-pending { background: #f59e0b; color: #000; }
-        .badge-active { background: #16a34a; color: white; }
-        .badge-blocked { background: #ef4444; color: white; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-active { background: #dcfce7; color: #15803d; }
 
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: #1e293b; padding: 35px; border-radius: 20px; width: 90%; max-width: 420px; text-align: center; border: 1px solid #334155; }
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: #ffffff; padding: 40px; border-radius: 20px; width: 90%; max-width: 480px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
-        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; border: 1px solid #475569; }
-        .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #0f172a; padding: 10px; border-radius: 8px; font-size: 12px; border: 1px solid #475569; }
-        .cat-checkboxes label { color: white; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .img-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 2px solid #cbd5e1; }
+        .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: #f1f5f9; padding: 12px; border-radius: 10px; font-size: 13px; border: 1px solid #cbd5e1; }
+        .cat-checkboxes label { color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
     <div class="login-box">
-        <h2 style="color: #38bdf8; margin-bottom: 10px;">ماركت نت 🛒</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">تسجيل الدخول للوحة التحكم</p>
+        <h2 style="color: #0284c7; margin-bottom: 10px; font-size: 28px;">ماركت نت 🛒</h2>
+        <p style="color: #64748b; font-size: 16px; margin-bottom: 25px;">تسجيل الدخول للوحة التحكم</p>
         
         <div id="stepPhone">
             <div class="form-group">
                 <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
             </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="checkUserStatus()">دخول / تسجيل 🔑</button>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="checkUserStatus()">دخول / تسجيل 🔑</button>
         </div>
 
         <div id="stepOTP" style="display: none;">
-            <p style="color: #f59e0b; font-size: 13px; margin-bottom: 10px;">أهلاً بك! تم إنشاء رقم معرف (ID) فريد لك. اضغط لإرساله للمالك ثم اضغط تأكيد:</p>
+            <p style="color: #d97706; font-size: 14px; margin-bottom: 12px;">أهلاً بك! تم إنشاء رقم معرف (ID) فريد لك. اضغط لإرساله للمالك ثم اضغط تأكيد:</p>
             <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 12px;">إرسال رقم الـ ID للواتساب 💬</a>
             
             <div class="form-group">
@@ -75,18 +78,18 @@
             <button class="btn btn-success" style="width: 100%;" onclick="verifyOTP()">تأكيد وإرسال الطلب للمالك 📩</button>
         </div>
 
-        <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 10px; border-radius: 8px;"></p>
+        <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 12px; border-radius: 10px;"></p>
     </div>
 </div>
 
 <div id="adminContent" style="display: none;">
     <div class="header-title">
         <h1>🛠️ لوحة الإدارة والسيطرة</h1>
-        <div id="adminPhoneBadge" style="background: #334155; padding: 8px 15px; border-radius: 20px; font-size: 14px;"></div>
+        <div id="adminPhoneBadge" style="background: #e2e8f0; color: #0f172a; padding: 10px 20px; border-radius: 20px; font-size: 15px; font-weight: bold;"></div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="card" style="border: 1px solid #38bdf8;">
+        <div class="card">
             <h3>📊 التحكم في عدادات المتجر (الزوار والطلبات)</h3>
             <div class="form-grid">
                 <div class="form-group">
@@ -101,24 +104,23 @@
             <button class="btn btn-primary" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
         </div>
 
-        <!-- قسم التحكم الخاص بالمالك فقط -->
         <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
             <h3>👑 لوحة المالك: التحكم في صلاحيات وأقسام المسجلين</h3>
             
-            <h4 style="color: #f59e0b; margin-top: 10px; font-size: 15px;">📥 طلبات الانضمام الجديدة (حدد الأقسام المسموحة):</h4>
+            <h4 style="color: #d97706; margin-top: 10px; font-size: 16px;">📥 طلبات الانضمام الجديدة:</h4>
             <table>
                 <thead>
                     <tr>
                         <th>رقم الهاتف</th>
                         <th>رقم الـ ID</th>
-                        <th>اختر الأقسام المسموح بالنشر فيها</th>
+                        <th>الأقسام المسموحة</th>
                         <th>القرار</th>
                     </tr>
                 </thead>
                 <tbody id="requestsTableBody"></tbody>
             </table>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 15px;">👥 المسؤولين المعتمدين وتعديل أقسامهم:</h4>
+            <h4 style="color: #16a34a; margin-top: 25px; font-size: 16px;">👥 المسؤولين المعتمدين:</h4>
             <table>
                 <thead>
                     <tr>
@@ -131,18 +133,6 @@
                 </thead>
                 <tbody id="activeUsersTableBody"></tbody>
             </table>
-
-            <h4 style="color: #ef4444; margin-top: 25px; font-size: 15px;">🗑️ طلبات حذف المنتجات المعلقة:</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم المنتج</th>
-                        <th>طالب الحذف</th>
-                        <th>القرار النهائي</th>
-                    </tr>
-                </thead>
-                <tbody id="deleteRequestsTableBody"></tbody>
-            </table>
         </div>
 
         <!-- إضافة وتعديل المنتجات -->
@@ -153,7 +143,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>اسم المنتج:</label>
-                        <input type="text" id="prodName" required placeholder="مثال: دجاج بانييه">
+                        <input type="text" id="prodName" required placeholder="مثال: دجاج بانييه" oninput="autoGenerateAIDesc()">
                     </div>
                     <div class="form-group">
                         <label>السعر (جنيه):</label>
@@ -161,8 +151,9 @@
                     </div>
                     <div class="form-group">
                         <label>القسم / الخانة:</label>
-                        <select id="prodCat" required>
+                        <select id="prodCat" required onchange="autoGenerateAIDesc()">
                             <option value="offers">🔥 العروض اليومية</option>
+                            <option value="grocery">🧀 أغذية وبقالة</option>
                             <option value="poultry">🍗 طيور</option>
                             <option value="frozen">🧊 مجمدات</option>
                             <option value="cleaning">✨ منظفات</option>
@@ -177,17 +168,14 @@
                     </div>
                     <div class="form-group">
                         <label>التقييم:</label>
-                        <select id="prodRating">
-                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                            <option value="3">⭐⭐⭐ (3/5)</option>
-                            <option value="2">⭐⭐ (2/5)</option>
-                            <option value="1">⭐ (1/5)</option>
-                        </select>
+                        <input type="text" id="prodRating" value="⭐⭐⭐⭐⭐ (5/5)" readonly style="background: #e2e8f0; font-weight: bold;">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>وصف وتفاصيل المنتج:</label>
-                        <textarea id="prodDesc" rows="2" placeholder="أدخل الوصف والتفاصيل..."></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="margin: 0;">وصف المنتج (توليد تلقائي بالذكاء الاصطناعي):</label>
+                            <button type="button" class="btn btn-ai" onclick="generateAIDescription()">🤖 إعادة توليد الوصف</button>
+                        </div>
+                        <textarea id="prodDesc" rows="3" placeholder="سيتم كتابة الوصف تلقائياً بذكاء وبدون تدخل منك..."></textarea>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>اختر صورة المنتج 📷:</label>
@@ -198,12 +186,13 @@
                 <div id="imagePreviewContainer" style="margin-bottom: 15px; display: none;">
                     <img id="imgPreview" class="img-preview" src="" alt="المعاينة">
                 </div>
-                <button type="submit" class="btn btn-success">حفظ المنتج 💾</button>
+                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 18px;">حفظ المنتج في المتجر 💾</button>
             </form>
         </div>
 
         <div class="card">
             <h3>📦 المنتجات المتاحة بالمتجر</h3>
+            <input type="text" id="searchBar" class="search-box" placeholder="🔎 إبحث عن اسم أي منتج بالمحل..." onkeyup="filterProducts()">
             <table>
                 <thead>
                     <tr>
@@ -212,6 +201,7 @@
                         <th>السعر</th>
                         <th>المخزون</th>
                         <th>القسم</th>
+                        <th>التقييم</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -239,9 +229,11 @@
   let generatedID = "";
   let currentAdminCategories = ["all"]; 
   let isSuperOwner = false;
+  let allProductsList = [];
 
   const CATEGORY_NAMES = {
       offers: "🔥 العروض اليومية",
+      grocery: "🧀 أغذية وبقالة",
       poultry: "🍗 طيور",
       frozen: "🧊 مجمدات",
       cleaning: "✨ منظفات",
@@ -260,7 +252,6 @@
       phone = phone.replace(/\s+/g, '');
       currentAdminPhone = phone;
 
-      // 1. المالك يدخل فوراً
       if (OWNER_NUMBERS.includes(currentAdminPhone)) {
           isSuperOwner = true;
           currentAdminCategories = ["all"];
@@ -268,23 +259,20 @@
           return;
       }
 
-      // 2. فحص السجل السابق للمستخدم
       try {
           const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
 
           if (doc.exists) {
               const data = doc.data();
               if (data.status === 'approved') {
-                  // مقبول مسبقاً -> دخول مباشر
                   currentAdminCategories = data.allowedCategories || ["all"];
                   grantAccess(false);
               } else if (data.status === 'blocked') {
-                  showLoginMsg("🚫 تم حظرك وطردك من لوحة التحكم بواسطة المالك.", "#ef4444");
+                  showLoginMsg("🚫 تم حظرك بواسطة المالك.", "#ef4444");
               } else {
-                  showLoginMsg("⏳ طلبك قيد المراجعة والموافقة من المالك...", "#f59e0b");
+                  showLoginMsg("⏳ طلبك قيد المراجعة والموافقة من المالك...", "#d97706");
               }
           } else {
-              // 3. أول مرة يسجل -> توليد ID فريد وإرساله
               sendUniqueUserID();
           }
       } catch (e) {
@@ -297,13 +285,11 @@
       document.getElementById('stepPhone').style.display = 'none';
       document.getElementById('stepOTP').style.display = 'block';
 
-      const waMsg = encodeURIComponent(`طلب تسجيل مسؤول جديد\nرقم الهاتف: ${currentAdminPhone}\nرقم المعرف الخااص بي (ID): ${generatedID}`);
+      const waMsg = encodeURIComponent(`طلب تسجيل مسؤول جديد\nرقم الهاتف: ${currentAdminPhone}\nرقم المعرف الخاص بي (ID): ${generatedID}`);
       const waUrl = `https://wa.me/2${OWNER_NUMBERS[0]}?text=${waMsg}`;
       
-      const waBtn = document.getElementById('waSendBtn');
-      waBtn.href = waUrl;
-
-      showLoginMsg(`رقم الـ ID الخاص بك هو: (${generatedID}). اضغط على زر WhatsApp لإرساله للمالك ثم أدخله أدناه للتأكيد.`, "#38bdf8");
+      document.getElementById('waSendBtn').href = waUrl;
+      showLoginMsg(`رقم الـ ID الخاص بك هو: (${generatedID}). أرسله للمالك ثم أدخله لتأكيد الحساب.`, "#0284c7");
   }
 
   async function verifyOTP() {
@@ -322,7 +308,7 @@
       });
 
       document.getElementById('stepOTP').style.display = 'none';
-      showLoginMsg("📩 تم إرسال الطلب ورقم الـ ID للمالك! بانتظار تفعيل حسابك وتحديد الأقسام.", "#38bdf8");
+      showLoginMsg("📩 تم إرسال الطلب للمالك بانتظار تفعيل حسابك.", "#0284c7");
   }
 
   function showLoginMsg(text, color) {
@@ -341,11 +327,150 @@
       if (isOwner) {
           document.getElementById('superAdminSection').style.display = 'block';
           listenToAllRequestsAndUsers();
-          listenToDeleteRequests();
       }
 
       loadProducts();
       loadStoreStats();
+  }
+
+  // توليد الذكاء الاصطناعي لوصف المنتج تلقائياً
+  function generateAIDescription() {
+      const name = document.getElementById('prodName').value.trim();
+      const catKey = document.getElementById('prodCat').value;
+      const catName = CATEGORY_NAMES[catKey] || "";
+
+      if (!name) return;
+
+      const aiTemplates = [
+          `منتج ${name} ممتاز وعالي الجودة ينتمي لقسم ${catName}. طازج ومضمون 100% لتلبية جميع احتياجاتك بأفضل سعر في ماركت نت.`,
+          `احصل الآن على ${name} من قسم ${catName}. يتميز بالجودة الفائقة والتغليف الآمن لضمان أفضل تجربة لك ولعائلتك.`,
+          `اختيارك الأمثل! ${name} ذو طعم وجودة لا تضاهى، متوفر الآن بقسم ${catName} بأسعار تنافسية وتسليم سريع.`
+      ];
+
+      const randomIndex = Math.floor(Math.random() * aiTemplates.length);
+      document.getElementById('prodDesc').value = aiTemplates[randomIndex];
+  }
+
+  function autoGenerateAIDesc() {
+      const name = document.getElementById('prodName').value.trim();
+      if (name.length >= 3 && !document.getElementById('prodDesc').value) {
+          generateAIDescription();
+      }
+  }
+
+  function previewFileImage(event) {
+      const reader = new FileReader();
+      reader.onload = function() {
+          document.getElementById('imgPreview').src = reader.result;
+          document.getElementById('prodBase64').value = reader.result;
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+      };
+      if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+  }
+
+  async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodId').value;
+      const name = document.getElementById('prodName').value.trim();
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const cat = document.getElementById('prodCat').value;
+      const stock = parseInt(document.getElementById('prodStock').value) || 0;
+      const desc = document.getElementById('prodDesc').value || `${name} عالي الجودة متوفر بمتجرنا.`;
+      const image = document.getElementById('prodBase64').value || 'https://via.placeholder.com/150';
+
+      const prodData = {
+          name, price, category: cat, stock, description: desc, rating: "5", image,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      if (id) {
+          await db.collection('products').doc(id).update(prodData);
+      } else {
+          await db.collection('products').add(prodData);
+      }
+
+      alert('تم حفظ المنتج وربطه بالمتجر بنجاح!');
+      resetForm();
+  }
+
+  function resetForm() {
+      document.getElementById('prodId').value = '';
+      document.getElementById('prodName').value = '';
+      document.getElementById('prodPrice').value = '';
+      document.getElementById('prodStock').value = '10';
+      document.getElementById('prodDesc').value = '';
+      document.getElementById('prodBase64').value = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+  }
+
+  function loadProducts() {
+      db.collection('products').onSnapshot(snapshot => {
+          allProductsList = [];
+          snapshot.forEach(doc => {
+              allProductsList.push({ id: doc.id, ...doc.data() });
+          });
+          renderProductsTable(allProductsList);
+      });
+  }
+
+  function renderProductsTable(products) {
+      const tbody = document.getElementById('adminProductsTable');
+      tbody.innerHTML = '';
+
+      products.forEach(p => {
+          const deleteBtnHtml = isSuperOwner 
+              ? `<button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>`
+              : `<span style="color:#94a3b8; font-size:12px;">حذف المالك فقط</span>`;
+
+          tbody.innerHTML += `
+              <tr>
+                  <td><img src="${p.image}" class="img-preview"></td>
+                  <td><strong>${p.name}</strong></td>
+                  <td>${p.price} ج.م</td>
+                  <td>${p.stock} قطعة</td>
+                  <td>${CATEGORY_NAMES[p.category] || p.category}</td>
+                  <td>⭐⭐⭐⭐⭐</td>
+                  <td>
+                      <button class="btn btn-primary" onclick="editProduct('${p.id}')">تعديل ✏️</button>
+                      ${deleteBtnHtml}
+                  </td>
+              </tr>
+          `;
+      });
+  }
+
+  function filterProducts() {
+      const query = document.getElementById('searchBar').value.toLowerCase().trim();
+      const filtered = allProductsList.filter(p => p.name.toLowerCase().includes(query));
+      renderProductsTable(filtered);
+  }
+
+  async function deleteProduct(id) {
+      if (!isSuperOwner) {
+          alert('عذراً! صلاحية حذف المنتجات مقتصرة على المالك فقط.');
+          return;
+      }
+      if (confirm('هل أنت تأكد من إزالة هذا المنتج نهائياً من المتجر؟')) {
+          await db.collection('products').doc(id).delete();
+          alert('تم حذف المنتج بنجاح.');
+      }
+  }
+
+  function editProduct(id) {
+      const p = allProductsList.find(prod => prod.id === id);
+      if (!p) return;
+      document.getElementById('prodId').value = p.id;
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodCat').value = p.category;
+      document.getElementById('prodStock').value = p.stock || 10;
+      document.getElementById('prodDesc').value = p.description || '';
+      document.getElementById('prodBase64').value = p.image || '';
+      if(p.image) {
+          document.getElementById('imgPreview').src = p.image;
+          document.getElementById('imagePreviewContainer').style.display = 'block';
+      }
+      window.scrollTo({ top: 400, behavior: 'smooth' });
   }
 
   function loadStoreStats() {
@@ -363,8 +488,7 @@
       const orders = parseInt(document.getElementById('editOrdersInput').value) || 0;
       
       db.collection('store_stats').doc('general').set({
-          visitors: visitors,
-          orders: orders
+          visitors, orders
       }, { merge: true }).then(() => {
           alert('تم تحديث العدادات بنجاح!');
       });
@@ -388,20 +512,17 @@
                           <td><strong>${data.phone}</strong></td>
                           <td><span class="badge badge-pending">${data.userId || 'بدون ID'}</span></td>
                           <td>
-                              <div class="cat-checkboxes" id="cats_${data.phone}">
-                                  <label><input type="checkbox" value="all" onchange="toggleAllCats('${data.phone}', this)"> 🔥 الكل</label>
+                              <div class="cat-checkboxes">
+                                  <label><input type="checkbox" value="grocery" class="chk_${data.phone}"> أغذية وبقالة</label>
                                   <label><input type="checkbox" value="offers" class="chk_${data.phone}"> العروض</label>
                                   <label><input type="checkbox" value="poultry" class="chk_${data.phone}"> طيور</label>
                                   <label><input type="checkbox" value="frozen" class="chk_${data.phone}"> مجمدات</label>
                                   <label><input type="checkbox" value="cleaning" class="chk_${data.phone}"> منظفات</label>
                                   <label><input type="checkbox" value="spices" class="chk_${data.phone}"> عطارة</label>
-                                  <label><input type="checkbox" value="beauty" class="chk_${data.phone}"> تجميل</label>
-                                  <label><input type="checkbox" value="accessories" class="chk_${data.phone}"> اكسسوارات</label>
                               </div>
                           </td>
                           <td>
                               <button class="btn btn-success" onclick="approveUser('${data.phone}')">قبول وتفعيل ✅</button>
-                              <button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">رفض ❌</button>
                           </td>
                       </tr>
                   `;
@@ -412,211 +533,28 @@
                           <td><strong>${data.phone}</strong></td>
                           <td><span class="badge badge-active">${data.userId || 'معتمد'}</span></td>
                           <td><span class="badge badge-active">${allowedList || 'لم تُحدد'}</span></td>
-                          <td>
-                              <div class="cat-checkboxes" id="edit_cats_${data.phone}">
-                                  <label><input type="checkbox" value="offers" class="echk_${data.phone}"> العروض</label>
-                                  <label><input type="checkbox" value="poultry" class="echk_${data.phone}"> طيور</label>
-                                  <label><input type="checkbox" value="frozen" class="echk_${data.phone}"> مجمدات</label>
-                                  <label><input type="checkbox" value="cleaning" class="echk_${data.phone}"> منظفات</label>
-                                  <label><input type="checkbox" value="spices" class="echk_${data.phone}"> عطارة</label>
-                                  <label><input type="checkbox" value="beauty" class="echk_${data.phone}"> تجميل</label>
-                                  <label><input type="checkbox" value="accessories" class="echk_${data.phone}"> اكسسوارات</label>
-                              </div>
-                              <button class="btn btn-primary" style="margin-top: 5px; width: 100%; font-size: 11px;" onclick="updateUserCats('${data.phone}')">حفظ الأقسام 🔄</button>
-                          </td>
-                          <td>
-                              ${data.status === 'approved' 
-                                  ? `<button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر وطرد 🚫</button>`
-                                  : `<button class="btn btn-success" onclick="setPermission('${data.phone}', 'approved')">إلغاء الحظر 🔓</button>`
-                              }
-                          </td>
+                          <td>-</td>
+                          <td><button class="btn btn-danger" onclick="setPermission('${data.phone}', 'blocked')">حظر ❌</button></td>
                       </tr>
                   `;
               }
           });
-
-          reqBody.innerHTML = reqHtml || '<tr><td colspan="4" style="text-align: center;">لا توجد طلبات جديدة حالياً</td></tr>';
-          activeBody.innerHTML = activeHtml || '<tr><td colspan="5" style="text-align: center;">لا يوجد مسؤولين أخرين</td></tr>';
+          reqBody.innerHTML = reqHtml;
+          activeBody.innerHTML = activeHtml;
       });
   }
 
-  function toggleAllCats(phone, mainChk) {
-      const checkboxes = document.querySelectorAll(`.chk_${phone}`);
-      checkboxes.forEach(c => c.checked = mainChk.checked);
-  }
-
   async function approveUser(phone) {
-      const selected = [];
-      const checkboxes = document.querySelectorAll(`#cats_${phone} input[type="checkbox"]:checked`);
-      checkboxes.forEach(c => selected.push(c.value));
-
-      if (selected.length === 0) {
-          alert('يرجى تحديد قسم واحد على الأقل للمسؤول قبل القبول!');
-          return;
-      }
-
+      const selected = Array.from(document.querySelectorAll(`.chk_${phone}:checked`)).map(cb => cb.value);
       await db.collection('admin_permissions').doc(phone).update({
           status: 'approved',
           allowedCategories: selected
       });
-  }
-
-  async function updateUserCats(phone) {
-      const selected = [];
-      const checkboxes = document.querySelectorAll(`#edit_cats_${phone} input[type="checkbox"]:checked`);
-      checkboxes.forEach(c => selected.push(c.value));
-
-      if (selected.length === 0) {
-          alert('اختر قسم واحد على الأقل!');
-          return;
-      }
-
-      await db.collection('admin_permissions').doc(phone).update({
-          allowedCategories: selected
-      });
-      alert('تم تحديث الأقسام المصرح بها لهذا المسؤول بنجاح!');
+      alert('تم تفعيل المستخدم ومنحه الصلاحيات.');
   }
 
   async function setPermission(phone, status) {
-      await db.collection('admin_permissions').doc(phone).update({ status: status });
-  }
-
-  function previewFileImage(e) {
-      const file = e.target.files[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-              document.getElementById('prodBase64').value = evt.target.result;
-              document.getElementById('imgPreview').src = evt.target.result;
-              document.getElementById('imagePreviewContainer').style.display = 'block';
-          };
-          reader.readAsDataURL(file);
-      }
-  }
-
-  async function saveProduct(e) {
-      e.preventDefault();
-      const id = document.getElementById('prodId').value;
-      const cat = document.getElementById('prodCat').value;
-
-      const isAllowed = isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(cat);
-
-      if (!isAllowed) {
-          alert(`🚫 غير مصرح لك بالتنزيل أو التعديل في قسم (${CATEGORY_NAMES[cat] || cat}). يمكنك فقط النشر في الأقسام المحددة لك.`);
-          return;
-      }
-
-      const data = {
-          name: document.getElementById('prodName').value.trim(),
-          price: parseFloat(document.getElementById('prodPrice').value),
-          cat: cat,
-          stock: parseInt(document.getElementById('prodStock').value) || 0,
-          rating: parseInt(document.getElementById('prodRating').value) || 5,
-          desc: document.getElementById('prodDesc').value.trim(),
-          img: document.getElementById('prodBase64').value
-      };
-
-      if (id) {
-          await db.collection('products').doc(id).update(data);
-          alert('تم تعديل المنتج بنجاح!');
-      } else {
-          await db.collection('products').add(data);
-          alert('تم إدراج المنتج بنجاح!');
-      }
-
-      document.getElementById('prodId').value = '';
-      document.getElementById('prodBase64').value = '';
-      document.getElementById('imagePreviewContainer').style.display = 'none';
-      e.target.reset();
-  }
-
-  function loadProducts() {
-      db.collection('products').onSnapshot(snapshot => {
-          const tbody = document.getElementById('adminProductsTable');
-          tbody.innerHTML = '';
-          snapshot.forEach(doc => {
-              const p = doc.data();
-              tbody.innerHTML += `
-                  <tr>
-                      <td><img src="${p.img || 'https://via.placeholder.com/50'}" class="img-preview"></td>
-                      <td><strong>${p.name}</strong></td>
-                      <td>${p.price} جنيه</td>
-                      <td>${p.stock}</td>
-                      <td>${CATEGORY_NAMES[p.cat] || p.cat}</td>
-                      <td>
-                          <button class="btn btn-warning" onclick="editProduct('${doc.id}', '${p.name}', ${p.price}, '${p.cat}', ${p.stock}, ${p.rating}, '${p.desc || ''}', '${p.img || ''}')">تعديل ✏️</button>
-                          <button class="btn btn-danger" onclick="requestDeleteProduct('${doc.id}', '${p.name}')">حذف 🗑️</button>
-                      </td>
-                  </tr>
-              `;
-          });
-      });
-  }
-
-  function editProduct(id, name, price, cat, stock, rating, desc, img) {
-      document.getElementById('prodId').value = id;
-      document.getElementById('prodName').value = name;
-      document.getElementById('prodPrice').value = price;
-      document.getElementById('prodCat').value = cat;
-      document.getElementById('prodStock').value = stock;
-      document.getElementById('prodRating').value = rating;
-      document.getElementById('prodDesc').value = desc;
-      document.getElementById('prodBase64').value = img;
-      if (img) {
-          document.getElementById('imgPreview').src = img;
-          document.getElementById('imagePreviewContainer').style.display = 'block';
-      }
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-  }
-
-  async function requestDeleteProduct(prodId, prodName) {
-      if (isSuperOwner) {
-          if (confirm(`هل أنت تأكد من حذف المنتج (${prodName}) نهائياً؟`)) {
-              await db.collection('products').doc(prodId).delete();
-              alert('تم الحذف مباشرة.');
-          }
-      } else {
-          await db.collection('delete_requests').add({
-              prodId: prodId,
-              prodName: prodName,
-              requestedBy: currentAdminPhone,
-              status: 'pending',
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert('📩 تم إرسال طلب الحذف إلى المالك!');
-      }
-  }
-
-  function listenToDeleteRequests() {
-      db.collection('delete_requests').where('status', '==', 'pending').onSnapshot(snapshot => {
-          const tbody = document.getElementById('deleteRequestsTableBody');
-          let html = '';
-          snapshot.forEach(doc => {
-              const req = doc.data();
-              html += `
-                  <tr>
-                      <td><strong>${req.prodName}</strong></td>
-                      <td>${req.requestedBy}</td>
-                      <td>
-                          <button class="btn btn-danger" onclick="confirmDelete('${doc.id}', '${req.prodId}')">موافقة وحذف ❌</button>
-                          <button class="btn btn-primary" onclick="rejectDelete('${doc.id}')">رفض 🛡️</button>
-                      </td>
-                  </tr>
-              `;
-          });
-          tbody.innerHTML = html || '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات حذف معلقة</td></tr>';
-      });
-  }
-
-  async function confirmDelete(reqId, prodId) {
-      await db.collection('products').doc(prodId).delete();
-      await db.collection('delete_requests').doc(reqId).update({ status: 'approved' });
-      alert('تم إقرار الطلب وحذف المنتج نهائياً!');
-  }
-
-  async function rejectDelete(reqId) {
-      await db.collection('delete_requests').doc(reqId).update({ status: 'rejected' });
-      alert('تم رفض طلب الحذف والإبقاء على المنتج.');
+      await db.collection('admin_permissions').doc(phone).update({ status });
   }
 </script>
 </body>
