@@ -1,569 +1,189 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم ماركت نت المتقدمة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <style>
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-        body { background: #f8fafc; color: #1e293b; padding: 25px; min-height: 100vh; }
-        
-        .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
-        .header-title h1 { color: #0284c7; font-size: 28px; font-weight: 800; }
-
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 25px; width: 100%; }
-        
-        .card { background: #ffffff; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
-        .card h3 { margin-bottom: 20px; color: #0369a1; font-size: 22px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
-
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #334155; font-size: 16px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 15px; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 12px; color: #0f172a; font-size: 16px; outline: none; transition: 0.2s; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0284c7; background: #fff; }
-        
-        .btn { padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; text-decoration: none; }
-        .btn-primary { background: #0284c7; color: white; }
-        .btn-primary:hover { background: #0369a1; }
-        .btn-success { background: #16a34a; color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-whatsapp { background: #25D366; color: white; }
-        .btn-pin { background: #6366f1; color: white; }
-        .btn-pinned { background: #4338ca; color: #fef08a; border: 2px solid #facc15; }
-
-        .search-box { width: 100%; padding: 16px; font-size: 16px; border: 2px solid #0284c7; border-radius: 12px; margin-bottom: 20px; background: #fff; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 14px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
-        th { background: #f1f5f9; color: #0284c7; font-weight: 700; }
-        tr:hover { background: #f8fafc; }
-
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: #ffffff; padding: 40px; border-radius: 20px; width: 90%; max-width: 480px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-
-        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 2px solid #cbd5e1; }
-        .cat-checkboxes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #f1f5f9; padding: 10px; border-radius: 10px; font-size: 12px; border: 1px solid #cbd5e1; max-width: 320px; }
-        .cat-checkboxes label { color: #334155; display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 600; }
-        
-        .pinned-row { background-color: #f0f9ff !important; font-weight: bold; }
-        .pinned-badge { background: #e0e7ff; color: #3730a3; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-right: 5px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماركت نت - تسجيل الدخول</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px 25px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0084c7;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      color: #6b7280;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.3s ease;
+    }
+    .tab-btn.active {
+      color: #0084c7;
+      border-bottom: 2px solid #0084c7;
+    }
+    .form-group {
+      margin-bottom: 16px;
+      text-align: right;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      border-color: #0084c7;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background-color: #0084c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background-color 0.2s;
+    }
+    .btn-submit:hover {
+      background-color: #00699e;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="login-box">
-        <h2 style="color: #0284c7; margin-bottom: 10px; font-size: 28px;">ماركت نت 🛒</h2>
-        <p style="color: #64748b; font-size: 16px; margin-bottom: 25px;">تسجيل الدخول للوحة التحكم</p>
-        
-        <div id="stepPhone">
-            <div class="form-group">
-                <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (مثال: 01127491224)">
-            </div>
-            <button class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 14px;" onclick="checkUserStatus()">دخول / تسجيل 🔑</button>
-        </div>
+  <div class="card">
+    <div class="logo">🛒 ماركت نت</div>
+    <div class="subtitle" id="form-subtitle">تسجيل دخول الإدارة والمسؤولين</div>
 
-        <div id="stepOTP" style="display: none;">
-            <p style="color: #d97706; font-size: 14px; margin-bottom: 12px;">أهلاً بك! تم إنشاء رقم معرف (ID) فريد لك. اضغط لإرساله للمالك ثم اضغط تأكيد:</p>
-            <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 12px; padding: 14px;">إرسال رقم الـ ID للواتساب 💬</a>
-            
-            <div class="form-group">
-                <input type="text" id="otpInput" placeholder="أدخل رقم الـ ID للـتأكيد">
-            </div>
-            <button class="btn btn-success" style="width: 100%; padding: 14px;" onclick="verifyOTP()">تأكيد وإرسال الطلب للمالك 📩</button>
-        </div>
-
-        <p id="loginMsg" style="margin-top: 15px; font-size: 14px; display: none; padding: 12px; border-radius: 10px;"></p>
-    </div>
-</div>
-
-<div id="adminContent" style="display: none;">
-    <div class="header-title">
-        <h1>🛠️ لوحة الإدارة والسيطرة</h1>
-        <div id="adminPhoneBadge" style="background: #e2e8f0; color: #0f172a; padding: 10px 20px; border-radius: 20px; font-size: 15px; font-weight: bold;"></div>
+    <!-- أزرار التنقل بين التسجيل وإنشاء الحساب -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
+      <button class="tab-btn" onclick="switchTab('register')">تسجيل لأول مرة</button>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="card">
-            <h3>📊 التحكم في عدادات المتجر (الزوار والطلبات)</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>عدد الزوار الحالي:</label>
-                    <input type="number" id="editVisitorsInput" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>عدد الطلبات المكتملة:</label>
-                    <input type="number" id="editOrdersInput" placeholder="0">
-                </div>
-            </div>
-            <button class="btn btn-primary" style="padding: 12px 24px;" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
-        </div>
+    <!-- نموذج تسجيل الدخول -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" class="input-field" placeholder="أدخل رقم الهاتف" required>
+      </div>
+      <div class="form-group">
+        <label>كلمة السر</label>
+        <input type="password" class="input-field" placeholder="أدخل كلمة السر" required>
+      </div>
+      <button type="submit" class="btn-submit">🔑 تسجيل الدخول</button>
+    </form>
 
-        <!-- لوحة المالك لتوزيع الصلاحيات -->
-        <div class="card" id="superAdminSection" style="display: none; border: 2px solid #0284c7;">
-            <h3>👑 لوحة المالك: التحكم في صلاحيات وأقسام المسجلين</h3>
-            
-            <h4 style="color: #d97706; margin-top: 10px; font-size: 16px;">📥 طلبات الانضمام الجديدة:</h4>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>رقم الهاتف</th>
-                            <th>رقم الـ ID</th>
-                            <th>تحديد الأقسام المسموحة</th>
-                            <th>القرار</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requestsTableBody"></tbody>
-                </table>
-            </div>
+    <!-- نموذج إنشاء حساب جديد (يظهر فقط عند الضغط على تسجيل لأول مرة) -->
+    <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" class="input-field" placeholder="أدخل رقم الهاتف الخاص بك" required>
+      </div>
+      <div class="form-group">
+        <label>إنشاء كلمة السر</label>
+        <input type="password" class="input-field" placeholder="أدخل كلمة سر جديدة" required>
+      </div>
+      <div class="form-group">
+        <label>تأكيد كلمة السر</label>
+        <input type="password" class="input-field" placeholder="أعد كتابة كلمة السر" required>
+      </div>
+      <button type="submit" class="btn-submit">✨ إنشاء حساب جديد</button>
+    </form>
+  </div>
 
-            <h4 style="color: #16a34a; margin-top: 25px; font-size: 16px;">👥 المسؤولين المعتمدين:</h4>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>رقم الهاتف</th>
-                            <th>رقم الـ ID</th>
-                            <th>الأقسام المتاحة</th>
-                            <th>تعديل الأقسام</th>
-                            <th>الإجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activeUsersTableBody"></tbody>
-                </table>
-            </div>
-        </div>
+  <script>
+    function switchTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const subtitle = document.getElementById('form-subtitle');
+      const tabs = document.querySelectorAll('.tab-btn');
 
-        <!-- إضافة وتعديل المنتجات -->
-        <div class="card">
-            <h3>➕ إضافة / تعديل منتج تفصيلي</h3>
-            <form onsubmit="saveProduct(event)">
-                <input type="hidden" id="prodId">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>اسم المنتج:</label>
-                        <input type="text" id="prodName" required placeholder="مثال: دجاج بانييه">
-                    </div>
-                    <div class="form-group">
-                        <label>السعر (جنيه):</label>
-                        <input type="number" id="prodPrice" step="0.5" required placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label>القسم / الخانة:</label>
-                        <select id="prodCat" required></select>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>اختر صورة المنتج 📷:</label>
-                        <input type="file" id="prodImageFile" accept="image/*" onchange="previewFileImage(event)">
-                        <input type="hidden" id="prodBase64">
-                    </div>
-                </div>
-                <div id="imagePreviewContainer" style="margin-bottom: 15px; display: none;">
-                    <img id="imgPreview" class="img-preview" src="" alt="المعاينة">
-                </div>
-                <button type="submit" class="btn btn-success" style="width: 100%; font-size: 18px; padding: 14px;">حفظ المنتج في المتجر 💾</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h3>📦 المنتجات المتاحة بالمتجر</h3>
-            <input type="text" id="searchBar" class="search-box" placeholder="🔎 إبحث عن اسم أي منتج بالمحل..." onkeyup="filterProducts()">
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الصورة</th>
-                            <th>اسم المنتج</th>
-                            <th>السعر</th>
-                            <th>المخزون</th>
-                            <th>القسم</th>
-                            <th>تثبيت بالقمة 📌</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminProductsTable"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
-    authDomain: "makhzan-9eb1f.firebaseapp.com",
-    projectId: "makhzan-9eb1f",
-    storageBucket: "makhzan-9eb1f.appspot.com",
-    messagingSenderId: "695067759501",
-    appId: "1:695067759501:web:df932ff7bac0b1470523c4"
-  };
-
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  const OWNER_NUMBERS = ["01127491224", "01012517345"];
-  let currentAdminPhone = "";
-  let generatedID = "";
-  let currentAdminCategories = ["all"]; 
-  let isSuperOwner = false;
-  let allProductsList = [];
-
-  const CATEGORY_NAMES = {
-      offers: "🔥 العروض اليومية",
-      grocery: "🧀 أغذية وبقالة",
-      poultry: "🍗 طيور",
-      frozen: "🧊 مجمدات",
-      cleaning: "✨ منظفات",
-      spices: "🧂 عطارة",
-      beauty: "💄 مستحضرات تجميل",
-      accessories: "💍 اكسسوارات بنات"
-  };
-
-  async function checkUserStatus() {
-      let phone = document.getElementById('adminPhoneInput').value.trim();
-      if (!phone) {
-          showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
-          return;
-      }
-      
-      phone = phone.replace(/\s+/g, '');
-      currentAdminPhone = phone;
-
-      if (OWNER_NUMBERS.includes(currentAdminPhone)) {
-          isSuperOwner = true;
-          currentAdminCategories = ["all"];
-          grantAccess(true);
-          return;
-      }
-
-      try {
-          const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
-
-          if (doc.exists) {
-              const data = doc.data();
-              if (data.status === 'approved') {
-                  currentAdminCategories = data.allowedCategories || ["all"];
-                  grantAccess(false);
-              } else if (data.status === 'blocked') {
-                  showLoginMsg("🚫 تم حظرك بواسطة المالك.", "#ef4444");
-              } else {
-                  showLoginMsg("⏳ طلبك قيد المراجعة والموافقة من المالك...", "#d97706");
-              }
-          } else {
-              sendUniqueUserID();
-          }
-      } catch (e) {
-          showLoginMsg("حدث خطأ في الاتصال، حاول مرة أخرى", "#ef4444");
-      }
-  }
-
-  function sendUniqueUserID() {
-      generatedID = "ID-" + Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('stepPhone').style.display = 'none';
-      document.getElementById('stepOTP').style.display = 'block';
-
-      const waMsg = encodeURIComponent(`طلب تسجيل مسؤول جديد\nرقم الهاتف: ${currentAdminPhone}\nرقم المعرف الخاص بي (ID): ${generatedID}`);
-      const waUrl = `https://wa.me/2${OWNER_NUMBERS[0]}?text=${waMsg}`;
-      
-      document.getElementById('waSendBtn').href = waUrl;
-      showLoginMsg(`رقم الـ ID الخاص بك هو: (${generatedID}). أرسله للمالك ثم أدخله لتأكيد الحساب.`, "#0284c7");
-  }
-
-  async function verifyOTP() {
-      const input = document.getElementById('otpInput').value.trim();
-      if (input.toUpperCase() !== generatedID.toUpperCase() && input !== "9999") { 
-          showLoginMsg("❌ رقم الـ ID غير صحيح!", "#ef4444");
-          return;
-      }
-
-      await db.collection('admin_permissions').doc(currentAdminPhone).set({
-          phone: currentAdminPhone,
-          userId: generatedID,
-          status: 'pending',
-          allowedCategories: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      document.getElementById('stepOTP').style.display = 'none';
-      showLoginMsg("📩 تم إرسال الطلب للمالك بانتظار تفعيل حسابك.", "#0284c7");
-  }
-
-  function showLoginMsg(text, color) {
-      const msg = document.getElementById('loginMsg');
-      msg.innerText = text;
-      msg.style.background = color + "22";
-      msg.style.color = color;
-      msg.style.display = "block";
-  }
-
-  function grantAccess(isOwner) {
-      document.getElementById('loginOverlay').style.display = 'none';
-      document.getElementById('adminContent').style.display = 'block';
-      document.getElementById('adminPhoneBadge').innerText = `المسؤول: ${currentAdminPhone} ${isOwner ? '(المالك 👑)' : ''}`;
-
-      populateAdminCategorySelect();
-
-      if (isOwner) {
-          document.getElementById('superAdminSection').style.display = 'block';
-          listenToAllRequestsAndUsers();
-      }
-
-      loadProducts();
-      loadStoreStats();
-  }
-
-  function populateAdminCategorySelect() {
-      const catSelect = document.getElementById('prodCat');
-      catSelect.innerHTML = '';
-
-      for (const [key, name] of Object.entries(CATEGORY_NAMES)) {
-          if (isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(key)) {
-              catSelect.innerHTML += `<option value="${key}">${name}</option>`;
-          }
-      }
-  }
-
-  function generateAutoAIDesc(name, catKey) {
-      const catName = CATEGORY_NAMES[catKey] || "";
-      const templates = [
-          `منتج ${name} فاخر وعالي الجودة من قسم ${catName}. متوفر الآن بخصم خاص وجاهز للتوصيل السريع!`,
-          `احصل على أفضل خامة وجودة مع ${name} ضمن تشكيلة ${catName} المتميزة في ماركت نت.`,
-          `اختيار ممتاز! ${name} ذو موثوقية عالية وطعم/جودة رائعة ينصح به دائماً لقسم ${catName}.`
-      ];
-      return templates[Math.floor(Math.random() * templates.length)];
-  }
-
-  function previewFileImage(event) {
-      const reader = new FileReader();
-      reader.onload = function() {
-          document.getElementById('imgPreview').src = reader.result;
-          document.getElementById('prodBase64').value = reader.result;
-          document.getElementById('imagePreviewContainer').style.display = 'block';
-      };
-      if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
-  }
-
-  async function saveProduct(e) {
-      e.preventDefault();
-      const id = document.getElementById('prodId').value;
-      const name = document.getElementById('prodName').value.trim();
-      const price = parseFloat(document.getElementById('prodPrice').value);
-      const cat = document.getElementById('prodCat').value;
-      const desc = generateAutoAIDesc(name, cat); 
-      const image = document.getElementById('prodBase64').value || 'https://via.placeholder.com/150';
-
-      const prodData = {
-          name, price, category: cat, stock: 150, description: desc, image,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      if (id) {
-          await db.collection('products').doc(id).update(prodData);
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+        subtitle.textContent = "تسجيل دخول الإدارة والمسؤولين";
       } else {
-          prodData.isPinned = false; 
-          await db.collection('products').add(prodData);
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+        subtitle.textContent = "إنشاء حساب جديد للمستخدم";
       }
+    }
 
-      alert('تم حفظ المنتج وربطه بالمتجر بنجاح!');
-      resetForm();
-  }
+    function handleLogin(e) {
+      e.preventDefault();
+      alert("تم تسجيل الدخول بنجاح!");
+    }
 
-  function resetForm() {
-      document.getElementById('prodId').value = '';
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodPrice').value = '';
-      document.getElementById('prodBase64').value = '';
-      document.getElementById('imagePreviewContainer').style.display = 'none';
-  }
+    function handleRegister(e) {
+      e.preventDefault();
+      alert("تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.");
+      switchTab('login');
+    }
+  </script>
 
-  function loadProducts() {
-      db.collection('products').onSnapshot(snapshot => {
-          allProductsList = [];
-          snapshot.forEach(doc => {
-              allProductsList.push({ id: doc.id, ...doc.data() });
-          });
-
-          // ترتيب المنتجات: المثبتة أولاً
-          allProductsList.sort((a, b) => (b.isPinned === true ? 1 : 0) - (a.isPinned === true ? 1 : 0));
-          renderProductsTable(allProductsList);
-      });
-  }
-
-  function renderProductsTable(products) {
-      const tbody = document.getElementById('adminProductsTable');
-      tbody.innerHTML = '';
-
-      products.forEach(p => {
-          if (!isSuperOwner && !currentAdminCategories.includes('all') && !currentAdminCategories.includes(p.category)) {
-              return; 
-          }
-
-          const deleteBtnHtml = isSuperOwner 
-              ? `<button class="btn btn-danger" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>`
-              : `<span style="color:#94a3b8; font-size:12px;">حذف المالك فقط</span>`;
-
-          const isPinned = p.isPinned || false;
-
-          tbody.innerHTML += `
-              <tr class="${isPinned ? 'pinned-row' : ''}">
-                  <td><img src="${p.image}" class="img-preview"></td>
-                  <td><strong>${p.name}</strong> ${isPinned ? '<span class="pinned-badge">مثبت 📌</span>' : ''}</td>
-                  <td style="color:#0284c7; font-weight:bold;">${p.price} ج.م</td>
-                  <td><span style="color:#16a34a; font-weight:bold;">+100 قطعة</span></td>
-                  <td>${CATEGORY_NAMES[p.category] || p.category}</td>
-                  <td>
-                      <button class="btn ${isPinned ? 'btn-pinned' : 'btn-pin'}" onclick="togglePinProduct('${p.id}', ${isPinned})">
-                          ${isPinned ? '📌 مثبت' : '📍 تثبيت'}
-                      </button>
-                  </td>
-                  <td>
-                      <button class="btn btn-warning" onclick="editProduct('${p.id}')">تعديل ✏️</button>
-                      ${deleteBtnHtml}
-                  </td>
-              </tr>
-          `;
-      });
-  }
-
-  async function togglePinProduct(id, currentStatus) {
-      await db.collection('products').doc(id).update({
-          isPinned: !currentStatus
-      });
-  }
-
-  function filterProducts() {
-      const term = document.getElementById('searchBar').value.toLowerCase();
-      const filtered = allProductsList.filter(p => p.name.toLowerCase().includes(term));
-      renderProductsTable(filtered);
-  }
-
-  function editProduct(id) {
-      const p = allProductsList.find(item => item.id === id);
-      if (!p) return;
-
-      document.getElementById('prodId').value = p.id;
-      document.getElementById('prodName').value = p.name;
-      document.getElementById('prodPrice').value = p.price;
-      document.getElementById('prodCat').value = p.category;
-      document.getElementById('prodBase64').value = p.image;
-      document.getElementById('imgPreview').src = p.image;
-      document.getElementById('imagePreviewContainer').style.display = 'block';
-
-      window.scrollTo({ top: 400, behavior: 'smooth' });
-  }
-
-  async function deleteProduct(id) {
-      if (confirm("هل أنت تأكد من حذف هذا المنتج نهائياً؟")) {
-          await db.collection('products').doc(id).delete();
-      }
-  }
-
-  // --- إدارة صلاحيات وتحديد أقسام المسؤولين للمالك ---
-  function renderCategoryCheckboxes(prefix, selectedCats = []) {
-      let html = `<div class="cat-checkboxes">`;
-      for (const [key, name] of Object.entries(CATEGORY_NAMES)) {
-          const checked = selectedCats.includes(key) || selectedCats.includes('all') ? 'checked' : '';
-          html += `<label><input type="checkbox" name="${prefix}_cat_${key}" value="${key}" ${checked}> ${name}</label>`;
-      }
-      html += `</div>`;
-      return html;
-  }
-
-  function listenToAllRequestsAndUsers() {
-      db.collection('admin_permissions').onSnapshot(snapshot => {
-          const reqTbody = document.getElementById('requestsTableBody');
-          const activeTbody = document.getElementById('activeUsersTableBody');
-          reqTbody.innerHTML = '';
-          activeTbody.innerHTML = '';
-
-          snapshot.forEach(doc => {
-              const u = doc.data();
-              if (u.status === 'pending') {
-                  reqTbody.innerHTML += `
-                      <tr>
-                          <td><strong>${u.phone}</strong></td>
-                          <td><span style="color:#8b5cf6; font-weight:bold;">${u.userId}</span></td>
-                          <td>${renderCategoryCheckboxes('req_' + u.phone)}</td>
-                          <td>
-                              <button class="btn btn-success" onclick="approveUser('${u.phone}')">موافقة ✅</button>
-                              <button class="btn btn-danger" onclick="blockUser('${u.phone}')">رفض ❌</button>
-                          </td>
-                      </tr>
-                  `;
-              } else if (u.status === 'approved') {
-                  activeTbody.innerHTML += `
-                      <tr>
-                          <td><strong>${u.phone}</strong></td>
-                          <td><span style="color:#8b5cf6; font-weight:bold;">${u.userId}</span></td>
-                          <td>${(u.allowedCategories || []).map(c => CATEGORY_NAMES[c] || c).join(', ') || 'الكل'}</td>
-                          <td>${renderCategoryCheckboxes('act_' + u.phone, u.allowedCategories || [])}</td>
-                          <td>
-                              <button class="btn btn-primary" onclick="updateUserCats('${u.phone}')">حفظ الأقسام 🔄</button>
-                              <button class="btn btn-danger" onclick="blockUser('${u.phone}')">حظر 🚫</button>
-                          </td>
-                      </tr>
-                  `;
-              }
-          });
-      });
-  }
-
-  function getSelectedCategoriesFromUI(prefix, phone) {
-      const selected = [];
-      for (const key of Object.keys(CATEGORY_NAMES)) {
-          const checkbox = document.querySelector(`input[name="${prefix}_${phone}_cat_${key}"]`);
-          if (checkbox && checkbox.checked) selected.push(key);
-      }
-      return selected;
-  }
-
-  async function approveUser(phone) {
-      const selectedCats = getSelectedCategoriesFromUI('req', phone);
-      await db.collection('admin_permissions').doc(phone).update({
-          status: 'approved',
-          allowedCategories: selectedCats.length ? selectedCats : ['all']
-      });
-      alert('تم اعتماد المسؤول وتحديد أقسامه بنجاح!');
-  }
-
-  async function updateUserCats(phone) {
-      const selectedCats = getSelectedCategoriesFromUI('act', phone);
-      await db.collection('admin_permissions').doc(phone).update({
-          allowedCategories: selectedCats
-      });
-      alert('تم تحديث أقسام المسؤول بنجاح!');
-  }
-
-  async function blockUser(phone) {
-      if (confirm(`هل أنت تأكد من حظر المسؤول ${phone}؟`)) {
-          await db.collection('admin_permissions').doc(phone).update({ status: 'blocked' });
-      }
-  }
-
-  // --- العدادات والإحصائيات ---
-  function loadStoreStats() {
-      db.collection('store_stats').doc('main').onSnapshot(doc => {
-          if (doc.exists) {
-              const data = doc.data();
-              document.getElementById('editVisitorsInput').value = data.visitors || 0;
-              document.getElementById('editOrdersInput').value = data.orders || 0;
-          }
-      });
-  }
-
-  async function updateStoreStats() {
-      const visitors = parseInt(document.getElementById('editVisitorsInput').value) || 0;
-      const orders = parseInt(document.getElementById('editOrdersInput').value) || 0;
-
-      await db.collection('store_stats').doc('main').set({ visitors, orders }, { merge: true });
-      alert('تم تحديث العدادات والإحصائيات بنجاح!');
-  }
-</script>
 </body>
 </html>
