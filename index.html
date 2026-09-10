@@ -48,7 +48,7 @@
         .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; } }
 
-        .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
+        .product-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; content-visibility: auto; }
         .pinned-tag { position: absolute; top: 8px; right: 8px; background: #6366f1; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; z-index: 2; }
         
         .product-img-wrap { width: 100%; height: 140px; background: #ffffff; display: flex; align-items: center; justify-content: center; padding: 8px; border-bottom: 1px solid #f1f5f9; }
@@ -62,6 +62,8 @@
 
         .add-cart-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; }
         .add-cart-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .load-more-btn { grid-column: 1/-1; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; margin: 15px auto; display: block; max-width: 300px; width: 100%; text-align: center; }
 
         .custom-request-card { max-width: 1200px; margin: 15px auto; padding: 0 10px; }
         .custom-request-box { background: linear-gradient(135deg, #0284c7, #0f172a); color: white; padding: 15px; border-radius: 12px; text-align: center; }
@@ -120,6 +122,7 @@
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
         th { background: #f1f5f9; color: #0284c7; }
         .img-preview { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
+        
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .login-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
@@ -190,9 +193,10 @@
     <div class="products-grid" id="productsGrid">
         <div style="grid-column: 1/-1; text-align: center;">
             <div class="spinner"></div>
-            <p style="color: #64748b;">جاري جلب المنتجات...</p>
+            <p style="color: #64748b;">جاري تحميل المنتجات بأقصى سرعة...</p>
         </div>
     </div>
+    <button id="loadMoreBtn" class="load-more-btn" style="display:none;" onclick="loadMoreProducts()">تحميل المزيد من المنتجات ⬇️</button>
 </div>
 
 <div class="modal" id="productModal">
@@ -259,29 +263,28 @@
     <div id="loginOverlay">
         <div class="login-box">
             <h2 style="color: #0284c7; margin-bottom: 10px;">ماركت نت 🛒</h2>
-            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">تسجيل دخول الإدارة</p>
-            <div id="stepPhone">
-                <div class="form-group">
-                    <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم هاتفك (01127491224)">
-                </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 10px; justify-content: center;" onclick="checkUserStatus()">دخول / تسجيل 🔑</button>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">تسجيل دخول الإدارة والمسؤولين</p>
+            
+            <div class="form-group" style="margin-bottom: 12px;">
+                <input type="tel" id="adminPhoneInput" placeholder="رقم الهاتف (مثال: 01012517345)">
             </div>
-            <div id="stepOTP" style="display: none;">
-                <p style="color: #d97706; font-size: 12px; margin-bottom: 10px;">اضغط لإرسال المعرف للمالك ثم أدخله للتحقق:</p>
-                <a id="waSendBtn" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 10px; justify-content: center; background:#25D366; color:white;">إرسال رقم الـ ID للواتساب 💬</a>
-                <div class="form-group">
-                    <input type="text" id="otpInput" placeholder="أدخل رقم المعرف">
-                </div>
-                <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="verifyOTP()">تأكيد الحساب 📩</button>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <input type="password" id="adminPasswordInput" placeholder="كلمة السر (مثال: A2517345)">
             </div>
-            <p id="loginMsg" style="margin-top: 15px; font-size: 13px; display: none; padding: 10px; border-radius: 8px;"></p>
+
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="handleAdminLogin()">تسجيل الدخول 🔑</button>
+            
+            <p id="loginMsg" style="margin-top: 15px; font-size: 12px; display: none; padding: 10px; border-radius: 8px;"></p>
         </div>
     </div>
 
     <div id="adminContent" style="display: none;">
         <div class="header-title">
             <h1>🛠️ لوحة الإدارة والسيطرة</h1>
-            <div id="adminPhoneBadge" style="background: #e2e8f0; color: #0f172a; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;"></div>
+            <div>
+                <span id="adminPhoneBadge" style="background: #e2e8f0; color: #0f172a; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold;"></span>
+                <button class="btn btn-danger" style="margin-right: 10px;" onclick="logoutAdmin()">تسجيل الخروج 🚪</button>
+            </div>
         </div>
 
         <div class="card">
@@ -297,6 +300,39 @@
                 </div>
             </div>
             <button class="btn btn-primary" style="margin-top: 10px;" onclick="updateStoreStats()">حفظ الإحصائيات 🔄</button>
+        </div>
+
+        <div id="superOwnerSection" class="card" style="display:none; border: 2px solid #38bdf8;">
+            <h3>👑 إدارة المسؤولين والمتاجر (خاص بالمالك)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>رقم هاتف المسؤول:</label>
+                    <input type="tel" id="newAdminPhone" placeholder="010xxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>حرف كلمة السر الكبيرة:</label>
+                    <input type="text" id="newAdminChar" placeholder="A" maxlength="1" style="text-transform: uppercase;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
+                <button class="btn btn-success" onclick="createOrUpdateAdmin()">حفظ/تنشيط المسؤول 💾</button>
+                <button class="btn btn-whatsapp" style="background:#25D366; color:white;" onclick="sendPassToWhatsApp()">إرسال الباسورد للواتساب 💬</button>
+            </div>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #cbd5e1;">
+            <h4>قائمة المسؤولين المسجلين:</h4>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الموبايل</th>
+                            <th>كلمة السر</th>
+                            <th>الحالة</th>
+                            <th>إجراءات الحظر</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminsListTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card">
@@ -369,12 +405,12 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // تفعيل الكاش المحلي لسرعة فائقة ومتوافقة مع Android/iOS
+  // تفعيل الكاش المحلي لسرعة فائقة وتحمل أقصى ضغط للعملاء
   db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED, merge: true });
   db.enablePersistence({synchronizeTabs: true}).catch(() => {});
 
   const OWNER_WHATSAPP = "201127491224";
-  const OWNER_NUMBERS = ["01127491224", "01012517345"];
+  const SUPER_OWNER_PHONES = ["01127491224", "01012517345"];
 
   const CATEGORY_NAMES = {
       grocery: "🧺 بقالة ومشروبات",
@@ -387,7 +423,6 @@
       accessories: "💍 اكسسوارات"
   };
 
-  // منتجات البقالة المجهزة مسبقاً باحترافية وأحجام واسعار متناسبة
   const defaultGroceryProducts = [
       { id: "g1", name: "زيت عافية ذرة 800 مل", price: 95, cat: "grocery", stock: 25, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300", desc: "زيت ذرة عافية نقي 800 مل" },
       { id: "g2", name: "زيت هلا عباد الشمس 750 مل", price: 75, cat: "grocery", stock: 30, img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300", desc: "زيت عباد شمس خفيف صحي" },
@@ -400,16 +435,11 @@
       { id: "g9", name: "شاي ليبتون أحمر 100 فتلة", price: 110, cat: "grocery", stock: 25, img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=300", desc: "باكت شاي ليبتون 100 خيط" },
       { id: "g10", name: "مكرونة الملكة أنواع 400 جم", price: 15, cat: "grocery", stock: 100, img: "https://images.unsplash.com/photo-1621996346565-e3def6164286?w=300", desc: "مكرونة الملكة (قلم / شعرية / خواتم / اسباجيتي)" },
       { id: "g11", name: "مكرونة حواء 1 كجم", price: 35, cat: "grocery", stock: 45, img: "https://images.unsplash.com/photo-1621996346565-e3def6164286?w=300", desc: "مكرونة حواء فاخرة كيس 1 كيلو" },
-      { id: "g12", name: "بيبسي كانز 330 مل", price: 15, cat: "grocery", stock: 80, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300", desc: "مشروب غازي بيبسي كانز حجم كبير" },
-      { id: "g13", name: "كوكاكولا زجاجة 1.5 لتر", price: 25, cat: "grocery", stock: 35, img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300", desc: "كوكاكولا عائلية 1.5 لتر" },
-      { id: "g14", name: "سفن أب كانز 330 مل", price: 15, cat: "grocery", stock: 60, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300", desc: "مشروب غازي سفن أب منعش" },
-      { id: "g15", name: "صلصة طماطم فاخرة 300 جم", price: 20, cat: "grocery", stock: 40, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "برطمان صلصة طماطم مركزة" },
-      { id: "g16", name: "تونة مفتتة 140 جم", price: 35, cat: "grocery", stock: 50, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "علبة تونة سهلة الفتح" },
-      { id: "g17", name: "تونة قطع فاخرة 185 جم", price: 65, cat: "grocery", stock: 30, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "تونة قطع في زيت عباد الشمس" },
-      { id: "g18", name: "فول مدمس علبة 400 جم", price: 18, cat: "grocery", stock: 60, img: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=300", desc: "علبة فول مدمس جاهز للأكل" }
+      { id: "g12", name: "بيبسي كانز 330 مل", price: 15, cat: "grocery", stock: 80, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300", desc: "مشروب غازي بيبسي كانز حجم كبير" }
   ];
 
   let allProducts = [];
+  let displayedCount = 12; // سرعة الفتح وتحميل 12 منتج فقط متكرر لتحمل الضغط
   let cart = [];
   let currentCategory = 'all';
   let currentSubCategory = 'all';
@@ -422,8 +452,6 @@
   let liveOrders = 10;
 
   let currentAdminPhone = "";
-  let generatedID = "";
-  let currentAdminCategories = ["all"]; 
   let isSuperOwner = false;
 
   window.onload = function() {
@@ -431,6 +459,7 @@
       listenToStoreStats();
       startDynamicStatsCounter();
       updateCartUI();
+      checkSavedSession();
   };
 
   function switchView(view) {
@@ -447,17 +476,16 @@
               const data = doc.data();
               dbProducts.push({
                   id: doc.id,
-                  name: data.name || data.title || data.prodName || 'منتج بدون اسم',
-                  price: parseFloat(data.price || data.prodPrice || 0),
-                  cat: data.category || data.cat || data.prodCat || 'grocery',
+                  name: data.name || 'منتج بدون اسم',
+                  price: parseFloat(data.price || 0),
+                  cat: data.category || data.cat || 'grocery',
                   stock: data.stock !== undefined ? parseInt(data.stock) : 10,
-                  img: data.image || data.img || data.prodBase64 || 'https://via.placeholder.com/200',
-                  desc: data.description || data.desc || '',
+                  img: data.image || data.img || 'https://via.placeholder.com/200',
+                  desc: data.description || '',
                   isPinned: data.isPinned || false
               });
           });
 
-          // دمج منتجات البقالة الافتراضية مع المنتجات المضافة في قاعدة البيانات
           let combined = [...defaultGroceryProducts];
           dbProducts.forEach(dbP => {
               const idx = combined.findIndex(item => item.id === dbP.id);
@@ -503,12 +531,13 @@
 
   function renderProducts(query = '') {
       const grid = document.getElementById('productsGrid');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
 
       if (!isDataLoaded) {
           grid.innerHTML = `
               <div style="grid-column: 1/-1; text-align: center;">
                   <div class="spinner"></div>
-                  <p style="color: #64748b;">جاري جلب المنتجات...</p>
+                  <p style="color: #64748b;">جاري التحميل بأقصى سرعة...</p>
               </div>`;
           return;
       }
@@ -530,17 +559,21 @@
 
       if (filtered.length === 0) {
           grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b; font-weight: bold;">لا توجد منتجات مطابقة.</p>';
+          loadMoreBtn.style.display = 'none';
           return;
       }
 
+      // تحسين السرعة عن طريق فتح وتطبيق Pagination 
+      const slicedProducts = filtered.slice(0, displayedCount);
+
       let htmlBuffer = '';
-      filtered.forEach(p => {
+      slicedProducts.forEach(p => {
           const isOutOfStock = p.stock <= 0;
           htmlBuffer += `
               <div class="product-card" onclick="openModal('${p.id}')">
                   ${p.isPinned ? '<span class="pinned-tag">📌 مثبت</span>' : ''}
                   <div class="product-img-wrap">
-                      <img src="${p.img}" class="product-img" loading="lazy" alt="${p.name}">
+                      <img src="${p.img}" class="product-img" loading="lazy" decoding="async" alt="${p.name}">
                   </div>
                   <div class="product-info">
                       <div class="product-title">${p.name}</div>
@@ -555,12 +588,25 @@
               </div>
           `;
       });
+
       grid.innerHTML = htmlBuffer;
+
+      if (filtered.length > displayedCount) {
+          loadMoreBtn.style.display = 'block';
+      } else {
+          loadMoreBtn.style.display = 'none';
+      }
+  }
+
+  function loadMoreProducts() {
+      displayedCount += 12;
+      renderProducts();
   }
 
   function debounceSearch() {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
+          displayedCount = 12;
           renderProducts(document.getElementById('searchInput').value);
       }, 150);
   }
@@ -568,6 +614,7 @@
   function filterCategory(cat, btn) {
       currentCategory = cat;
       currentSubCategory = 'all';
+      displayedCount = 12;
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
@@ -583,6 +630,7 @@
 
   function filterSubCategory(subCat, btn) {
       currentSubCategory = subCat;
+      displayedCount = 12;
       document.querySelectorAll('.sub-cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderProducts();
@@ -729,58 +777,165 @@
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${msg}`, '_blank');
   }
 
-  async function checkUserStatus() {
-      let phone = document.getElementById('adminPhoneInput').value.trim();
-      if (!phone) return showLoginMsg("يرجى إدخال رقم الهاتف أولاً", "#ef4444");
-      
-      phone = phone.replace(/\s+/g, '');
+  // --- نظام الدخول الجديد وحفظ الجلسة مع إمكانية البلوك ---
+
+  async function checkSavedSession() {
+      const savedPhone = localStorage.getItem('admin_phone');
+      const savedPass = localStorage.getItem('admin_pass');
+
+      if (savedPhone && savedPass) {
+          const success = await validateCredentials(savedPhone, savedPass, true);
+          if (!success) {
+              logoutAdmin();
+          }
+      }
+  }
+
+  async function handleAdminLogin() {
+      const phone = document.getElementById('adminPhoneInput').value.trim();
+      const password = document.getElementById('adminPasswordInput').value.trim();
+
+      if (!phone || !password) return showLoginMsg("يرجى إدخال الموبايل والباسورد", "#ef4444");
+
+      const success = await validateCredentials(phone, password, false);
+      if (success) {
+          localStorage.setItem('admin_phone', phone);
+          localStorage.setItem('admin_pass', password);
+      }
+  }
+
+  async function validateCredentials(phone, password, isSilent = false) {
       currentAdminPhone = phone;
 
-      if (OWNER_NUMBERS.includes(currentAdminPhone)) {
-          isSuperOwner = true;
-          currentAdminCategories = ["all"];
-          grantAccess(true);
-          return;
+      // التأكد هل هو المالك المباشر
+      if (SUPER_OWNER_PHONES.includes(phone)) {
+          const last6 = phone.slice(-6);
+          const firstChar = password.charAt(0).toUpperCase();
+          if (password === firstChar + last6 || password === "A" + last6) {
+              isSuperOwner = true;
+              grantAccess(true);
+              return true;
+          }
       }
 
       try {
-          const doc = await db.collection('admin_permissions').doc(currentAdminPhone).get();
-          if (doc.exists && doc.data().status === 'approved') {
-              currentAdminCategories = doc.data().allowedCategories || ["all"];
-              grantAccess(false);
+          const doc = await db.collection('admins').doc(phone).get();
+          if (doc.exists) {
+              const data = doc.data();
+              
+              if (data.status === 'blocked') {
+                  if (!isSilent) showLoginMsg("❌ تم حظر حسابك من قبل المالك!", "#ef4444");
+                  return false;
+              }
+
+              if (data.password === password) {
+                  isSuperOwner = false;
+                  grantAccess(false);
+                  return true;
+              } else {
+                  if (!isSilent) showLoginMsg("❌ كلمة السر غير صحيحة!", "#ef4444");
+                  return false;
+              }
           } else {
-              sendUniqueUserID();
+              if (!isSilent) showLoginMsg("❌ الحساب غير مسجل! تواصل مع المالك لتنشيطه.", "#ef4444");
+              return false;
           }
       } catch (e) {
-          showLoginMsg("حدث خطأ، حاول مرة أخرى", "#ef4444");
+          if (!isSilent) showLoginMsg("حدث خطأ في الاتصال، حاول مجدداً", "#ef4444");
+          return false;
       }
   }
 
-  function sendUniqueUserID() {
-      generatedID = "ID-" + Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('stepPhone').style.display = 'none';
-      document.getElementById('stepOTP').style.display = 'block';
-
-      const waMsg = encodeURIComponent(`طلب تسجيل مسؤول جديد\nالهاتف: ${currentAdminPhone}\nمعرف (ID): ${generatedID}`);
-      document.getElementById('waSendBtn').href = `https://wa.me/${OWNER_WHATSAPP}?text=${waMsg}`;
-      showLoginMsg(`معرفك هو: (${generatedID}). أرسله للمالك للتأكيد.`, "#0284c7");
-  }
-
-  async function verifyOTP() {
-      const input = document.getElementById('otpInput').value.trim();
-      if (input.toUpperCase() !== generatedID.toUpperCase() && input !== "9999") { 
-          return showLoginMsg("❌ معرف غير صحيح!", "#ef4444");
+  function grantAccess(isOwner) {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      document.getElementById('adminPhoneBadge').innerText = `المسؤول: ${currentAdminPhone} ${isOwner ? '(المالك 👑)' : ''}`;
+      
+      if (isOwner) {
+          document.getElementById('superOwnerSection').style.display = 'block';
+          loadAdminsList();
+      } else {
+          document.getElementById('superOwnerSection').style.display = 'none';
       }
 
-      await db.collection('admin_permissions').doc(currentAdminPhone).set({
-          phone: currentAdminPhone,
-          userId: generatedID,
-          status: 'pending',
-          allowedCategories: []
+      populateAdminCategorySelect();
+  }
+
+  function logoutAdmin() {
+      localStorage.removeItem('admin_phone');
+      localStorage.removeItem('admin_pass');
+      document.getElementById('loginOverlay').style.display = 'flex';
+      document.getElementById('adminContent').style.display = 'none';
+      document.getElementById('adminPhoneInput').value = '';
+      document.getElementById('adminPasswordInput').value = '';
+      showLoginMsg("تم تسجيل الخروج بنجاح", "#0284c7");
+  }
+
+  // --- خاص بالمالك: إضافة وتسليم الباسورد عبر الواتس وتطبيق البلوك ---
+
+  async function createOrUpdateAdmin() {
+      const phone = document.getElementById('newAdminPhone').value.trim();
+      let char = document.getElementById('newAdminChar').value.trim().toUpperCase();
+
+      if (!phone || phone.length < 10) return alert("يرجى أدخال رقم هاتف صحيح");
+      if (!char) char = "A";
+
+      const last6 = phone.slice(-6);
+      const generatedPass = char + last6;
+
+      await db.collection('admins').doc(phone).set({
+          phone: phone,
+          password: generatedPass,
+          status: 'active',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      alert(`تم تفعيل/تحديث الحساب بنجاح!\nكلمة السر هي: ${generatedPass}`);
+      loadAdminsList();
+  }
+
+  function sendPassToWhatsApp() {
+      const phone = document.getElementById('newAdminPhone').value.trim();
+      let char = document.getElementById('newAdminChar').value.trim().toUpperCase() || "A";
+
+      if (!phone || phone.length < 10) return alert("أدخل رقم الموبايل لتتمكن من إرسال الباسورد له");
+
+      const last6 = phone.slice(-6);
+      const generatedPass = char + last6;
+
+      const waText = encodeURIComponent(`أهلاً بك! تم إنشاء حساب مسؤول لك في ماركت نت 🛒\nرقم الهاتف: ${phone}\nكلمة السر الخاصة بك هي: ${generatedPass}`);
+      window.open(`https://wa.me/2${phone}?text=${waText}`, '_blank');
+  }
+
+  function loadAdminsList() {
+      db.collection('admins').onSnapshot(snapshot => {
+          const tbody = document.getElementById('adminsListTable');
+          if (!tbody) return;
+          tbody.innerHTML = '';
+
+          snapshot.forEach(doc => {
+              const data = doc.data();
+              const isBlocked = data.status === 'blocked';
+              tbody.innerHTML += `
+                  <tr>
+                      <td><strong>${data.phone}</strong></td>
+                      <td><code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">${data.password}</code></td>
+                      <td><span style="color:${isBlocked ? '#ef4444' : '#16a34a'}; font-weight:bold;">${isBlocked ? 'محظور ❌' : 'نشط 🟢'}</span></td>
+                      <td>
+                          <button class="btn ${isBlocked ? 'btn-success' : 'btn-danger'}" onclick="toggleBlockAdmin('${data.phone}', ${isBlocked})">
+                              ${isBlocked ? 'فك الحظر 🔓' : 'عمل بلوك 🚫'}
+                          </button>
+                      </td>
+                  </tr>
+              `;
+          });
       });
+  }
 
-      document.getElementById('stepOTP').style.display = 'none';
-      showLoginMsg("📩 تم إرسال الطلب للمالك بانتظار التفعيل.", "#0284c7");
+  async function toggleBlockAdmin(phone, isCurrentlyBlocked) {
+      const newStatus = isCurrentlyBlocked ? 'active' : 'blocked';
+      await db.collection('admins').doc(phone).update({ status: newStatus });
+      alert(`تم ${isCurrentlyBlocked ? 'فك الحظر عن' : 'حظر'} المسؤول ${phone}`);
   }
 
   function showLoginMsg(text, color) {
@@ -791,20 +946,11 @@
       msg.style.display = "block";
   }
 
-  function grantAccess(isOwner) {
-      document.getElementById('loginOverlay').style.display = 'none';
-      document.getElementById('adminContent').style.display = 'block';
-      document.getElementById('adminPhoneBadge').innerText = `المسؤول: ${currentAdminPhone} ${isOwner ? '(المالك 👑)' : ''}`;
-      populateAdminCategorySelect();
-  }
-
   function populateAdminCategorySelect() {
       const catSelect = document.getElementById('prodCat');
       catSelect.innerHTML = '';
       for (const [key, name] of Object.entries(CATEGORY_NAMES)) {
-          if (isSuperOwner || currentAdminCategories.includes('all') || currentAdminCategories.includes(key)) {
-              catSelect.innerHTML += `<option value="${key}">${name}</option>`;
-          }
+          catSelect.innerHTML += `<option value="${key}">${name}</option>`;
       }
   }
 
