@@ -3,97 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ماركت نت</title>
+  <title>ماركت نت - Market Net</title>
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f6f9; padding-bottom: 60px; }
+    body { background-color: #f4f6f9; padding-bottom: 90px; }
+
+    /* الهيدر واللوجو المدمج */
+    header { background: linear-gradient(135deg, #0084c7, #005681); color: white; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    .brand-logo { font-size: 22px; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .brand-logo span { background: #25D366; color: white; padding: 2px 8px; border-radius: 6px; font-size: 14px; text-transform: uppercase; }
+
+    .container { max-width: 600px; margin: 0 auto; padding: 12px; }
+
+    /* شريط البحث */
+    .search-box { margin-bottom: 12px; }
+    .search-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+    .search-input:focus { border-color: #0084c7; box-shadow: 0 0 5px rgba(0,132,199,0.3); }
+
+    /* شريط الأقسام الأفقي */
+    .categories-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; scrollbar-width: none; }
+    .categories-bar::-webkit-scrollbar { display: none; }
+    .cat-btn { white-space: nowrap; padding: 8px 14px; background: white; border: 1px solid #e5e7eb; border-radius: 20px; font-size: 13px; font-weight: bold; color: #4b5563; cursor: pointer; }
+    .cat-btn.active { background: #0084c7; color: white; border-color: #0084c7; }
+
+    /* تقسيم المنتجات إلى نصفين (2 Columns) */
+    .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .product-card { background: white; border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04); position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+    .badge-discount { position: absolute; top: 8px; right: 8px; background: #e11d48; color: white; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; z-index: 2; }
+    .product-img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+    .product-title { font-size: 13px; font-weight: bold; color: #1f2937; margin: 8px 0 4px 0; height: 32px; overflow: hidden; }
+    .product-price { font-size: 14px; color: #16a34a; font-weight: 800; margin-bottom: 8px; }
+    .btn-add { background: #0084c7; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-add:active { transform: scale(0.98); }
+
+    /* السلة العائمة */
+    .cart-floating { position: fixed; bottom: 15px; left: 15px; background: #25D366; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; display: flex; align-items: center; gap: 8px; }
+
+    /* النافذة المنبثقة (Modal) */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; width: 100%; max-width: 500px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 12px; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+
+    /* نماذج وحقول السلة */
+    .form-group { margin-bottom: 10px; text-align: right; }
+    .form-group label { display: block; font-size: 12px; font-weight: bold; color: #374151; margin-bottom: 4px; }
+    .form-input { width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; outline: none; }
     
-    header { background: #0084c7; color: white; padding: 15px 20px; text-align: center; font-size: 20px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    
-    .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-    
-    .section-title { font-size: 18px; margin-bottom: 15px; color: #333; border-right: 4px solid #0084c7; padding-right: 10px; }
-    
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    
-    .product-card { background: white; border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    .product-title { font-size: 15px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-    .product-price { font-size: 14px; color: #27ae60; font-weight: bold; margin-bottom: 10px; }
-    
-    .btn-add { background: #0084c7; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-    .btn-add:hover { background: #00699e; }
-    
-    .checkout-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 20px; }
-    .payment-options { display: flex; gap: 10px; margin: 15px 0; }
-    .payment-btn { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; text-align: center; font-weight: bold; }
-    .payment-btn.active { border-color: #0084c7; background: #e0f2fe; color: #0084c7; }
-    
-    .payment-details { background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 14px; color: #334155; margin-bottom: 15px; text-align: center; font-weight: bold; }
+    .pay-options { display: flex; gap: 6px; margin-top: 6px; }
+    .pay-btn { flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; background: white; font-size: 11px; font-weight: bold; cursor: pointer; }
+    .pay-btn.active { border-color: #0084c7; background: #e0f2fe; color: #0084c7; }
+    .pay-info { background: #f8fafc; padding: 8px; border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; margin: 8px 0; border: 1px dashed #0084c7; }
   </style>
 </head>
 <body>
 
-  <header>🛒 ماركت نت</header>
+  <header>
+    <div class="brand-logo">
+      🛒 ماركت نت <span>Market Net</span>
+    </div>
+  </header>
 
   <div class="container">
-    <div class="section-title">قسم البقالة</div>
-    
-    <!-- عرض المنتجات مباشرة دون تقسيم فرعي -->
-    <div class="products-grid" id="grocery-products">
-      <!-- يتم تحميل منتجات البقالة هنا -->
+    <!-- البحث -->
+    <div class="search-box">
+      <input type="text" class="search-input" id="search-input" placeholder="🔍 ابحث عن أي منتج..." oninput="filterProducts()">
     </div>
 
-    <div class="checkout-section">
-      <div class="section-title">طريقة الدفع</div>
-      <div class="payment-options">
-        <button class="payment-btn active" onclick="selectPayment('instapay')">InstaPay</button>
-        <button class="payment-btn" onclick="selectPayment('vodafone')">فودافون كاش</button>
+    <!-- الأقسام -->
+    <div class="categories-bar">
+      <button class="cat-btn active" onclick="filterCategory('الكل', this)">الكل</button>
+      <button class="cat-btn" onclick="filterCategory('عروض يومية', this)">🏷️ عروض يومية</button>
+      <button class="cat-btn" onclick="filterCategory('منظفات', this)">منظفات</button>
+      <button class="cat-btn" onclick="filterCategory('مجمدات', this)">مجمدات</button>
+      <button class="cat-btn" onclick="filterCategory('طيور طازجة', this)">طيور طازجة</button>
+      <button class="cat-btn" onclick="filterCategory('بقالة', this)">بقالة</button>
+      <button class="cat-btn" onclick="filterCategory('عطارة', this)">عطارة</button>
+    </div>
+
+    <!-- شبكة المنتجات (مقسمة إلى نصفين) -->
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- زر السلة العائم -->
+  <button class="cart-floating" onclick="toggleCart(true)">
+    🛒 السلة (<span id="cart-count">0</span>)
+  </button>
+
+  <!-- نافذة السلة والطلب -->
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🛒 سلة الشراء</h3>
+        <button class="close-btn" onclick="toggleCart(false)">✕</button>
       </div>
 
-      <div class="payment-details" id="payment-info">
-        برجاء التحويل على رقم الانستا باي: <span style="color:#0084c7;">01127491224</span>
+      <div id="cart-items" style="margin-bottom: 10px;"></div>
+      <div style="font-weight: bold; font-size: 15px; margin-bottom: 12px; text-align: left;" id="cart-total">الإجمالي: 0 ج.م</div>
+
+      <!-- بيانات العميل -->
+      <div class="form-group">
+        <label>الاسم بالكامل</label>
+        <input type="text" id="cust-name" class="form-input" placeholder="أدخل اسمك">
       </div>
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" id="cust-phone" class="form-input" placeholder="أدخل رقم هاتفك">
+      </div>
+      <div class="form-group">
+        <label>العنوان بالتفصيل</label>
+        <input type="text" id="cust-address" class="form-input" placeholder="المنطقة / الشارع / رقم العقار">
+      </div>
+
+      <!-- وسيلة الدفع -->
+      <div class="form-group">
+        <label>طريقة الدفع</label>
+        <div class="pay-options">
+          <button class="pay-btn active" id="p-voda" onclick="selectPay('voda')">فودافون كاش</button>
+          <button class="pay-btn" id="p-insta" onclick="selectPay('insta')">InstaPay</button>
+          <button class="pay-btn" id="p-cash" onclick="selectPay('cash')">كاش عند الاستلام</button>
+        </div>
+        <div class="pay-info" id="pay-info-text">التحويل على رقم فودافون كاش: 01012517345</div>
+      </div>
+
+      <button class="btn-add" style="background:#25D366; padding: 12px; font-size: 14px;" onclick="checkout()">📲 تأكيد الطلب عبر الواتساب</button>
+    </div>
+  </div>
+
+  <!-- نافذة تفاصيل المنتج -->
+  <div class="modal" id="details-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="det-title">تفاصيل المنتج</h3>
+        <button class="close-btn" onclick="toggleDetails(false)">✕</button>
+      </div>
+      <img id="det-img" src="" style="width:100%; height:180px; object-fit:cover; border-radius:10px; margin-bottom:10px;">
+      <p id="det-desc" style="font-size:13px; color:#4b5563; margin-bottom:10px; text-align:right;"></p>
+      <div id="det-price" style="font-size:16px; font-weight:bold; color:#16a34a; margin-bottom:12px;"></div>
+      <button class="btn-add" id="det-add-btn">إضافة إلى السلة</button>
     </div>
   </div>
 
   <script>
-    // قائمة منتجات البقالة المباشرة
-    const groceryProducts = [
-      { id: 1, name: "ارز مصري 1كجم", price: "30 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 2, name: "زيت عباد الشمس 1 ليتر", price: "65 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 3, name: "سكر أبيض 1كجم", price: "27 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 4, name: "مكرونة 400 جرام", price: "12 ج.م", img: "https://via.placeholder.com/150" }
+    const ADMIN_PHONE = "201012517345";
+    let selectedCategory = 'الكل';
+    let selectedPayMethod = 'voda';
+    let cart = [];
+
+    // البيانات محملة محلياً لضمان السرعة الفائقة
+    const products = [
+      { id: 1, category: "عروض يومية", name: "عرض زيت + أرز مصري", price: 95, isOffer: true, img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300", desc: "عرض خاص مكون من زجاجة زيت عباد الشمس 1 ليتر مع كيس أرز مصري درجة أولى 1 كجم." },
+      { id: 2, category: "منظفات", name: "مسحوق غسيل أتوماتيك 2k", price: 110, isOffer: false, img: "https://images.unsplash.com/photo-1585830812416-a6c86bb14576?w=300", desc: "مسحوق غسيل للملابس البيضاء والألوان برائحة اللافندر." },
+      { id: 3, category: "مجمدات", name: "برجر بقر فاخر 8 قطع", price: 85, isOffer: false, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300", desc: "شرائح برجر لحم بقر خالص جاهز للشوي والتحمير." },
+      { id: 4, category: "طيور طازجة", name: "دجاج بلدي طازج 1.2k", price: 130, isOffer: false, img: "https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=300", desc: "دجاج بلدي طازج مذبوح يومياً وفق الشريعة الإسلامية." },
+      { id: 5, category: "بقالة", name: "مكرونة فرن 400 جرام", price: 12, isOffer: false, img: "https://images.unsplash.com/photo-1621996346565-e3def6164286?w=300", desc: "مكرونة مصنوعة من أجود أنواع القمح الصلب." },
+      { id: 6, category: "عطارة", name: "فلفل أسود حصى 100 جرام", price: 35, isOffer: false, img: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=300", desc: "فلفل أسود طبيعي ممتاز عالي الجودة والرائحة." }
     ];
 
-    function renderProducts() {
-      const container = document.getElementById('grocery-products');
-      container.innerHTML = groceryProducts.map(p => `
+    function renderProducts(items) {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = items.map(p => `
         <div class="product-card">
-          <img src="${p.img}" alt="${p.name}">
+          ${p.isOffer ? '<div class="badge-discount">خصم 🏷️</div>' : ''}
+          <img src="${p.img}" class="product-img" onclick="showDetails(${p.id})">
           <div class="product-title">${p.name}</div>
-          <div class="product-price">${p.price}</div>
-          <button class="btn-add">إضافة للسلة</button>
+          <div class="product-price">${p.price} ج.م</div>
+          <button class="btn-add" onclick="addToCart(${p.id})">إضافة للسلة</button>
         </div>
       `).join('');
     }
 
-    function selectPayment(type) {
-      const btns = document.querySelectorAll('.payment-btn');
-      const infoBox = document.getElementById('payment-info');
+    function filterCategory(cat, btn) {
+      selectedCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterProducts();
+    }
 
-      btns.forEach(btn => btn.classList.remove('active'));
+    function filterProducts() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const filtered = products.filter(p => {
+        const matchesCat = (selectedCategory === 'الكل' || p.category === selectedCategory);
+        const matchesSearch = p.name.toLowerCase().includes(search);
+        return matchesCat && matchesSearch;
+      });
+      renderProducts(filtered);
+    }
 
-      if (type === 'instapay') {
-        btns[0].classList.add('active');
-        infoBox.innerHTML = 'برجاء التحويل على رقم الانستا باي: <span style="color:#0084c7;">01127491224</span>';
-      } else if (type === 'vodafone') {
-        btns[1].classList.add('active');
-        infoBox.innerHTML = 'برجاء التحويل على رقم فودافون كاش: <span style="color:#e11d48;">01012517345</span>';
+    function addToCart(id) {
+      const item = products.find(p => p.id === id);
+      cart.push(item);
+      updateCart();
+    }
+
+    function updateCart() {
+      document.getElementById('cart-count').textContent = cart.length;
+      const container = document.getElementById('cart-items');
+      container.innerHTML = cart.map((item, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:13px;">
+          <span>${item.name}</span>
+          <span>${item.price} ج.م <button onclick="removeFromCart(${idx})" style="color:red; border:none; background:none; cursor:pointer;">✕</button></span>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('cart-total').textContent = `الإجمالي: ${total} ج.م`;
+    }
+
+    function removeFromCart(idx) {
+      cart.splice(idx, 1);
+      updateCart();
+    }
+
+    function toggleCart(show) {
+      document.getElementById('cart-modal').classList.toggle('active', show);
+    }
+
+    function toggleDetails(show) {
+      document.getElementById('details-modal').classList.toggle('active', show);
+    }
+
+    function showDetails(id) {
+      const p = products.find(item => item.id === id);
+      document.getElementById('det-title').textContent = p.name;
+      document.getElementById('det-img').src = p.img;
+      document.getElementById('det-desc').textContent = p.desc;
+      document.getElementById('det-price').textContent = `${p.price} ج.م`;
+      document.getElementById('det-add-btn').onclick = () => { addToCart(p.id); toggleDetails(false); };
+      toggleDetails(true);
+    }
+
+    function selectPay(type) {
+      selectedPayMethod = type;
+      document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+      const info = document.getElementById('pay-info-text');
+
+      if(type === 'voda') {
+        document.getElementById('p-voda').classList.add('active');
+        info.textContent = 'التحويل على رقم فودافون كاش: 01012517345';
+      } else if(type === 'insta') {
+        document.getElementById('p-insta').classList.add('active');
+        info.textContent = 'التحويل على رقم انستا باي: 01127491224';
+      } else {
+        document.getElementById('p-cash').classList.add('active');
+        info.textContent = 'الدفع نقداً عند استلام الطلب.';
       }
     }
 
-    renderProducts();
+    function checkout() {
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
+
+      if(cart.length === 0) return alert("السلة فارغة!");
+      if(!name || !phone || !address) return alert("يرجى ملء جميع البيانات (الاسم، الهاتف، العنوان بالتفصيل).");
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      const itemsList = cart.map(i => `- ${i.name} (${i.price} ج.م)`).join('%0A');
+      const payText = selectedPayMethod === 'voda' ? 'فودافون كاش (01012517345)' : selectedPayMethod === 'insta' ? 'انستا باي (01127491224)' : 'كاش عند الاستلام';
+
+      const msg = `🛒 *طلب جديد - ماركت نت Market Net*%0A%0A` +
+                  `👤 *الاسم:* ${encodeURIComponent(name)}%0A` +
+                  `📱 *الهاتف:* ${encodeURIComponent(phone)}%0A` +
+                  `📍 *العنوان:* ${encodeURIComponent(address)}%0A%0A` +
+                  `📦 *الطلبات:*%0A${itemsList}%0A%0A` +
+                  `💰 *الإجمالي:* ${total} ج.م%0A` +
+                  `💳 *طريقة الدفع:* ${encodeURIComponent(payText)}`;
+
+      window.open(`https://wa.me/${ADMIN_PHONE}?text=${msg}`, '_blank');
+    }
+
+    renderProducts(products);
   </script>
 
 </body>
