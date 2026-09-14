@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ماركت نت - طلب الدخول</title>
+  <title>ماركت نت - الدخول للنظام</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,7 +24,7 @@
       border-radius: 16px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.05);
       width: 100%;
-      max-width: 380px;
+      max-width: 420px;
       text-align: center;
     }
     .logo {
@@ -32,37 +32,11 @@
       font-weight: bold;
       color: #0084c7;
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
     .subtitle {
       color: #6b7280;
       font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .tabs {
-      display: flex;
-      border-bottom: 2px solid #e5e7eb;
       margin-bottom: 20px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: none;
-      border: none;
-      font-size: 14px;
-      font-weight: bold;
-      color: #6b7280;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.3s ease;
-    }
-    .tab-btn.active {
-      color: #0084c7;
-      border-bottom: 2px solid #0084c7;
     }
     .form-group {
       margin-bottom: 16px;
@@ -82,118 +56,162 @@
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s;
-    }
-    .input-field:focus {
-      border-color: #0084c7;
     }
     .btn-submit {
       width: 100%;
       padding: 12px;
-      background-color: #25D366;
+      background-color: #0084c7;
       color: #ffffff;
       border: none;
       border-radius: 8px;
       font-size: 15px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 8px;
-      transition: background-color 0.2s;
+    }
+    .admin-panel {
+      margin-top: 20px;
+      border-top: 2px solid #e5e7eb;
+      padding-top: 15px;
+      text-align: right;
+    }
+    .user-item {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      background: #f9fafb;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      border: 1px solid #e5e7eb;
     }
-    .btn-submit:hover {
-      background-color: #1ebc57;
+    .btn-approve {
+      background: #25D366;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
     }
-    .hidden {
-      display: none;
+    .btn-reject {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
     }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
 
   <div class="card">
     <div class="logo">🛒 ماركت نت</div>
-    <div class="subtitle" id="form-subtitle">طلب موافقة دخول النظام</div>
+    <div class="subtitle">أدخل رقم الهاتف للدخول</div>
 
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
-      <button class="tab-btn" onclick="switchTab('register')">طلب حساب جديد</button>
+    <!-- نموذج الدخول برقم الهاتف فقط -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" id="user-phone" class="input-field" placeholder="أدخل رقم هاتفك" required>
+      </div>
+      <button type="submit" class="btn-submit">دخول</button>
+    </form>
+
+    <!-- لوحة التحكم الخاصة بك (تظهر فقط عند كتابة رقمك 01012517345) -->
+    <div id="admin-panel" class="admin-panel hidden">
+      <h3>لوحة إدارة الموافقات (المالك)</h3>
+      <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">الطلبات المعلقة للوصول للموقع:</p>
+      <div id="pending-list"></div>
     </div>
-
-    <!-- نموذج تسجيل الدخول -->
-    <form id="login-form" onsubmit="handleAuth(event, 'تسجيل دخول')">
-      <div class="form-group">
-        <label>الاسم بالكامل</label>
-        <input type="text" id="login-name" class="input-field" placeholder="أدخل اسمك" required>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="login-phone" class="input-field" placeholder="أدخل رقم الهاتف" required>
-      </div>
-      <button type="submit" class="btn-submit">📲 إرسال طلب الدخول للآدمن</button>
-    </form>
-
-    <!-- نموذج حساب جديد -->
-    <form id="register-form" class="hidden" onsubmit="handleAuth(event, 'حساب جديد')">
-      <div class="form-group">
-        <label>الاسم بالكامل</label>
-        <input type="text" id="reg-name" class="input-field" placeholder="أدخل اسمك الكامل" required>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="reg-phone" class="input-field" placeholder="أدخل رقم الهاتف الخاص بك" required>
-      </div>
-      <button type="submit" class="btn-submit">✨ إرسال طلب التسجيل للآدمن</button>
-    </form>
   </div>
 
   <script>
-    const ADMIN_PHONE = "201012517345";
+    const OWNER_PHONE = "01012517345";
 
-    function switchTab(tab) {
-      const loginForm = document.getElementById('login-form');
-      const registerForm = document.getElementById('register-form');
-      const subtitle = document.getElementById('form-subtitle');
-      const tabs = document.querySelectorAll('.tab-btn');
+    // جلب قائمة المستخدمين من LocalStorage أو إنشاؤها
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users_db')) || {};
+    }
 
-      if (tab === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        tabs[0].classList.add('active');
-        tabs[1].classList.remove('active');
-        subtitle.textContent = "طلب موافقة دخول النظام";
-      } else {
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-        tabs[0].classList.remove('active');
-        tabs[1].classList.add('active');
-        subtitle.textContent = "طلب إنشاء حساب جديد";
+    function saveUsers(users) {
+      localStorage.setItem('users_db', JSON.stringify(users));
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('user-phone').value.trim();
+      const adminPanel = document.getElementById('admin-panel');
+
+      // 1. إذا كان المدخل هو رقم المالك
+      if (phone === OWNER_PHONE) {
+        alert("أهلاً بك يا مالك الموقع! تم فتح لوحة التحكم بالطلبات.");
+        adminPanel.classList.remove('hidden');
+        renderPendingUsers();
+        return;
+      }
+
+      adminPanel.classList.add('hidden');
+      let users = getUsers();
+
+      // 2. إذا كان المستخدم موجود ومقبول سابقاً
+      if (users[phone] && users[phone].status === 'approved') {
+        alert("تم دخولك بنجاح إلى الموقع!");
+        // هنا يمكنك توجيهه لصفحة المتجر الرئيسية
+        // window.location.href = "home.html";
+      } 
+      // 3. إذا كان طلبه قيد الانتظار
+      else if (users[phone] && users[phone].status === 'pending') {
+        alert("طلبك قيد الانتظار، في انتظار موافقة المالك.");
+      } 
+      // 4. إذا كان يسجل أول مرة (إنشاء طلب جديد)
+      else {
+        users[phone] = { status: 'pending' };
+        saveUsers(users);
+        alert("تم إرسال طلبك إلى المالك، يرجى الانتظار لحين الموافقة.");
       }
     }
 
-    function handleAuth(e, type) {
-      e.preventDefault();
-      
-      const name = type === 'تسجيل دخول' 
-        ? document.getElementById('login-name').value 
-        : document.getElementById('reg-name').value;
-        
-      const phone = type === 'تسجيل دخول' 
-        ? document.getElementById('login-phone').value 
-        : document.getElementById('reg-phone').value;
+    // عرض قائمة المنتظرين في لوحة المالك
+    function renderPendingUsers() {
+      const pendingList = document.getElementById('pending-list');
+      const users = getUsers();
+      pendingList.innerHTML = '';
 
-      const message = `مرحباً آدمن، هناك طلب (${type}) جديد:%0A` +
-                      `👤 الاسم: ${encodeURIComponent(name)}%0A` +
-                      `📱 الرقم: ${encodeURIComponent(phone)}%0A` +
-                      `يرجى المراجعة والموافقة على الدخول.`;
+      let hasPending = false;
+      for (let phone in users) {
+        if (users[phone].status === 'pending') {
+          hasPending = true;
+          const div = document.createElement('div');
+          div.className = 'user-item';
+          div.innerHTML = `
+            <span>📱 ${phone}</span>
+            <div>
+              <button class="btn-approve" onclick="updateStatus('${phone}', 'approved')">موافقة</button>
+              <button class="btn-reject" onclick="updateStatus('${phone}', 'rejected')">رفض</button>
+            </div>
+          `;
+          pendingList.appendChild(div);
+        }
+      }
 
-      const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${message}`;
-      
-      alert("سيتم تحويلك الآن إلى الواتساب لإرسال طلب الموافقة إلى المسؤول.");
-      window.open(whatsappUrl, '_blank');
+      if (!hasPending) {
+        pendingList.innerHTML = '<p style="font-size: 12px; color: #9ca3af;">لا توجد طلبات معلقة حالياً.</p>';
+      }
+    }
+
+    // قبول أو رفض الطلب من قبل المالك
+    function updateStatus(phone, newStatus) {
+      let users = getUsers();
+      if (newStatus === 'rejected') {
+        delete users[phone];
+      } else {
+        users[phone].status = newStatus;
+      }
+      saveUsers(users);
+      renderPendingUsers();
+      alert(`تم ${newStatus === 'approved' ? 'الموافقة على' : 'رفض'} الرقم ${phone}`);
     }
   </script>
 
