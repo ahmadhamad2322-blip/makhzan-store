@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ماركت نت 🛒 - المتجر الإلكتروني</title>
+    <title>MarketNet | ماركت نت 🛒</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -14,7 +14,11 @@
 
         header { background: #0f172a; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
+        
+        /* شعار المتجر بلغة فرانكو / مزيج عربي وإنجليزي أنيق */
+        .logo { font-size: 20px; font-weight: 900; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+        .logo-en { background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.5px; }
+        .logo-ar { color: #f8fafc; font-size: 17px; background: rgba(56, 189, 248, 0.15); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3); }
 
         .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .cart-badge { background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; }
@@ -22,19 +26,19 @@
         .stats-bar { background: #1e293b; color: #94a3b8; padding: 8px 15px; text-align: center; font-size: 12px; display: flex; justify-content: center; gap: 20px; }
         .stats-num { color: #38bdf8; font-weight: bold; }
 
-        /* مربع بحث عائم */
+        /* مربع بحث عائم سريع */
         .floating-search { position: sticky; top: 65px; z-index: 90; padding: 10px 15px; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(5px); }
         .search-box { max-width: 600px; margin: 0 auto; position: relative; }
         .search-box input { width: 100%; padding: 10px 40px 10px 15px; border-radius: 25px; border: 2px solid #38bdf8; outline: none; font-size: 14px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .search-box .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; color: #0284c7; }
 
-        /* الأقسام والتصنيفات */
+        /* التصنيفات */
         .categories-container { max-width: 1200px; margin: 10px auto; padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .categories-container::-webkit-scrollbar { display: none; }
         .cat-btn { background: white; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; color: #475569; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active, .cat-btn:hover { background: #0284c7; color: white; border-color: #0284c7; }
 
-        /* المنتجات (2 في كل صف) */
+        /* المنتجات (2 في الصف) */
         .products-grid { max-width: 1200px; margin: 15px auto; padding: 0 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) {
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
@@ -97,7 +101,11 @@
 
 <header>
     <div class="header-container">
-        <a href="#" class="logo">🛒 ماركت نت</a>
+        <a href="#" class="logo">
+            <span>🛒</span>
+            <span class="logo-en">MarketNet</span>
+            <span class="logo-ar">ماركت نت</span>
+        </a>
         <button class="cart-icon-btn" onclick="toggleCart()">
             🛒 السلة
             <span class="cart-badge" id="cartCount">0</span>
@@ -110,11 +118,11 @@
     <div>📦 الطلبات: <span class="stats-num" id="ordersCount">0</span></div>
 </div>
 
-<!-- مربع بحث عائم -->
+<!-- مربع بحث عائم محصن وسريع -->
 <div class="floating-search">
     <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ابحث عن اسم المنتج هنا...">
+        <input type="text" id="searchInput" oninput="handleSearchDebounced()" placeholder="ابحث عن اسم المنتج هنا...">
     </div>
 </div>
 
@@ -131,12 +139,12 @@
     <button class="cat-btn" onclick="filterCategory('accessories', this)">💍 اكسسوارات بنات</button>
 </div>
 
-<!-- شبكة المنتجات (2 في الصف) -->
+<!-- شبكة المنتجات -->
 <div class="products-grid" id="productsGrid">
     <p style="text-align: center; grid-column: 1/-1; padding: 40px; color: #64748b;">جاري تحميل المنتجات...</p>
 </div>
 
-<!-- نافذة عرض تفاصيل المنتج عند الضغط عليه -->
+<!-- نافذة عرض تفاصيل المنتج -->
 <div class="modal" id="productModal">
     <div class="modal-content">
         <button class="modal-close" onclick="closeModal()">✕</button>
@@ -224,6 +232,7 @@
   let allProducts = [];
   let cart = [];
   let currentCategory = 'all';
+  let searchTimeout = null;
 
   window.onload = function() {
       incrementVisitorCount();
@@ -259,14 +268,14 @@
 
   function renderProducts(query = '') {
       const grid = document.getElementById('productsGrid');
-      grid.innerHTML = '';
 
       let filtered = currentCategory === 'all' 
           ? allProducts 
           : allProducts.filter(p => p.cat === currentCategory);
 
       if (query.trim() !== '') {
-          filtered = filtered.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+          const q = query.toLowerCase().trim();
+          filtered = filtered.filter(p => p.name && p.name.toLowerCase().includes(q));
       }
 
       if (filtered.length === 0) {
@@ -274,14 +283,15 @@
           return;
       }
 
+      let cardsHTML = '';
       filtered.forEach(p => {
           const stockNum = (p.stock !== undefined && p.stock !== null) ? parseInt(p.stock) : 10;
           const isOutOfStock = stockNum <= 0;
 
-          grid.innerHTML += `
+          cardsHTML += `
               <div class="product-card" onclick="openModal('${p.id}')">
                   <div class="product-img-wrap">
-                      <img src="${p.img || 'https://via.placeholder.com/200'}" class="product-img" alt="${p.name}">
+                      <img src="${p.img || 'https://via.placeholder.com/200'}" class="product-img" alt="${p.name}" loading="lazy">
                   </div>
                   <div class="product-info">
                       <div class="product-title">${p.name}</div>
@@ -296,11 +306,17 @@
               </div>
           `;
       });
+
+      grid.innerHTML = cardsHTML;
   }
 
-  function handleSearch() {
-      const q = document.getElementById('searchInput').value;
-      renderProducts(q);
+  /* تحسين البحث بالتأخير الخفيف (Debounce) لسرعة استجابة فائقة */
+  function handleSearchDebounced() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+          const q = document.getElementById('searchInput').value;
+          renderProducts(q);
+      }, 150);
   }
 
   function filterCategory(cat, btn) {
@@ -310,7 +326,6 @@
       renderProducts(document.getElementById('searchInput').value);
   }
 
-  /* فتح تفاصيل المنتج ومعالجة المخزون بدقة */
   function openModal(prodId) {
       const p = allProducts.find(item => item.id === prodId);
       if (!p) return;
@@ -330,7 +345,6 @@
       btn.disabled = isOutOfStock;
       btn.innerText = !isOutOfStock ? 'إضافة للسلة 🛒' : 'غير متوفر بالمخزن';
       
-      // إعادة ربط الزر بالمنتج الحالي حصراً
       btn.onclick = function() {
           addToCart(p.id);
           closeModal();
