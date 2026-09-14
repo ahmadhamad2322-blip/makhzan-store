@@ -151,7 +151,7 @@
   </div>
 
   <script>
-    const ADMIN_PHONE = "201012517345"; // الرقم بصيغة دولية
+    const ADMIN_PHONE = "201012517345";
 
     function switchTab(tab) {
       const loginForm = document.getElementById('login-form');
@@ -185,13 +185,11 @@
         ? document.getElementById('login-phone').value 
         : document.getElementById('reg-phone').value;
 
-      // تجهيز نص الرسالة للواتساب
       const message = `مرحباً آدمن، هناك طلب (${type}) جديد:%0A` +
                       `👤 الاسم: ${encodeURIComponent(name)}%0A` +
                       `📱 الرقم: ${encodeURIComponent(phone)}%0A` +
                       `يرجى المراجعة والموافقة على الدخول.`;
 
-      // فتح الواتساب مباشرة لرقمك
       const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${message}`;
       
       alert("سيتم تحويلك الآن إلى الواتساب لإرسال طلب الموافقة إلى المسؤول.");
