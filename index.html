@@ -1,783 +1,2154 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>متجر نت | بقالة ومستلزمات البيت أونلاين</title>
-
-    <meta name="description"
-          content="متجر نت - كل احتياجات البيت من بقالة ومجمدات وطيور ومنظفات وعطارة ومستحضرات تجميل وإكسسوارات. اطلب أونلاين والتوصيل 25 جنيه فقط.">
-
-    <meta name="keywords"
-          content="متجر نت, متجرنت, بقالة اونلاين, سوبر ماركت اونلاين, طلبات بقالة, توصيل بقالة, منظفات, مجمدات, عطارة, مستحضرات تجميل, اكسسوارات">
-
-    <meta name="robots"
-          content="index, follow">
-
-    <meta property="og:title"
-          content="متجر نت | كل احتياجات البيت">
-
-    <meta property="og:description"
-          content="يا ست البيت، لو محتاجة حاجة ومش موجودة عندنا قولي لنا وإحنا نوفرهالك ❤️">
-
-    <meta property="og:type"
-          content="website">
-
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
-          rel="stylesheet">
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "Cairo", sans-serif;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background: #f8fafc;
-            color: #0f172a;
-            padding-bottom: 90px;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font-family: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        /* =========================
-           HEADER
-        ========================= */
-
-        header {
-            background: #0f172a;
-            color: white;
-            padding: 13px 15px;
-            position: sticky;
-            top: 0;
-            z-index: 500;
-            box-shadow: 0 4px 15px rgba(0,0,0,.12);
-        }
-
-        .header-container {
-            max-width: 1200px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .brand-area {
-            min-width: 0;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            text-decoration: none;
-            color: white;
-            font-weight: 900;
-            font-size: 21px;
-        }
-
-        .logo-icon {
-            font-size: 23px;
-        }
-
-        .logo-ar {
-            color: #38bdf8;
-        }
-
-        .store-message {
-            margin-top: 3px;
-            color: #cbd5e1;
-            font-size: 10px;
-            line-height: 1.6;
-            max-width: 290px;
-        }
-
-        .store-message strong {
-            color: #38bdf8;
-        }
-
-        .cart-icon-btn {
-            flex-shrink: 0;
-            background: #0284c7;
-            color: white;
-            border: none;
-            padding: 9px 13px;
-            border-radius: 22px;
-            font-size: 12px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .cart-icon-btn:hover {
-            background: #0369a1;
-        }
-
-        .cart-badge {
-            min-width: 21px;
-            height: 21px;
-            padding: 1px 5px;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            background: #ef4444;
-            color: white;
-            font-size: 11px;
-        }
-
-        /* =========================
-           STATS
-        ========================= */
-
-        .stats-bar {
-            background: #1e293b;
-            color: #94a3b8;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 25px;
-            font-size: 11px;
-        }
-
-        .stats-num {
-            color: #38bdf8;
-            font-weight: 900;
-        }
-
-        /* =========================
-           HERO
-        ========================= */
-
-        .hero {
-            max-width: 1200px;
-            margin: 12px auto 5px;
-            padding: 0 12px;
-        }
-
-        .hero-box {
-            background: linear-gradient(
-                135deg,
-                #0284c7,
-                #0f172a
-            );
-
-            color: white;
-            border-radius: 18px;
-            padding: 20px 16px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(2,132,199,.15);
-        }
-
-        .hero-box h1 {
-            font-size: 23px;
-            font-weight: 900;
-            margin-bottom: 5px;
-        }
-
-        .hero-box p {
-            color: #e0f2fe;
-            font-size: 12px;
-            line-height: 1.8;
-        }
-
-        .delivery-badge {
-            display: inline-block;
-            margin-top: 10px;
-            background: rgba(255,255,255,.14);
-            border: 1px solid rgba(255,255,255,.25);
-            border-radius: 20px;
-            padding: 5px 13px;
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        /* =========================
-           SEARCH
-        ========================= */
-
-        .floating-search {
-            position: sticky;
-            top: 71px;
-            z-index: 400;
-            padding: 10px 12px;
-            background: rgba(248,250,252,.96);
-            backdrop-filter: blur(7px);
-        }
-
-        .search-box {
-            max-width: 650px;
-            margin: auto;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            height: 47px;
-            padding: 8px 43px 8px 15px;
-            border-radius: 25px;
-            border: 2px solid #38bdf8;
-            outline: none;
-            background: white;
-            font-size: 13px;
-            box-shadow: 0 4px 15px rgba(0,0,0,.06);
-        }
-
-        .search-box input:focus {
-            border-color: #0284c7;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #0284c7;
-            font-size: 18px;
-        }
-
-        /* =========================
-           CATEGORIES
-        ========================= */
-
-        .categories-container {
-            max-width: 1200px;
-            margin: 4px auto 10px;
-            padding: 0 12px;
-            display: flex;
-            gap: 7px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .categories-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat-btn {
-            flex-shrink: 0;
-            border: 1px solid #cbd5e1;
-            background: white;
-            color: #475569;
-            padding: 7px 13px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            transition: .2s;
-        }
-
-        .cat-btn:hover,
-        .cat-btn.active {
-            background: #0284c7;
-            border-color: #0284c7;
-            color: white;
-        }
-
-        /* =========================
-           PRODUCTS
-        ========================= */
-
-        .products-grid {
-            max-width: 1200px;
-            margin: 12px auto;
-            padding: 0 10px;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        @media (min-width: 600px) {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 900px) {
-            .products-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 15px;
-            }
-        }
-
-        .product-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 13px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,.035);
-            transition: .2s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0,0,0,.08);
-        }
-
-        .product-img-wrap {
-            width: 100%;
-            height: 145px;
-            background: white;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 7px;
-        }
-
-        .product-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .product-info {
-            padding: 10px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-title {
-            font-size: 13px;
-            font-weight: 800;
-            line-height: 1.5;
-            min-height: 39px;
-            color: #0f172a;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .product-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 5px;
-            margin: 7px 0;
-        }
-
-        .product-price {
-            color: #16a34a;
-            font-size: 14px;
-            font-weight: 900;
-        }
-
-        .product-stock {
-            background: #f1f5f9;
-            color: #475569;
-            border-radius: 10px;
-            padding: 2px 5px;
-            font-size: 9px;
-            white-space: nowrap;
-        }
-
-        .add-cart-btn {
-            width: 100%;
-            border: none;
-            background: #0284c7;
-            color: white;
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 11px;
-            font-weight: 900;
-        }
-
-        .add-cart-btn:hover {
-            background: #0369a1;
-        }
-
-        .add-cart-btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        /* =========================
-           MODAL
-        ========================= */
-
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.65);
-            z-index: 1500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 14px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            position: relative;
-            background: white;
-            width: 100%;
-            max-width: 450px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 17px;
-            padding: 18px;
-        }
-
-        .modal-close {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            width: 31px;
-            height: 31px;
-            border: none;
-            border-radius: 50%;
-            background: #f1f5f9;
-            color: #334155;
-            font-weight: 900;
-            z-index: 2;
-        }
-
-        .modal-img {
-            width: 100%;
-            height: 220px;
-            object-fit: contain;
-            border-radius: 10px;
-            background: #f8fafc;
-            margin-bottom: 12px;
-        }
-
-        .modal-detail-item {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            border-bottom: 1px dashed #e2e8f0;
-            padding: 6px 0;
-            color: #475569;
-            font-size: 12px;
-        }
-
-        .modal-detail-item strong {
-            color: #0f172a;
-        }
-
-        /* =========================
-           CART
-        ========================= */
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.52);
-            z-index: 999;
-            display: none;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        .cart-drawer {
-            position: fixed;
-            top: 0;
-            right: -430px;
-            width: 100%;
-            max-width: 410px;
-            height: 100%;
-            background: white;
-            z-index: 1200;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -7px 0 25px rgba(0,0,0,.15);
-            transition: .3s ease;
-        }
-
-        .cart-drawer.open {
-            right: 0;
-        }
-
-        .cart-header {
-            background: #0f172a;
-            color: white;
-            padding: 14px 17px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .cart-header h3 {
-            font-size: 16px;
-        }
-
-        .close-cart {
-            border: none;
-            background: transparent;
-            color: white;
-            font-size: 19px;
-        }
-
-        .cart-items {
-            padding: 12px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .cart-item {
-            display: flex;
-            gap: 9px;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-
-        .cart-item img {
-            width: 55px;
-            height: 55px;
-            border-radius: 8px;
-            object-fit: contain;
-            background: #f8fafc;
-        }
-
-        .cart-item-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .cart-item-title {
-            font-size: 12px;
-            font-weight: 800;
-            line-height: 1.4;
-        }
-
-        .cart-item-price {
-            color: #16a34a;
-            font-size: 11px;
-            font-weight: 900;
-            margin-top: 2px;
-        }
-
-        .qty-controls {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 5px;
-        }
-
-        .qty-btn {
-            width: 23px;
-            height: 23px;
-            border: none;
-            background: #e2e8f0;
-            border-radius: 5px;
-            font-weight: 900;
-        }
-
-        .remove-item {
-            border: none;
-            background: #fee2e2;
-            color: #dc2626;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            font-weight: 900;
-        }
-
-        .cart-footer {
-            padding: 13px;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-
-        .cart-summary-line {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #475569;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        .cart-total {
-            border-top: 1px solid #cbd5e1;
-            margin-top: 9px;
-            padding-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 15px;
-            font-weight: 900;
-        }
-
-        .checkout-form label {
-            display: block;
-            color: #475569;
-            font-size: 11px;
-            font-weight: 800;
-            margin: 7px 0 3px;
-        }
-
-        .checkout-form input,
-        .checkout-form textarea,
-        .checkout-form select {
-            width: 100%;
-            border: 1px solid #cbd5e1;
-            border-radius: 7px;
-            outline: none;
-            padding: 8px 9px;
-            font-size: 11px;
-            background: white;
-        }
-
-        .checkout-form input:focus,
-        .checkout-form textarea:focus,
-        .checkout-form select:focus {
-            border-color: #0284c7;
-        }
-
-        .delivery-fixed {
-            background: #e0f2fe;
-            border: 1px solid #7dd3fc;
-            color: #0369a1;
-            padding: 8px;
-            border-radius: 7px;
-            text-align: center;
-            font-size: 11px;
-            font-weight: 900;
-            margin-top: 5px;
-        }
-
-        .pay-info-box {
-            background: #f0fdf4;
-            border: 1px solid #86efac;
-            color: #166534;
-            padding: 8px;
-            border-radius: 7px;
-            text-align: center;
-            font-size: 10px;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .send-order-btn {
-            width: 100%;
-            border: none;
-            background: #25D366;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .send-order-btn:hover {
-            background: #1ebe5d;
-        }
-
-        .send-order-btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        /* =========================
-           WHATSAPP FLOAT
-        ========================= */
-
-        .floating-whatsapp {
-            position: fixed;
-            right: 17px;
-            bottom: 18px;
-            width: 59px;
-            height: 59px;
-            border-radius: 50%;
-            background: #25D366;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            z-index: 2000;
-            box-shadow: 0 5px 22px rgba(0,0,0,.25);
-            animation: whatsappPulse 2s infinite;
-        }
-
-        .floating-whatsapp:hover {
-            transform: scale(1.08);
-        }
-
-        @keyframes whatsappPulse {
-
-            0% {
-                box-shadow:
-                    0 0 0 0 rgba(37,211,102,.5);
-            }
-
-            70% {
-                box-shadow:
-                    0 0 0 14px rgba(37,211,102,0);
-            }
-
-            100% {
-                box-shadow:
-                    0 0 0 0 rgba(37,211,102,0);
-            }
-        }
-
-        /* =========================
-           EMPTY / LOADING
-        ========================= */
-
-        .message-box {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 45px 15px;
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .loading {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-        }
-
-        .spinner
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title id="pageTitle">ماركت نت</title>
+
+<meta id="metaDescription" name="description"
+content="ماركت نت - تسوق منتجات البقالة والمجمدات والمنظفات والعطارة وغيرها.">
+
+<meta id="metaKeywords" name="keywords"
+content="ماركت نت, متجر نت, بقالة, مجمدات, منظفات, عطارة, طيور">
+
+<meta name="robots" content="index,follow">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+margin:0;
+font-family:Tahoma,Arial,sans-serif;
+background:#f5f7fa;
+color:#182230;
+}
+
+button,
+input,
+select{
+font-family:inherit;
+}
+
+button{
+cursor:pointer;
+}
+
+.header{
+background:#0ca678;
+color:#fff;
+position:sticky;
+top:0;
+z-index:1000;
+box-shadow:0 3px 15px #0002;
+}
+
+.header-inner{
+max-width:1250px;
+margin:auto;
+padding:13px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+}
+
+.logo-area{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logo{
+width:52px;
+height:52px;
+border-radius:14px;
+object-fit:cover;
+background:#fff;
+}
+
+.logo-name{
+font-size:23px;
+font-weight:900;
+}
+
+.slogan{
+font-size:11px;
+margin-top:3px;
+}
+
+.cart-button{
+border:0;
+background:#fff;
+color:#087f5b;
+padding:10px 13px;
+border-radius:12px;
+font-weight:900;
+}
+
+.cart-count{
+background:#e03131;
+color:#fff;
+padding:3px 7px;
+border-radius:50%;
+font-size:11px;
+}
+
+.container{
+max-width:1250px;
+margin:auto;
+padding:12px;
+}
+
+.hero{
+background:linear-gradient(135deg,#087f5b,#12b886);
+color:#fff;
+border-radius:20px;
+padding:25px 18px;
+margin-bottom:15px;
+text-align:center;
+}
+
+.hero h1{
+margin:0 0 8px;
+font-size:30px;
+}
+
+.hero p{
+margin:5px 0;
+}
+
+.search{
+width:100%;
+padding:15px;
+border:0;
+border-radius:13px;
+font-size:16px;
+margin-top:15px;
+outline:none;
+}
+
+.ad{
+background:#fff;
+border:1px dashed #bfc5cc;
+border-radius:15px;
+padding:15px;
+margin:15px 0;
+text-align:center;
+overflow:hidden;
+}
+
+.ad-title{
+font-size:11px;
+color:#888;
+margin-bottom:5px;
+}
+
+.categories{
+display:flex;
+gap:8px;
+overflow-x:auto;
+padding:5px 0 12px;
+}
+
+.category{
+white-space:nowrap;
+border:0;
+background:#fff;
+padding:11px 15px;
+border-radius:12px;
+box-shadow:0 3px 12px #0000000b;
+font-weight:bold;
+}
+
+.category.active{
+background:#0ca678;
+color:#fff;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+gap:13px;
+}
+
+.product{
+background:#fff;
+border-radius:16px;
+padding:10px;
+box-shadow:0 4px 17px #0000000b;
+position:relative;
+overflow:hidden;
+}
+
+.product img{
+width:100%;
+height:170px;
+object-fit:cover;
+border-radius:12px;
+background:#f1f3f5;
+}
+
+.offer{
+position:absolute;
+top:18px;
+right:18px;
+background:#e03131;
+color:#fff;
+padding:5px 8px;
+border-radius:7px;
+font-size:11px;
+font-weight:bold;
+}
+
+.product-name{
+font-size:16px;
+font-weight:900;
+margin:10px 2px 5px;
+}
+
+.product-description{
+font-size:12px;
+color:#777;
+min-height:32px;
+}
+
+.price{
+font-size:20px;
+font-weight:900;
+color:#087f5b;
+margin:8px 0;
+}
+
+.stock{
+font-size:12px;
+color:#777;
+margin-bottom:8px;
+}
+
+.add{
+width:100%;
+border:0;
+background:#0ca678;
+color:#fff;
+padding:12px;
+border-radius:10px;
+font-weight:900;
+}
+
+.add:disabled{
+background:#aaa;
+cursor:not-allowed;
+}
+
+.counter{
+background:#fff;
+border-radius:15px;
+padding:14px;
+text-align:center;
+margin:15px 0;
+box-shadow:0 3px 12px #0001;
+}
+
+.counter strong{
+color:#0ca678;
+font-size:23px;
+}
+
+.whatsapp{
+position:fixed;
+left:18px;
+bottom:18px;
+width:58px;
+height:58px;
+border-radius:50%;
+background:#25d366;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:27px;
+text-decoration:none;
+z-index:1500;
+box-shadow:0 5px 20px #0003;
+}
+
+.empty{
+background:#fff;
+padding:30px;
+border-radius:15px;
+text-align:center;
+}
+
+.modal{
+position:fixed;
+inset:0;
+background:#0008;
+display:none;
+align-items:center;
+justify-content:center;
+z-index:2000;
+padding:12px;
+}
+
+.modal.show{
+display:flex;
+}
+
+.modal-box{
+background:#fff;
+width:100%;
+max-width:600px;
+max-height:90vh;
+overflow:auto;
+border-radius:20px;
+padding:18px;
+}
+
+.modal-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.close{
+border:0;
+background:#f1f3f5;
+width:38px;
+height:38px;
+border-radius:50%;
+font-size:20px;
+}
+
+.cart-item{
+display:flex;
+gap:10px;
+padding:12px 0;
+border-bottom:1px solid #eee;
+align-items:center;
+}
+
+.cart-item img{
+width:65px;
+height:65px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.cart-info{
+flex:1;
+}
+
+.qty{
+display:flex;
+gap:5px;
+align-items:center;
+margin-top:5px;
+}
+
+.qty button{
+border:0;
+background:#e9ecef;
+width:30px;
+height:30px;
+border-radius:8px;
+font-weight:bold;
+}
+
+.total{
+background:#f8f9fa;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+}
+
+.checkout-input{
+width:100%;
+padding:13px;
+border:1px solid #ddd;
+border-radius:10px;
+margin:6px 0;
+}
+
+.submit-order{
+width:100%;
+background:#0ca678;
+border:0;
+color:#fff;
+padding:15px;
+border-radius:12px;
+font-size:17px;
+font-weight:900;
+margin-top:10px;
+}
+
+.footer{
+margin-top:40px;
+background:#182230;
+color:#fff;
+padding:30px 15px;
+text-align:center;
+}
+
+.video-ad{
+background:#111;
+color:#fff;
+border-radius:15px;
+padding:20px;
+text-align:center;
+}
+
+.video-ad video{
+width:100%;
+max-height:300px;
+border-radius:12px;
+}
+
+.download-button{
+background:#0ca678;
+color:#fff;
+border:0;
+padding:13px 20px;
+border-radius:10px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.hidden{
+display:none!important;
+}
+
+@media(max-width:600px){
+
+.header-inner{
+align-items:center;
+}
+
+.logo-name{
+font-size:19px;
+}
+
+.slogan{
+font-size:9px;
+}
+
+.products{
+grid-template-columns:repeat(2,1fr);
+gap:9px;
+}
+
+.product img{
+height:135px;
+}
+
+.product-name{
+font-size:14px;
+}
+
+.price{
+font-size:17px;
+}
+
+.hero h1{
+font-size:25px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+<div class="header-inner">
+
+<div class="logo-area">
+
+<img
+id="storeLogo"
+class="logo"
+src="https://via.placeholder.com/100?text=MN"
+alt="ماركت نت">
+
+<div>
+
+<div
+id="storeName"
+class="logo-name">
+ماركت نت
+</div>
+
+<div
+id="storeSlogan"
+class="slogan">
+يا ست البيت، لو محتاجة حاجة ومش موجودة عندنا، إحنا نوفرهالك ❤️
+</div>
+
+</div>
+
+</div>
+
+<button
+class="cart-button"
+onclick="openCart()">
+
+🛒 السلة
+
+<span
+id="cartCount"
+class="cart-count">
+0
+</span>
+
+</button>
+
+</div>
+
+</header>
+
+
+<main class="container">
+
+
+<section class="hero">
+
+<h1 id="heroName">
+ماركت نت
+</h1>
+
+<p>
+كل احتياجات البيت في مكان واحد ❤️
+</p>
+
+<input
+id="search"
+class="search"
+placeholder="🔎 ابحث عن المنتج الذي تريده..."
+oninput="renderProducts()">
+
+</section>
+
+
+<div
+id="topAd"
+class="ad">
+
+<div class="ad-title">
+إعلان
+</div>
+
+<div id="topAdContent">
+</div>
+
+</div>
+
+
+<section>
+
+<div
+id="categories"
+class="categories">
+</div>
+
+</section>
+
+
+<div class="counter">
+
+عدد العملاء الذين يطلبون الآن:
+
+<strong id="orderCounter">
+10
+</strong>
+
+</div>
+
+
+<section>
+
+<div
+id="products"
+class="products">
+
+<div class="empty">
+جاري تحميل المنتجات...
+</div>
+
+</div>
+
+</section>
+
+
+<div
+id="middleAd"
+class="ad">
+
+<div class="ad-title">
+إعلان
+</div>
+
+<div id="middleAdContent">
+</div>
+
+</div>
+
+
+</main>
+
+
+<footer class="footer">
+
+<h2 id="footerName">
+ماركت نت
+</h2>
+
+<p>
+جميع الحقوق محفوظة © ماركت نت
+</p>
+
+<p>
+التوصيل متاح حسب إعدادات المتجر
+</p>
+
+</footer>
+
+
+<a
+id="whatsappButton"
+class="whatsapp"
+href="#"
+target="_blank">
+☎
+</a>
+
+
+<!-- CART MODAL -->
+
+<div
+id="cartModal"
+class="modal">
+
+<div class="modal-box">
+
+<div class="modal-head">
+
+<h2>🛒 سلة المشتريات</h2>
+
+<button
+class="close"
+onclick="closeCart()">
+×
+</button>
+
+</div>
+
+<div
+id="cartItems">
+</div>
+
+<div
+id="cartTotal"
+class="total">
+</div>
+
+<hr>
+
+<h3>بيانات الطلب</h3>
+
+<input
+id="customerName"
+class="checkout-input"
+placeholder="الاسم">
+
+<input
+id="customerPhone"
+class="checkout-input"
+type="tel"
+placeholder="رقم الموبايل">
+
+<input
+id="customerAddress"
+class="checkout-input"
+placeholder="العنوان بالتفصيل">
+
+<textarea
+id="customerNotes"
+class="checkout-input"
+placeholder="ملاحظات إضافية"></textarea>
+
+<button
+class="submit-order"
+onclick="submitOrder()">
+
+تأكيد الطلب عبر واتساب
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- BEFORE DOWNLOAD -->
+
+<div
+id="downloadModal"
+class="modal">
+
+<div class="modal-box">
+
+<div class="modal-head">
+
+<h2>
+إعلان قبل التحميل
+</h2>
+
+<button
+class="close"
+onclick="closeDownloadAd()">
+×
+</button>
+
+</div>
+
+<div
+id="videoAdArea"
+class="video-ad">
+
+<p>
+شاهد الإعلان ثم اضغط تحميل
+</p>
+
+<div id="videoContainer">
+</div>
+
+<button
+id="downloadAfterAd"
+class="download-button hidden"
+onclick="continueDownload()">
+⬇️ متابعة التحميل
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+
+<script>
+
+const firebaseConfig={
+
+apiKey:"AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4",
+
+authDomain:"makhzan-9eb1f.firebaseapp.com",
+
+projectId:"makhzan-9eb1f",
+
+storageBucket:"makhzan-9eb1f.appspot.com",
+
+messagingSenderId:"695067759501",
+
+appId:"1:695067759501:web:df932ff7bac0b1470523c4"
+
+};
+
+
+firebase.initializeApp(firebaseConfig);
+
+const db=firebase.firestore();
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+let products=[];
+let categories=[];
+
+let cart=
+JSON.parse(
+localStorage.getItem("marketnet_cart")||"[]"
+);
+
+let storeSettings={
+name:"ماركت نت",
+whatsapp:"01127491224",
+slogan:"يا ست البيت، لو محتاجة حاجة ومش موجودة عندنا، إحنا نوفرهالك ❤️",
+deliveryPrice:25,
+counterMin:10,
+counterMax:40,
+allowOrders:true,
+showStock:true,
+showPrices:true,
+enableWhatsapp:true,
+logo:"",
+primaryColor:"#0ca678"
+};
+
+let ads={
+enabled:false,
+top:"",
+middle:"",
+bottom:"",
+beforeDownload:""
+};
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHTML(value){
+
+return String(value??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function normalizeWhatsapp(phone){
+
+phone=
+String(phone||"")
+.replace(/[^\d]/g,"");
+
+if(phone.startsWith("0")){
+
+phone="20"+phone.substring(1);
+
+}
+
+if(!phone.startsWith("20")){
+
+phone="20"+phone;
+
+}
+
+return phone;
+
+}
+
+
+/* =========================
+   LOAD STORE
+========================= */
+
+async function loadStore(){
+
+try{
+
+const doc=
+await db.collection("settings")
+.doc("store")
+.get();
+
+if(doc.exists){
+
+storeSettings={
+...storeSettings,
+...doc.data()
+};
+
+}
+
+}catch(error){
+
+console.log(error);
+
+}
+
+
+document.title=
+storeSettings.name||"ماركت نت";
+
+document.getElementById("storeName")
+.textContent=
+storeSettings.name||"ماركت نت";
+
+document.getElementById("heroName")
+.textContent=
+storeSettings.name||"ماركت نت";
+
+document.getElementById("footerName")
+.textContent=
+storeSettings.name||"ماركت نت";
+
+document.getElementById("storeSlogan")
+.textContent=
+storeSettings.slogan||"";
+
+if(storeSettings.logo){
+
+document.getElementById("storeLogo")
+.src=
+storeSettings.logo;
+
+}
+
+document.documentElement.style
+.setProperty(
+"--primary",
+storeSettings.primaryColor||"#0ca678"
+);
+
+document.querySelectorAll(
+".header,.hero,.category.active,.add"
+)
+.forEach(el=>{
+el.style.backgroundColor=
+storeSettings.primaryColor||"#0ca678";
+});
+
+if(
+storeSettings.enableWhatsapp!==false
+){
+
+const whatsapp=
+normalizeWhatsapp(
+storeSettings.whatsapp
+);
+
+document.getElementById(
+"whatsappButton"
+).href=
+"https://wa.me/"+whatsapp;
+
+}else{
+
+document.getElementById(
+"whatsappButton"
+).style.display="none";
+
+}
+
+}
+
+
+/* =========================
+   SEO
+========================= */
+
+async function loadSEO(){
+
+try{
+
+const doc=
+await db.collection("settings")
+.doc("seo")
+.get();
+
+if(!doc.exists)return;
+
+const seo=doc.data();
+
+if(seo.title){
+
+document.title=seo.title;
+
+document.getElementById(
+"pageTitle"
+).textContent=seo.title;
+
+}
+
+if(seo.description){
+
+document.getElementById(
+"metaDescription"
+).content=
+seo.description;
+
+}
+
+if(seo.keywords){
+
+document.getElementById(
+"metaKeywords"
+).content=
+seo.keywords;
+
+}
+
+}catch(error){
+
+console.log(error);
+
+}
+
+}
+
+
+/* =========================
+   ADS
+========================= */
+
+async function loadAds(){
+
+try{
+
+const doc=
+await db.collection("settings")
+.doc("ads")
+.get();
+
+if(doc.exists){
+
+ads={
+...ads,
+...doc.data()
+};
+
+}
+
+}catch(error){
+
+console.log(error);
+
+}
+
+
+if(ads.enabled){
+
+document.getElementById(
+"topAdContent"
+).innerHTML=
+ads.top||"";
+
+document.getElementById(
+"middleAdContent"
+).innerHTML=
+ads.middle||"";
+
+}else{
+
+document.getElementById(
+"topAd"
+).style.display="none";
+
+document.getElementById(
+"middleAd"
+).style.display="none";
+
+}
+
+}
+
+
+/* =========================
+   CATEGORIES
+========================= */
+
+async function loadCategories(){
+
+const defaultCategories=[
+
+"بقالة",
+"العروض اليومية",
+"طيور",
+"مجمدات",
+"منظفات",
+"عطارة",
+"مستحضرات تجميل",
+"اكسسوارات بنات"
+
+];
+
+try{
+
+const doc=
+await db.collection("settings")
+.doc("categories")
+.get();
+
+if(doc.exists){
+
+categories=
+doc.data().items||[];
+
+}else{
+
+categories=
+defaultCategories.map(
+(name,index)=>({
+
+id:String(index+1),
+name,
+active:true,
+order:index
+
+})
+);
+
+}
+
+}catch(error){
+
+categories=
+defaultCategories.map(
+(name,index)=>({
+
+id:String(index+1),
+name,
+active:true,
+order:index
+
+})
+);
+
+}
+
+
+renderCategories();
+
+}
+
+
+function renderCategories(){
+
+const box=
+document.getElementById("categories");
+
+let html=
+`<button
+class="category active"
+onclick="selectCategory('الكل',this)">
+كل المنتجات
+</button>`;
+
+categories
+.filter(c=>c.active!==false)
+.sort(
+(a,b)=>
+(a.order||0)-(b.order||0)
+)
+.forEach(c=>{
+
+html+=`
+<button
+class="category"
+onclick="selectCategory('${escapeHTML(c.name)}',this)">
+${escapeHTML(c.name)}
+</button>
+`;
+
+});
+
+box.innerHTML=html;
+
+}
+
+
+let selectedCategory="الكل";
+
+
+function selectCategory(category,button){
+
+selectedCategory=category;
+
+document.querySelectorAll(
+".category"
+).forEach(x=>
+x.classList.remove("active")
+);
+
+button.classList.add("active");
+
+renderProducts();
+
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+async function loadProducts(){
+
+try{
+
+const snap=
+await db.collection("products")
+.get();
+
+products=[];
+
+snap.forEach(doc=>{
+
+const p=doc.data();
+
+if(p.active!==false){
+
+products.push({
+
+id:doc.id,
+...p
+
+});
+
+}
+
+});
+
+}catch(error){
+
+console.log(error);
+
+document.getElementById(
+"products"
+).innerHTML=
+`
+<div class="empty">
+تعذر تحميل المنتجات حاليًا.
+</div>
+`;
+
+return;
+
+}
+
+renderProducts();
+
+}
+
+
+function renderProducts(){
+
+const box=
+document.getElementById("products");
+
+const search=
+(
+document.getElementById("search")
+.value||""
+)
+.toLowerCase()
+.trim();
+
+let list=
+products.filter(p=>{
+
+const matchSearch=
+!search ||
+String(p.name||"")
+.toLowerCase()
+.includes(search);
+
+const matchCategory=
+selectedCategory==="الكل" ||
+p.category===selectedCategory;
+
+return matchSearch&&matchCategory;
+
+});
+
+
+if(!list.length){
+
+box.innerHTML=
+`
+<div class="empty">
+
+<h3>لا توجد منتجات</h3>
+
+<p>
+جرب البحث باسم آخر أو اختر قسمًا مختلفًا.
+</p>
+
+</div>
+`;
+
+return;
+
+}
+
+
+box.innerHTML=
+list.map(productHTML)
+.join("");
+
+}
+
+
+function productHTML(p){
+
+const stock=
+Number(p.stock||0);
+
+const outOfStock=
+stock<=0;
+
+const image=
+p.image||
+"https://via.placeholder.com/500x350?text=MarketNet";
+
+let price="";
+
+if(storeSettings.showPrices!==false){
+
+price=
+`
+<div class="price">
+${Number(p.price||0)}
+ج
+${p.unit?` / ${escapeHTML(p.unit)}`:""}
+</div>
+`;
+
+}
+
+let stockHTML="";
+
+if(storeSettings.showStock!==false){
+
+stockHTML=
+`
+<div class="stock">
+${
+outOfStock
+?"❌ غير متوفر"
+:"📦 المتبقي: "+stock
+}
+</div>
+`;
+
+}
+
+return`
+
+<article class="product">
+
+${
+p.offer
+?
+`<div class="offer">
+عرض اليوم
+</div>`
+:""
+}
+
+<img
+src="${escapeHTML(image)}"
+alt="${escapeHTML(p.name||"منتج")}"
+loading="lazy"
+onerror="this.src='https://via.placeholder.com/500x350?text=MarketNet'"
+>
+
+<div class="product-name">
+${escapeHTML(p.name||"منتج")}
+</div>
+
+<div class="product-description">
+${escapeHTML(p.description||"")}
+</div>
+
+${price}
+
+${stockHTML}
+
+<button
+class="add"
+onclick="addToCart('${p.id}')"
+${outOfStock?"disabled":""}
+>
+
+${outOfStock?"غير متوفر":"🛒 أضف للسلة"}
+
+</button>
+
+</article>
+
+`;
+
+}
+
+
+/* =========================
+   CART
+========================= */
+
+function saveCart(){
+
+localStorage.setItem(
+"marketnet_cart",
+JSON.stringify(cart)
+);
+
+updateCartCount();
+
+}
+
+
+function addToCart(id){
+
+const product=
+products.find(x=>x.id===id);
+
+if(!product)return;
+
+const stock=
+Number(product.stock||0);
+
+if(stock<=0){
+
+alert("هذا المنتج غير متوفر حاليًا.");
+
+return;
+
+}
+
+const existing=
+cart.find(x=>x.id===id);
+
+if(existing){
+
+if(existing.quantity>=stock){
+
+alert(
+"لا يمكن إضافة كمية أكبر من المتاح."
+);
+
+return;
+
+}
+
+existing.quantity++;
+
+}else{
+
+cart.push({
+
+id:product.id,
+name:product.name,
+price:Number(product.price||0),
+image:product.image||"",
+quantity:1,
+stock,
+unit:product.unit||"قطعة"
+
+});
+
+}
+
+saveCart();
+
+}
+
+
+function updateCartCount(){
+
+const count=
+cart.reduce(
+(sum,item)=>
+sum+Number(item.quantity||0),
+0
+);
+
+document.getElementById(
+"cartCount"
+).textContent=count;
+
+}
+
+
+function openCart(){
+
+renderCart();
+
+document.getElementById(
+"cartModal"
+).classList.add("show");
+
+}
+
+
+function closeCart(){
+
+document.getElementById(
+"cartModal"
+).classList.remove("show");
+
+}
+
+
+function renderCart(){
+
+const box=
+document.getElementById("cartItems");
+
+if(!cart.length){
+
+box.innerHTML=
+`
+<div class="empty">
+
+🛒 السلة فارغة
+
+</div>
+`;
+
+document.getElementById(
+"cartTotal"
+).innerHTML=
+"الإجمالي: 0 ج";
+
+return;
+
+}
+
+
+let subtotal=0;
+
+box.innerHTML=
+cart.map(item=>{
+
+const total=
+Number(item.price)*Number(item.quantity);
+
+subtotal+=total;
+
+return`
+
+<div class="cart-item">
+
+<img
+src="${escapeHTML(item.image||"https://via.placeholder.com/100?text=Product")}"
+onerror="this.src='https://via.placeholder.com/100?text=Product'"
+>
+
+<div class="cart-info">
+
+<b>
+${escapeHTML(item.name)}
+</b>
+
+<div>
+${item.price} ج
+</div>
+
+<div class="qty">
+
+<button
+onclick="changeQty('${item.id}',-1)">
+−
+</button>
+
+<span>
+${item.quantity}
+</span>
+
+<button
+onclick="changeQty('${item.id}',1)">
++
+</button>
+
+<button
+onclick="removeFromCart('${item.id}')"
+style="background:#ffe3e3;color:#c92a2a">
+×
+</button>
+
+</div>
+
+</div>
+
+<div>
+<b>
+${total} ج
+</b>
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+
+const delivery=
+Number(
+storeSettings.deliveryPrice||0
+);
+
+const grand=
+subtotal+delivery;
+
+document.getElementById(
+"cartTotal"
+).innerHTML=
+`
+<div>
+قيمة المنتجات:
+<b>${subtotal} ج</b>
+</div>
+
+<div>
+التوصيل:
+<b>${delivery} ج</b>
+</div>
+
+<hr>
+
+<div style="font-size:19px">
+الإجمالي:
+<b style="color:#087f5b">
+${grand} ج
+</b>
+</div>
+`;
+
+}
+
+
+function changeQty(id,change){
+
+const item=
+cart.find(x=>x.id===id);
+
+if(!item)return;
+
+const product=
+products.find(x=>x.id===id);
+
+const stock=
+Number(product?.stock||item.stock||0);
+
+item.quantity+=change;
+
+if(item.quantity<1){
+
+removeFromCart(id);
+
+return;
+
+}
+
+if(item.quantity>stock){
+
+item.quantity=stock;
+
+alert("الكمية المتاحة غير كافية.");
+
+}
+
+saveCart();
+
+renderCart();
+
+}
+
+
+function removeFromCart(id){
+
+cart=
+cart.filter(x=>x.id!==id);
+
+saveCart();
+
+renderCart();
+
+}
+
+
+/* =========================
+   ORDER
+========================= */
+
+async function submitOrder(){
+
+if(!storeSettings.allowOrders){
+
+alert("الطلبات مغلقة حاليًا.");
+
+return;
+
+}
+
+if(!cart.length){
+
+alert("السلة فارغة.");
+
+return;
+
+}
+
+const name=
+document.getElementById(
+"customerName"
+).value.trim();
+
+const phone=
+document.getElementById(
+"customerPhone"
+).value.trim();
+
+const address=
+document.getElementById(
+"customerAddress"
+).value.trim();
+
+const notes=
+document.getElementById(
+"customerNotes"
+).value.trim();
+
+if(!name||!phone||!address){
+
+alert(
+"من فضلك اكتب الاسم ورقم الموبايل والعنوان."
+);
+
+return;
+
+}
+
+
+let subtotal=0;
+
+cart.forEach(item=>{
+
+subtotal+=
+Number(item.price)*
+Number(item.quantity);
+
+});
+
+
+const delivery=
+Number(
+storeSettings.deliveryPrice||0
+);
+
+const total=
+subtotal+delivery;
+
+
+const orderItems=
+cart.map(item=>({
+
+id:item.id,
+name:item.name,
+price:item.price,
+quantity:item.quantity,
+unit:item.unit||"قطعة"
+
+}));
+
+
+try{
+
+const orderRef=
+await db.collection("orders")
+.add({
+
+name,
+phone,
+address,
+notes,
+
+items:orderItems,
+
+subtotal,
+delivery,
+total,
+
+status:"new",
+
+createdAt:
+firebase.firestore.FieldValue.serverTimestamp()
+
+});
+
+
+/*
+خصم الكمية من المخزون
+*/
+
+for(const item of cart){
+
+const ref=
+db.collection("products")
+.doc(item.id);
+
+await db.runTransaction(
+async transaction=>{
+
+const snap=
+await transaction.get(ref);
+
+if(!snap.exists)return;
+
+const data=snap.data();
+
+const oldStock=
+Number(data.stock||0);
+
+const newStock=
+Math.max(
+0,
+oldStock-Number(item.quantity)
+);
+
+transaction.update(
+ref,
+{
+stock:newStock
+}
+);
+
+});
+
+}
+
+
+/*
+رسالة واتساب
+*/
+
+const whatsapp=
+normalizeWhatsapp(
+storeSettings.whatsapp
+);
+
+let message=
+`طلب جديد من ${storeSettings.name}
+
+الاسم: ${name}
+الهاتف: ${phone}
+العنوان: ${address}
+
+المنتجات:
+`;
+
+cart.forEach(item=>{
+
+message+=
+`\n- ${item.name} × ${item.quantity} = ${Number(item.price)*Number(item.quantity)} ج`;
+
+});
+
+message+=
+`\n\nقيمة المنتجات: ${subtotal} ج`;
+
+message+=
+`\nالتوصيل: ${delivery} ج`;
+
+message+=
+`\nالإجمالي: ${total} ج`;
+
+if(notes){
+
+message+=
+`\n\nملاحظات: ${notes}`;
+
+}
+
+message+=
+`\n\nرقم الطلب: ${orderRef.id}`;
+
+
+cart=[];
+
+saveCart();
+
+closeCart();
+
+document.getElementById(
+"customerName"
+).value="";
+
+document.getElementById(
+"customerPhone"
+).value="";
+
+document.getElementById(
+"customerAddress"
+).value="";
+
+document.getElementById(
+"customerNotes"
+).value="";
+
+
+await loadProducts();
+
+
+if(storeSettings.enableWhatsapp!==false){
+
+window.open(
+"https://wa.me/"+
+whatsapp+
+"?text="+
+encodeURIComponent(message),
+"_blank"
+);
+
+}else{
+
+alert(
+storeSettings.successMessage||
+"تم استلام طلبك بنجاح ❤️"
+);
+
+}
+
+
+}catch(error){
+
+console.log(error);
+
+alert(
+"حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى."
+);
+
+}
+
+}
+
+
+/* =========================
+   ORDER COUNTER
+========================= */
+
+function randomCounter(){
+
+const min=
+Number(storeSettings.counterMin||10);
+
+const max=
+Number(storeSettings.counterMax||40);
+
+const value=
+Math.floor(
+Math.random()*
+(max-min+1)
+)+min;
+
+document.getElementById(
+"orderCounter"
+).textContent=value;
+
+}
+
+
+setInterval(
+randomCounter,
+8000
+);
+
+
+/* =========================
+   VISITOR COUNTER
+========================= */
+
+async function registerVisitor(){
+
+const today=
+new Date()
+.toISOString()
+.slice(0,10);
+
+const month=
+today.slice(0,7);
+
+const ref=
+db.collection("siteStats")
+.doc("main");
+
+try{
+
+await db.runTransaction(
+async transaction=>{
+
+const snap=
+await transaction.get(ref);
+
+const data=
+snap.exists
+?snap.data()
+:{};
+
+const lastDay=
+data.lastDay||"";
+
+const lastMonth=
+data.lastMonth||"";
+
+let visitors=
+Number(data.visitors||0)+1;
+
+let dayCount=
+Number(data.today||0);
+
+let monthCount=
+Number(data.month||0);
+
+if(lastDay!==today){
+
+dayCount=1;
+
+}else{
+
+dayCount++;
+
+}
+
+if(lastMonth!==month){
+
+monthCount=1;
+
+}else{
+
+monthCount++;
+
+}
+
+transaction.set(
+ref,
+{
+visitors,
+today:dayCount,
+month:monthCount,
+lastDay:today,
+lastMonth:month
+},
+{merge:true}
+);
+
+});
+
+}catch(error){
+
+console.log(
+"Visitor counter:",
+error
+);
+
+}
+
+}
+
+
+/* =========================
+   DOWNLOAD AD
+========================= */
+
+let pendingDownloadUrl="";
+
+
+function openDownloadAd(url){
+
+pendingDownloadUrl=url;
+
+if(
+!ads.enabled ||
+!ads.beforeDownload
+){
+
+continueDownload();
+
+return;
+
+}
+
+const area=
+document.getElementById(
+"videoContainer"
+);
+
+area.innerHTML=
+ads.beforeDownload;
+
+document.getElementById(
+"downloadAfterAd"
+).classList.add("hidden");
+
+document.getElementById(
+"downloadModal"
+).classList.add("show");
+
+
+setTimeout(()=>{
+
+document.getElementById(
+"downloadAfterAd"
+).classList.remove("hidden");
+
+},5000);
+
+}
+
+
+function closeDownloadAd(){
+
+document.getElementById(
+"downloadModal"
+).classList.remove("show");
+
+}
+
+
+function continueDownload(){
+
+closeDownloadAd();
+
+if(pendingDownloadUrl){
+
+window.open(
+pendingDownloadUrl,
+"_blank"
+);
+
+}
+
+}
+
+
+/* =========================
+   INIT
+========================= */
+
+async function init(){
+
+updateCartCount();
+
+await loadStore();
+
+await loadSEO();
+
+await loadAds();
+
+await loadCategories();
+
+await loadProducts();
+
+randomCounter();
+
+registerVisitor();
+
+}
+
+init();
+
+</script>
+
+</body>
+</html>
