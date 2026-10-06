@@ -3,191 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم في المتجر</title>
+    <title>لوحة التحكم | ماركت نت - MarketNet</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK v8.10.1 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
     <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --sidebar-width: 260px;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --featured-color: #8b5cf6;
+        }
+
         * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
         }
+
         body {
-            background-color: #f4f6f9;
-            color: #333;
-            padding: 20px;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
         }
-        .container {
-            max-width: 1100px;
-            margin: auto;
+
+        /* Login Screen Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #064e3b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
-        h1 {
+
+        .login-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            margin-bottom: 25px;
-            color: #2c3e50;
         }
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
+
+        .login-card h2 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
         }
-        @media (max-width: 768px) {
-            .grid-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: #34495e;
-            border-bottom: 2px solid #ecf0f1;
-            padding-bottom: 8px;
-        }
-        .form-group {
-            margin-bottom: 12px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+
+        .login-card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
             font-size: 0.9rem;
         }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 0.95rem;
-        }
-        button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #219150;
-        }
-        .btn-delete {
-            background-color: #e74c3c;
-            padding: 5px 10px;
-            width: auto;
-            font-size: 0.85rem;
-        }
-        .btn-delete:hover {
-            background-color: #c0392b;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            text-align: right;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            font-size: 0.9rem;
-        }
-        th {
-            background-color: #f8f9fa;
-        }
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            color: #fff;
-        }
-        .status-pending { background-color: #f39c12; }
-        .status-completed { background-color: #27ae60; }
-    </style>
-</head>
-<body>
 
-<div class="container">
-    <h1>لوحة التحكم وإدارة المتجر</h1>
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #065f46;
+            color: #ffffff;
+            min-height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
 
-    <div class="grid-layout">
-        <!-- قسم إضافة منتج جديد -->
-        <div class="card">
-            <h2>إضافة منتج جديد</h2>
-            <form id="productForm">
-                <div class="form-group">
-                    <label>اسم المنتج</label>
-                    <input type="text" id="productName" placeholder="مثال: شاي أخضر" required>
-                </div>
-                <div class="form-group">
-                    <label>السعر (جنيه)</label>
-                    <input type="number" id="productPrice" placeholder="50" required>
-                </div>
-                <div class="form-group">
-                    <label>القسم</label>
-                    <select id="productCategory">
-                        <option value="بقالة">بقالة</option>
-                        <option value="منظفات">منظفات</option>
-                        <option value="مشروبات">مشروبات</option>
-                    </select>
-                </div>
-                <button type="submit">إضافة للمتجر</button>
-            </form>
-        </div>
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        <!-- قسم قائمة المنتجات المتاحة -->
-        <div class="card">
-            <h2>قائمة المنتجات الحالية</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>المنتج</th>
-                        <th>السعر</th>
-                        <th>القسم</th>
-                        <th>إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="productList">
-                    <!-- يتم إدراج المنتجات هنا تلقائياً -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- قسم إدارة الطلبات الواردة -->
-    <div class="card">
-        <h2>أحدث طلبات الشراء</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>رقم الطلب</th>
-                    <th>اسم العميل</th>
-                    <th>إجمالي المبلغ</th>
-                    <th>الحالة</th>
-                    <th>تغيير الحالة</th>
-                </tr>
-            </thead>
-            <tbody id="orderList">
-                <!-- يتم إدراج الطلبات هنا تلقائياً -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    // بيانات أولية تجريبية
-    let products = [
-        { id: 1, name: "منظف أرضيات 1 لتر", price: 45, category: "منظفات" },
-        { id: 2, name: "زيت طعام 800 مل", price: 65, category: "بقالة" }
-    ];
-
-    let orders = [
-        { id: 101, customer: "أحمد محمود", total: 110, status: "pending" },
-        { id: 102, customer: "سارة علي", total: 45, status: "completed" }
-    ];
-
-    // عرض المنتجات
+        .sidebar-header h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
