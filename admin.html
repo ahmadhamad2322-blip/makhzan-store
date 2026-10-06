@@ -3,1120 +3,1123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>لوحة تحكم متجر نت</title>
 <meta name="robots" content="noindex,nofollow">
-<title>ماركت نت | لوحة تحكم المالك</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
 <style>
 *{box-sizing:border-box}
 body{
-    margin:0;
-    font-family:Tahoma,Arial,sans-serif;
-    background:#f3f6fa;
-    color:#172033
+ margin:0;
+ font-family:Tahoma,Arial,sans-serif;
+ background:#f3f6f4;
+ color:#18231d
 }
 button,input,select,textarea{font-family:inherit}
 button{cursor:pointer}
-.header{
-    background:linear-gradient(135deg,#087f5b,#0ca678);
-    color:#fff;
-    padding:18px;
-    position:sticky;
-    top:0;
-    z-index:100
-}
-.header-inner{
-    max-width:1400px;
-    margin:auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px
-}
-.logo{font-size:24px;font-weight:900}
-.owner-badge{
-    background:#ffffff22;
-    padding:8px 12px;
-    border-radius:30px;
-    font-size:13px
-}
-.container{
-    max-width:1400px;
-    margin:auto;
-    padding:18px
-}
-.card{
-    background:#fff;
-    border-radius:18px;
-    padding:20px;
-    margin-bottom:18px;
-    box-shadow:0 5px 25px rgba(0,0,0,.06)
-}
-.login-card{
-    max-width:460px;
-    margin:70px auto
-}
-h1,h2,h3{margin-top:0}
-input,select,textarea{
-    width:100%;
-    border:1px solid #d8dee8;
-    border-radius:11px;
-    padding:13px;
-    margin:6px 0;
-    outline:none;
-    background:#fff
-}
-input:focus,select:focus,textarea:focus{
-    border-color:#0ca678
-}
-textarea{min-height:100px;resize:vertical}
-.btn{
-    border:0;
-    border-radius:11px;
-    padding:12px 17px;
-    background:#0ca678;
-    color:#fff;
-    font-weight:800;
-    margin:4px
-}
-.btn:hover{opacity:.9}
-.btn-dark{background:#253044}
-.btn-red{background:#e03131}
-.btn-orange{background:#f08c00}
-.btn-blue{background:#1971c2}
-.btn-gray{background:#868e96}
-.btn-purple{background:#7950f2}
-.tabs{
-    display:flex;
-    gap:7px;
-    overflow-x:auto;
-    margin-bottom:18px;
-    padding-bottom:4px
-}
-.tab{
-    border:0;
-    background:#e9edf3;
-    color:#333;
-    padding:12px 16px;
-    border-radius:10px;
-    white-space:nowrap;
-    font-weight:700
-}
-.tab.active{
-    background:#0ca678;
-    color:#fff
-}
-.panel{display:none}
-.panel.active{display:block}
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:13px;
-    margin-bottom:18px
-}
-.stat{
-    background:#fff;
-    border-radius:16px;
-    padding:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,.05)
-}
-.stat-title{color:#6c757d;font-size:14px}
-.stat-number{
-    font-size:30px;
-    font-weight:900;
-    margin-top:7px
-}
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:12px
-}
-.product-card{
-    border:1px solid #e6e9ee;
-    border-radius:14px;
-    padding:12px
-}
-.product-card img{
-    width:100%;
-    height:150px;
-    object-fit:cover;
-    border-radius:10px;
-    background:#f1f3f5
-}
-.table-wrap{
-    overflow-x:auto
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:800px
-}
-th,td{
-    padding:12px;
-    border-bottom:1px solid #edf0f4;
-    text-align:right;
-    vertical-align:middle
-}
-th{
-    background:#f8f9fa
-}
-.status{
-    display:inline-block;
-    padding:5px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:bold
-}
-.status-new{background:#fff3bf;color:#8d6b00}
-.status-done{background:#d3f9d8;color:#087f23}
-.status-cancel{background:#ffe3e3;color:#c92a2a}
-.status-active{background:#d3f9d8;color:#087f23}
-.status-off{background:#ffe3e3;color:#c92a2a}
-.row{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px
-}
-.row3{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px
-}
-.checks{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-    gap:8px
-}
-.check{
-    border:1px solid #ddd;
-    padding:10px;
-    border-radius:10px
-}
-.check input{width:auto;margin-left:7px}
-.notice{
-    padding:12px;
-    border-radius:10px;
-    margin:8px 0
-}
-.notice-success{background:#d3f9d8;color:#087f23}
-.notice-error{background:#ffe3e3;color:#c92a2a}
-.notice-info{background:#dbeafe;color:#1e40af}
 .hidden{display:none!important}
-.small{font-size:12px;color:#6c757d}
-.center{text-align:center}
-.logo-preview{
-    width:100px;
-    height:100px;
-    object-fit:cover;
-    border-radius:15px;
-    border:1px solid #ddd
+
+.login-wrap{
+ min-height:100vh;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+ background:linear-gradient(135deg,#e4fff1,#f7faf8)
 }
-.permission-box{
-    background:#f8f9fa;
-    border-radius:12px;
-    padding:12px;
-    margin-top:8px
+
+.login{
+ width:min(440px,100%);
+ background:#fff;
+ border-radius:20px;
+ padding:24px;
+ box-shadow:0 10px 35px #0002
 }
-.order-items{
-    white-space:pre-line;
-    font-size:13px;
-    color:#555
+
+.logo{
+ text-align:center;
+ color:#07894f;
+ font-size:27px;
+ font-weight:900;
+ margin-bottom:5px
 }
-@media(max-width:700px){
-    .row,.row3{grid-template-columns:1fr}
-    .header-inner{flex-direction:column;align-items:flex-start}
-    .container{padding:10px}
+
+.muted{
+ color:#718078;
+ font-size:13px;
+ line-height:1.8
+}
+
+.input{
+ width:100%;
+ padding:12px;
+ border:1px solid #d7e1dc;
+ border-radius:10px;
+ margin-top:8px;
+ margin-bottom:10px;
+ outline:none;
+ background:#fff
+}
+
+.input:focus{
+ border-color:#07894f;
+ box-shadow:0 0 0 3px #07894f18
+}
+
+.btn{
+ border:0;
+ border-radius:10px;
+ padding:11px 14px;
+ font-weight:800
+}
+
+.primary{background:#07894f;color:#fff}
+.dark{background:#18231d;color:#fff}
+.gray{background:#edf1ef;color:#25322b}
+.red{background:#dc3545;color:#fff}
+.orange{background:#f59f00;color:#fff}
+.green{background:#198754;color:#fff}
+.full{width:100%;margin-top:10px}
+
+.tabs{
+ display:flex;
+ gap:7px;
+ margin:14px 0;
+ flex-wrap:wrap
+}
+
+.tab{
+ border:0;
+ background:#edf1ef;
+ padding:10px 12px;
+ border-radius:10px;
+ font-weight:bold
+}
+
+.tab.active{
+ background:#07894f;
+ color:#fff
+}
+
+.message{
+ padding:10px;
+ border-radius:10px;
+ margin-top:10px;
+ background:#eef8f2;
+ color:#17623d;
+ display:none
+}
+
+.message.error{
+ background:#fff0f0;
+ color:#a61b1b
+}
+
+.admin-layout{
+ display:none;
+ min-height:100vh
+}
+
+.sidebar{
+ position:fixed;
+ right:0;
+ top:0;
+ bottom:0;
+ width:240px;
+ background:#15221c;
+ color:#fff;
+ padding:15px;
+ overflow:auto;
+ z-index:30
+}
+
+.brand{
+ font-size:21px;
+ font-weight:900;
+ padding:10px 5px 16px
+}
+
+.nav{
+ display:grid;
+ gap:6px
+}
+
+.nav button{
+ border:0;
+ background:transparent;
+ color:#dce9e1;
+ text-align:right;
+ padding:11px;
+ border-radius:9px
+}
+
+.nav button.active,
+.nav button:hover{
+ background:#07894f;
+ color:#fff
+}
+
+.main{
+ margin-right:240px;
+ padding:20px;
+ max-width:1500px
+}
+
+.topbar{
+ background:#fff;
+ border-radius:15px;
+ padding:12px 15px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:10px;
+ box-shadow:0 2px 12px #0000000a;
+ margin-bottom:15px
+}
+
+.cards{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:12px
+}
+
+.card{
+ background:#fff;
+ border-radius:15px;
+ padding:17px;
+ box-shadow:0 2px 12px #00000008
+}
+
+.card .num{
+ font-size:28px;
+ font-weight:900;
+ color:#07894f;
+ margin-top:8px
+}
+
+.panel{
+ background:#fff;
+ border-radius:15px;
+ padding:16px;
+ margin-bottom:15px;
+ box-shadow:0 2px 12px #00000008
+}
+
+.panel h2,
+.panel h3{
+ margin-top:0
+}
+
+.grid2{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px
+}
+
+.grid3{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:12px
+}
+
+.form-grid{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:10px
+}
+
+.form-grid .wide{
+ grid-column:1/-1
+}
+
+label{
+ font-size:12px;
+ color:#5f6d65;
+ font-weight:bold
+}
+
+.table-wrap{
+ overflow:auto
+}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ min-width:760px
+}
+
+th,td{
+ padding:10px;
+ border-bottom:1px solid #e8ece9;
+ text-align:right;
+ vertical-align:middle
+}
+
+th{
+ background:#f7faf8
+}
+
+.badge{
+ display:inline-block;
+ padding:5px 8px;
+ border-radius:20px;
+ background:#edf1ef;
+ font-size:11px
+}
+
+.badge.green{
+ background:#e7f8ee;
+ color:#08733f
+}
+
+.badge.red{
+ background:#ffe9e9;
+ color:#a61c1c
+}
+
+.badge.orange{
+ background:#fff2d6;
+ color:#8a5a00
+}
+
+.product-thumb{
+ width:55px;
+ height:55px;
+ object-fit:cover;
+ border-radius:9px;
+ background:#eef5f1
+}
+
+.preview{
+ width:90px;
+ height:90px;
+ border-radius:12px;
+ object-fit:cover;
+ background:#eef5f1;
+ display:block;
+ margin-top:8px
+}
+
+.actions{
+ display:flex;
+ gap:6px;
+ flex-wrap:wrap
+}
+
+.checks{
+ display:flex;
+ flex-wrap:wrap;
+ gap:7px;
+ margin-top:8px
+}
+
+.check{
+ background:#f4f7f5;
+ padding:8px;
+ border-radius:8px
+}
+
+.statline{
+ display:flex;
+ justify-content:space-between;
+ padding:9px 0;
+ border-bottom:1px solid #eee
+}
+
+.request{
+ border:1px solid #e4e9e6;
+ padding:12px;
+ border-radius:12px;
+ margin-bottom:9px
+}
+
+.modal{
+ position:fixed;
+ inset:0;
+ background:#0008;
+ z-index:100;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ padding:15px
+}
+
+.modal.show{
+ display:flex
+}
+
+.modal-box{
+ background:#fff;
+ border-radius:17px;
+ padding:18px;
+ width:min(850px,100%);
+ max-height:92vh;
+ overflow:auto
+}
+
+.close{
+ float:left;
+ border:0;
+ background:#eee;
+ border-radius:8px;
+ padding:7px 10px
+}
+
+.file{
+ padding:9px;
+ background:#f6f8f7;
+ border:1px dashed #cdd8d2;
+ border-radius:9px;
+ width:100%
+}
+
+pre.rules{
+ white-space:pre-wrap;
+ background:#15221c;
+ color:#e8fff0;
+ padding:14px;
+ border-radius:12px;
+ direction:ltr;
+ text-align:left;
+ max-height:400px;
+ overflow:auto;
+ font-size:11px
+}
+
+.small{
+ font-size:11px;
+ color:#718078
+}
+
+.empty{
+ text-align:center;
+ padding:30px;
+ color:#718078
+}
+
+.success-box{
+ background:#e7f8ee;
+ color:#08733f;
+ border-radius:10px;
+ padding:12px;
+ margin-top:10px
+}
+
+.warning-box{
+ background:#fff4d8;
+ color:#7c5700;
+ border-radius:10px;
+ padding:12px;
+ margin-top:10px
+}
+
+.danger-box{
+ background:#ffeaea;
+ color:#a61c1c;
+ border-radius:10px;
+ padding:12px;
+ margin-top:10px
+}
+
+@media(max-width:900px){
+ .sidebar{
+  width:72px;
+  padding:8px
+ }
+
+ .sidebar .nav button{
+  font-size:0;
+  text-align:center
+ }
+
+ .sidebar .nav button::first-letter{
+  font-size:20px
+ }
+
+ .brand{
+  font-size:0;
+  text-align:center
+ }
+
+ .brand::after{
+  content:"MN";
+  font-size:18px
+ }
+
+ .main{
+  margin-right:72px;
+  padding:10px
+ }
+
+ .cards{
+  grid-template-columns:repeat(2,1fr)
+ }
+
+ .grid3{
+  grid-template-columns:1fr 1fr
+ }
+}
+
+@media(max-width:600px){
+ .cards,
+ .grid2,
+ .grid3,
+ .form-grid{
+  grid-template-columns:1fr
+ }
+
+ .topbar{
+  align-items:flex-start;
+  flex-direction:column
+ }
 }
 </style>
 </head>
 
 <body>
 
-<header class="header">
-    <div class="header-inner">
-        <div>
-            <div class="logo">🛒 ماركت نت</div>
-            <div style="font-size:12px;margin-top:3px">لوحة التحكم الكاملة</div>
-        </div>
-
-        <div class="owner-badge" id="topUser">
-            غير مسجل
-        </div>
-    </div>
-</header>
-
 <!-- LOGIN -->
-<div id="loginScreen" class="container">
+<div id="loginWrap" class="login-wrap">
 
-    <div class="card login-card">
+ <div class="login">
 
-        <h2 class="center">🔐 دخول لوحة التحكم</h2>
+  <div class="logo">MarketNet</div>
 
-        <div class="notice notice-info">
-            المالك الرئيسي: <b>01127491224</b>
-        </div>
+  <div style="text-align:center;font-weight:bold">
+   لوحة تحكم متجر نت
+  </div>
 
-        <div id="loginMessage"></div>
+  <p class="muted" style="text-align:center">
+   دخول المالك أو الأدمن المعتمد
+  </p>
 
-        <input
-            id="ownerPhone"
-            type="tel"
-            inputmode="tel"
-            value="01127491224"
-            placeholder="رقم الموبايل"
-        >
+  <div class="tabs">
 
-        <input
-            id="ownerPassword"
-            type="password"
-            placeholder="كلمة السر"
-        >
+   <button
+    id="loginTab"
+    class="tab active"
+    type="button"
+    onclick="showLogin()">
+    دخول
+   </button>
 
-        <button class="btn" style="width:100%" onclick="ownerLogin()">
-            دخول المالك
-        </button>
+   <button
+    id="requestTab"
+    class="tab"
+    type="button"
+    onclick="showRequest()">
+    طلب أدمن جديد
+   </button>
 
-        <hr>
+  </div>
 
-        <h3>دخول أدمن مساعد</h3>
+  <div id="loginBox">
 
-        <input
-            id="staffPhone"
-            type="tel"
-            inputmode="tel"
-            placeholder="رقم الموبايل"
-        >
+   <label>رقم الموبايل</label>
 
-        <div id="recaptcha-container"></div>
+   <input
+    id="loginPhone"
+    class="input"
+    type="tel"
+    placeholder="01127491224"
+    inputmode="tel">
 
-        <button class="btn btn-blue" style="width:100%" onclick="sendStaffCode()">
-            إرسال كود الدخول
-        </button>
+   <label>كلمة المرور</label>
 
-        <input
-            id="staffCode"
-            type="number"
-            placeholder="كود التحقق"
-        >
+   <input
+    id="loginPassword"
+    class="input"
+    type="password"
+    placeholder="كلمة المرور">
 
-        <button class="btn btn-dark" style="width:100%" onclick="verifyStaffCode()">
-            دخول الأدمن
-        </button>
+   <button
+    class="btn primary full"
+    type="button"
+    onclick="login()">
+    دخول لوحة التحكم
+   </button>
 
-        <p class="small center">
-            المالك فقط يستطيع إضافة أو حذف الأدمنز وتحديد صلاحياتهم.
-        </p>
+  </div>
 
-    </div>
+  <div id="requestBox" class="hidden">
+
+   <p class="muted">
+    أنشئ حسابًا ليتم إرساله للمالك للموافقة عليه.
+    لن يستطيع الحساب التحكم في المتجر قبل الموافقة.
+   </p>
+
+   <label>رقم الموبايل</label>
+
+   <input
+    id="requestPhone"
+    class="input"
+    type="tel"
+    placeholder="01xxxxxxxxx"
+    inputmode="tel">
+
+   <label>كلمة المرور</label>
+
+   <input
+    id="requestPassword"
+    class="input"
+    type="password"
+    placeholder="6 أحرف/أرقام على الأقل">
+
+   <button
+    class="btn primary full"
+    type="button"
+    onclick="requestAdmin()">
+    إرسال طلب الدخول
+   </button>
+
+  </div>
+
+  <div id="loginMessage" class="message"></div>
+
+ </div>
 </div>
 
 
 <!-- APP -->
-<div id="app" class="container hidden">
+<div id="app" class="admin-layout">
 
-    <div class="card">
+ <aside class="sidebar">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+  <div class="brand">
+   MarketNet
+  </div>
 
-            <div>
-                <h2 style="margin-bottom:4px">لوحة التحكم</h2>
-                <span class="small" id="roleText"></span>
-            </div>
+  <div id="nav" class="nav">
 
-            <button class="btn btn-red" onclick="logout()">
-                تسجيل الخروج
-            </button>
+   <button data-page="dashboard" onclick="go('dashboard')">
+    📊 الرئيسية
+   </button>
 
-        </div>
+   <button data-page="products" onclick="go('products')">
+    📦 المنتجات
+   </button>
 
-    </div>
+   <button data-page="orders" onclick="go('orders')">
+    🧾 الطلبات
+   </button>
 
+   <button data-page="categories" onclick="go('categories')">
+    🗂️ الأقسام
+   </button>
 
-    <!-- STATS -->
-    <div class="stats">
+   <button data-page="admins" onclick="go('admins')">
+    👥 الأدمنز
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">👥 الزوار</div>
-            <div class="stat-number" id="statVisitors">0</div>
-        </div>
+   <button data-page="ads" onclick="go('ads')">
+    📢 الإعلانات
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">📦 المنتجات</div>
-            <div class="stat-number" id="statProducts">0</div>
-        </div>
+   <button data-page="settings" onclick="go('settings')">
+    ⚙️ إعدادات المتجر
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">🛒 إجمالي الطلبات</div>
-            <div class="stat-number" id="statOrders">0</div>
-        </div>
+   <button data-page="seo" onclick="go('seo')">
+    🔎 SEO
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">🔔 الطلبات الجديدة</div>
-            <div class="stat-number" id="statNewOrders">0</div>
-        </div>
+   <button data-page="stats" onclick="go('stats')">
+    📈 الإحصائيات
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">💰 إجمالي المبيعات</div>
-            <div class="stat-number" id="statSales">0 ج</div>
-        </div>
+   <button data-page="rules" onclick="go('rules')">
+    🔐 قواعد الحماية
+   </button>
 
-        <div class="stat">
-            <div class="stat-title">👨‍💼 الأدمنز</div>
-            <div class="stat-number" id="statAdmins">0</div>
-        </div>
+  </div>
 
-    </div>
+ </aside>
 
 
-    <!-- TABS -->
-    <div class="tabs">
+ <main class="main">
 
-        <button class="tab active" onclick="openPanel('dashboard',this)">
-            الرئيسية
-        </button>
+  <div class="topbar">
 
-        <button class="tab" onclick="openPanel('products',this)">
-            المنتجات
-        </button>
+   <div>
+    <strong>لوحة تحكم متجر نت</strong>
+    <div id="who" class="muted"></div>
+   </div>
 
-        <button class="tab" onclick="openPanel('orders',this)">
-            الطلبات
-        </button>
+   <button
+    class="btn red"
+    type="button"
+    onclick="logout()">
+    خروج
+   </button>
 
-        <button class="tab" onclick="openPanel('categories',this)">
-            الأقسام
-        </button>
+  </div>
 
-        <button class="tab" onclick="openPanel('admins',this)">
-            الأدمنز
-        </button>
+  <div id="content"></div>
 
-        <button class="tab" onclick="openPanel('ads',this)">
-            الإعلانات
-        </button>
-
-        <button class="tab" onclick="openPanel('store',this)">
-            إعدادات المتجر
-        </button>
-
-        <button class="tab" onclick="openPanel('seo',this)">
-            SEO
-        </button>
-
-        <button class="tab" onclick="openPanel('stats',this)">
-            الإحصائيات
-        </button>
-
-    </div>
-
-
-    <!-- DASHBOARD -->
-    <section id="dashboard" class="panel active">
-
-        <div class="card">
-
-            <h2>⚡ تحكم سريع</h2>
-
-            <button class="btn" onclick="openPanelByName('products')">
-                ➕ إضافة منتج
-            </button>
-
-            <button class="btn btn-blue" onclick="openPanelByName('orders')">
-                🛒 مشاهدة الطلبات
-            </button>
-
-            <button class="btn btn-purple" onclick="openPanelByName('ads')">
-                📢 إدارة الإعلانات
-            </button>
-
-            <button class="btn btn-orange" onclick="openPanelByName('store')">
-                ⚙️ إعدادات المتجر
-            </button>
-
-        </div>
-
-        <div class="card">
-
-            <h2>📌 معلومات المتجر الحالية</h2>
-
-            <div id="quickStoreInfo">
-                جاري التحميل...
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- PRODUCTS -->
-    <section id="products" class="panel">
-
-        <div class="card">
-
-            <h2>➕ إضافة منتج جديد</h2>
-
-            <div id="productMessage"></div>
-
-            <div class="row">
-
-                <div>
-                    <label>اسم المنتج</label>
-                    <input id="productName" placeholder="مثال: زيت عباد الشمس">
-                </div>
-
-                <div>
-                    <label>السعر</label>
-                    <input id="productPrice" type="number" step="0.01">
-                </div>
-
-            </div>
-
-            <div class="row3">
-
-                <div>
-                    <label>القطع المتبقية</label>
-                    <input id="productStock" type="number" value="0">
-                </div>
-
-                <div>
-                    <label>القسم</label>
-                    <select id="productCategory"></select>
-                </div>
-
-                <div>
-                    <label>الوحدة</label>
-                    <select id="productUnit">
-                        <option value="قطعة">قطعة</option>
-                        <option value="كيلو">كيلو</option>
-                        <option value="جرام">جرام</option>
-                        <option value="لتر">لتر</option>
-                        <option value="علبة">علبة</option>
-                        <option value="كيس">كيس</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <label>رابط صورة المنتج</label>
-            <input id="productImage" placeholder="https://...">
-
-            <label>وصف المنتج</label>
-            <textarea id="productDescription"></textarea>
-
-            <label>
-                <input id="productFeatured" type="checkbox" style="width:auto">
-                منتج مميز
-            </label>
-
-            <label>
-                <input id="productOffer" type="checkbox" style="width:auto">
-                يظهر في العروض اليومية
-            </label>
-
-            <br>
-
-            <button class="btn" onclick="saveProduct()">
-                💾 حفظ المنتج
-            </button>
-
-            <button class="btn btn-gray" onclick="clearProductForm()">
-                مسح
-            </button>
-
-            <input id="editingProductId" type="hidden">
-
-        </div>
-
-
-        <div class="card">
-
-            <h2>📦 كل المنتجات</h2>
-
-            <input
-                id="productSearch"
-                placeholder="🔎 ابحث باسم المنتج..."
-                oninput="renderProducts()"
-            >
-
-            <div id="productsList">
-                جاري التحميل...
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ORDERS -->
-    <section id="orders" class="panel">
-
-        <div class="card">
-
-            <h2>🛒 الطلبات الحالية</h2>
-
-            <button class="btn btn-blue" onclick="loadOrders()">
-                🔄 تحديث
-            </button>
-
-            <div id="ordersList">
-                جاري التحميل...
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- CATEGORIES -->
-    <section id="categories" class="panel">
-
-        <div class="card">
-
-            <h2>📂 إدارة الأقسام</h2>
-
-            <p class="small">
-                تستطيع تغيير أسماء الأقسام وترتيبها وإخفاء أي قسم.
-            </p>
-
-            <div id="categoriesList">
-                جاري التحميل...
-            </div>
-
-            <hr>
-
-            <h3>➕ إضافة قسم</h3>
-
-            <input id="newCategoryName" placeholder="اسم القسم">
-
-            <button class="btn" onclick="addCategory()">
-                إضافة القسم
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- ADMINS -->
-    <section id="admins" class="panel">
-
-        <div class="card">
-
-            <h2>👨‍💼 إدارة الأدمنز</h2>
-
-            <div class="notice notice-info">
-                أنت المالك الوحيد. تستطيع هنا قبول الأدمنز وتحديد الأقسام التي يستطيع كل أدمن التحكم فيها.
-            </div>
-
-            <h3>طلبات الأدمن الجديدة</h3>
-
-            <div id="adminRequests">
-                جاري التحميل...
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h3>الأدمنز الحاليون</h3>
-
-            <div id="adminsList">
-                جاري التحميل...
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- ADS -->
-    <section id="ads" class="panel">
-
-        <div class="card">
-
-            <h2>📢 الإعلانات</h2>
-
-            <div class="notice notice-info">
-                هنا تتحكم في أماكن الإعلانات وروابطها وصورها. ويمكن لاحقًا وضع كود AdSense في الأماكن المخصصة.
-            </div>
-
-            <h3>إعلان أعلى المتجر</h3>
-
-            <textarea id="adTop" placeholder="ضع كود الإعلان أو محتوى الإعلان"></textarea>
-
-            <h3>إعلان وسط المنتجات</h3>
-
-            <textarea id="adMiddle" placeholder="ضع كود الإعلان"></textarea>
-
-            <h3>إعلان أسفل المتجر</h3>
-
-            <textarea id="adBottom" placeholder="ضع كود الإعلان"></textarea>
-
-            <h3>إعلان قبل التحميل</h3>
-
-            <textarea id="adBeforeDownload" placeholder="رابط فيديو الإعلان أو كود الإعلان"></textarea>
-
-            <label>
-                <input id="adEnabled" type="checkbox" style="width:auto">
-                تفعيل الإعلانات
-            </label>
-
-            <br>
-
-            <button class="btn btn-purple" onclick="saveAds()">
-                💾 حفظ الإعلانات
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- STORE SETTINGS -->
-    <section id="store" class="panel">
-
-        <div class="card">
-
-            <h2>⚙️ التحكم الكامل في المتجر</h2>
-
-            <div class="row">
-
-                <div>
-                    <label>اسم المتجر</label>
-                    <input id="storeName">
-                </div>
-
-                <div>
-                    <label>رقم واتساب الطلبات</label>
-                    <input id="storeWhatsapp">
-                </div>
-
-            </div>
-
-            <label>الجملة أسفل اسم المتجر</label>
-
-            <input id="storeSlogan">
-
-            <div class="row3">
-
-                <div>
-                    <label>مصاريف التوصيل</label>
-                    <input id="deliveryPrice" type="number">
-                </div>
-
-                <div>
-                    <label>أقل رقم للعداد</label>
-                    <input id="counterMin" type="number">
-                </div>
-
-                <div>
-                    <label>أكبر رقم للعداد</label>
-                    <input id="counterMax" type="number">
-                </div>
-
-            </div>
-
-            <h3>💬 رسائل المتجر</h3>
-
-            <label>رسالة نجاح الطلب</label>
-            <textarea id="successMessage"></textarea>
-
-            <label>رسالة عدم وجود المنتج</label>
-            <textarea id="missingMessage"></textarea>
-
-            <h3>🛍️ إعدادات الطلب</h3>
-
-            <label>
-                <input id="allowOrders" type="checkbox" style="width:auto">
-                السماح باستقبال الطلبات
-            </label>
-
-            <br>
-
-            <label>
-                <input id="showStock" type="checkbox" style="width:auto">
-                إظهار عدد القطع المتبقية
-            </label>
-
-            <br>
-
-            <label>
-                <input id="showPrices" type="checkbox" style="width:auto">
-                إظهار الأسعار
-            </label>
-
-            <br>
-
-            <label>
-                <input id="enableWhatsapp" type="checkbox" style="width:auto">
-                تفعيل طلبات واتساب
-            </label>
-
-            <br><br>
-
-            <button class="btn" onclick="saveStoreSettings()">
-                💾 حفظ إعدادات المتجر
-            </button>
-
-        </div>
-
-
-        <div class="card">
-
-            <h2>🖼️ هوية المتجر</h2>
-
-            <label>رابط اللوجو</label>
-
-            <input id="storeLogo">
-
-            <img id="logoPreview" class="logo-preview">
-
-            <br>
-
-            <label>لون المتجر الرئيسي</label>
-
-            <input id="primaryColor" type="color" value="#0ca678">
-
-            <br>
-
-            <button class="btn" onclick="saveBranding()">
-                حفظ الهوية
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- SEO -->
-    <section id="seo" class="panel">
-
-        <div class="card">
-
-            <h2>🔎 SEO</h2>
-
-            <label>عنوان الموقع</label>
-            <input id="seoTitle">
-
-            <label>وصف الموقع</label>
-            <textarea id="seoDescription"></textarea>
-
-            <label>الكلمات المفتاحية</label>
-            <textarea id="seoKeywords"></textarea>
-
-            <label>اسم الموقع في محركات البحث</label>
-            <input id="seoSiteName">
-
-            <label>رابط الموقع</label>
-            <input id="seoUrl">
-
-            <button class="btn btn-blue" onclick="saveSEO()">
-                💾 حفظ SEO
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- STATS -->
-    <section id="stats" class="panel">
-
-        <div class="card">
-
-            <h2>📊 الإحصائيات</h2>
-
-            <div class="grid">
-
-                <div class="stat">
-                    <div class="stat-title">إجمالي الزوار</div>
-                    <div class="stat-number" id="statsVisitors">0</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-title">اليوم</div>
-                    <div class="stat-number" id="statsToday">0</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-title">هذا الشهر</div>
-                    <div class="stat-number" id="statsMonth">0</div>
-                </div>
-
-            </div>
-
-            <button class="btn btn-red" onclick="resetVisitors()">
-                تصفير عداد الزوار
-            </button>
-
-        </div>
-
-    </section>
+ </main>
 
 </div>
 
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- PRODUCT MODAL -->
+<div id="productModal" class="modal">
+
+ <div class="modal-box">
+
+  <button
+   class="close"
+   type="button"
+   onclick="closeProduct()">
+   ✕
+  </button>
+
+  <h2 id="productModalTitle">
+   إضافة منتج
+  </h2>
+
+  <input id="productId" type="hidden">
+
+  <div class="form-grid">
+
+   <div>
+    <label>اسم المنتج</label>
+
+    <input
+     id="pName"
+     class="input"
+     placeholder="مثال: تونة 140 جم">
+   </div>
+
+
+   <div>
+    <label>القسم</label>
+
+    <select id="pCategory" class="input"></select>
+   </div>
+
+
+   <div>
+    <label>السعر</label>
+
+    <input
+     id="pPrice"
+     class="input"
+     type="number"
+     min="0"
+     step="0.01">
+   </div>
+
+
+   <div>
+    <label>سعر العرض (اختياري)</label>
+
+    <input
+     id="pSalePrice"
+     class="input"
+     type="number"
+     min="0"
+     step="0.01">
+   </div>
+
+
+   <div>
+    <label>الكمية/المخزون</label>
+
+    <input
+     id="pStock"
+     class="input"
+     type="number"
+     min="0"
+     step="1"
+     value="0">
+   </div>
+
+
+   <div>
+    <label>الوحدة/الحجم</label>
+
+    <input
+     id="pUnit"
+     class="input"
+     placeholder="1 كيلو / 500 جم">
+   </div>
+
+
+   <div class="wide">
+
+    <label>رابط الصورة (اختياري)</label>
+
+    <input
+     id="pImage"
+     class="input"
+     placeholder="https://...">
+
+   </div>
+
+
+   <div class="wide">
+
+    <label>رفع صورة من الهاتف</label>
+
+    <input
+     id="pFile"
+     class="file"
+     type="file"
+     accept="image/*"
+     onchange="previewImage()">
+
+    <img
+     id="imagePreview"
+     class="preview hidden"
+     alt="معاينة">
+
+   </div>
+
+
+   <div>
+
+    <label>إيموجي بديل لو لا توجد صورة</label>
+
+    <input
+     id="pEmoji"
+     class="input"
+     placeholder="🥫">
+
+   </div>
+
+
+   <div>
+
+    <label>ترتيب المنتج</label>
+
+    <input
+     id="pSort"
+     class="input"
+     type="number"
+     value="0">
+
+   </div>
+
+
+   <div class="wide">
+
+    <label>وصف المنتج</label>
+
+    <textarea
+     id="pDescription"
+     class="input"
+     rows="3"></textarea>
+
+   </div>
+
+
+   <div>
+
+    <label>التقييم</label>
+
+    <input
+     id="pRating"
+     class="input"
+     type="number"
+     min="0"
+     max="5"
+     step="0.1"
+     value="4.5">
+
+   </div>
+
+
+   <div>
+
+    <label>الحالة</label>
+
+    <select id="pActive" class="input">
+
+     <option value="true">
+      ظاهر في المتجر
+     </option>
+
+     <option value="false">
+      مخفي
+     </option>
+
+    </select>
+
+   </div>
+
+
+   <div class="wide">
+
+    <div class="checks">
+
+     <label class="check">
+      <input id="pFeatured" type="checkbox">
+      ⭐ تثبيت المنتج
+     </label>
+
+     <label class="check">
+      <input id="pOffer" type="checkbox">
+      🔥 منتج عرض
+     </label>
+
+    </div>
+
+   </div>
+
+  </div>
+
+
+  <div class="actions" style="margin-top:15px">
+
+   <button
+    class="btn primary"
+    type="button"
+    onclick="saveProduct()">
+    💾 حفظ المنتج
+   </button>
+
+   <button
+    class="btn gray"
+    type="button"
+    onclick="closeProduct()">
+    إلغاء
+   </button>
+
+  </div>
+
+  <div id="productMessage" class="message"></div>
+
+ </div>
+</div>
+
 
 <script>
 
-const firebaseConfig={
-    apiKey:"AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4",
-    authDomain:"makhzan-9eb1f.firebaseapp.com",
-    projectId:"makhzan-9eb1f",
-    storageBucket:"makhzan-9eb1f.appspot.com",
-    messagingSenderId:"695067759501",
-    appId:"1:695067759501:web:df932ff7bac0b1470523c4"
+/* =========================
+   FIREBASE
+========================= */
+
+const firebaseConfig = {
+ apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4",
+ authDomain: "makhzan-9eb1f.firebaseapp.com",
+ projectId: "makhzan-9eb1f",
+ storageBucket: "makhzan-9eb1f.appspot.com",
+ messagingSenderId: "695067759501",
+ appId: "1:695067759501:web:df932ff7bac0b1470523c4"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-const OWNER_PHONE="01127491224";
-const OWNER_EMAIL="201127491224@marketnet.local";
-
-const CATEGORIES_DEFAULT=[
-    "بقالة",
-    "العروض اليومية",
-    "طيور",
-    "مجمدات",
-    "منظفات",
-    "عطارة",
-    "مستحضرات تجميل",
-    "اكسسوارات بنات"
-];
-
-let currentUser=null;
-let isOwner=false;
-let currentAdmin=null;
-let products=[];
-let categories=[];
-let editingProduct=null;
-let confirmationResult=null;
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 
 
 /* =========================
-   GENERAL
+   CONSTANTS
 ========================= */
+
+const OWNER_PHONE = "01127491224";
+
+const OWNER_EMAIL =
+ "201127491224@marketnet.local";
+
+const OWNER_PASSWORD = "1378";
+
+const WHATSAPP =
+ "201127491224";
+
+
+/* =========================
+   STATE
+========================= */
+
+let currentUser = null;
+let currentAdmin = null;
+let currentPage = "dashboard";
+
+let productsCache = [];
+let ordersCache = [];
+let adminsCache = [];
+let categoriesCache = [];
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function $(id){
+ return document.getElementById(id);
+}
+
+function esc(value){
+ return String(value ?? "")
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+}
+
+function money(value){
+ return Number(value || 0).toLocaleString("ar-EG") + " ج.م";
+}
+
+function showMessage(id,text,error=false){
+
+ const el = $(id);
+
+ if(!el) return;
+
+ el.textContent = text;
+ el.style.display = "block";
+
+ el.classList.toggle("error",error);
+
+ setTimeout(()=>{
+  el.style.display = "none";
+ },5000);
+}
 
 function normalizePhone(phone){
 
-    phone=String(phone||"").replace(/[^\d+]/g,"");
+ let p = String(phone || "").trim();
 
-    if(phone.startsWith("+20")){
-        phone="0"+phone.substring(3);
-    }
+ p = p.replace(/\s+/g,"");
 
-    if(phone.startsWith("20") && phone.length===12){
-        phone="0"+phone.substring(2);
-    }
+ if(p.startsWith("+20")){
+  p = "0" + p.slice(3);
+ }
 
-    return phone;
+ if(p.startsWith("20") && p.length === 12){
+  p = "0" + p.slice(2);
+ }
+
+ return p;
 }
 
-function escapeHTML(value){
+function internalEmail(phone){
 
-    return String(value??"")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+ const p = normalizePhone(phone);
+
+ return p.replace(/\D/g,"") + "@marketnet.local";
 }
 
-function showMessage(id,text,type="success"){
+function isOwner(){
 
-    const el=document.getElementById(id);
-
-    if(!el)return;
-
-    el.innerHTML=
-        `<div class="notice notice-${type}">
-            ${escapeHTML(text)}
-        </div>`;
+ return currentUser &&
+ currentUser.email === OWNER_EMAIL;
 }
 
-function ownerOnly(){
+function hasPermission(permission){
 
-    if(!isOwner){
+ if(isOwner()) return true;
 
-        alert("هذه الخاصية للمالك فقط.");
+ if(!currentAdmin) return false;
 
-        return false;
-    }
+ return currentAdmin.active === true &&
+ currentAdmin.permissions &&
+ currentAdmin.permissions[permission] === true;
+}
 
-    return true;
+function categoryAllowed(category){
+
+ if(isOwner()) return true;
+
+ if(!currentAdmin || !currentAdmin.active){
+  return false;
+ }
+
+ const permissions =
+ currentAdmin.categoryPermissions || {};
+
+ if(permissions.all === true){
+  return true;
+ }
+
+ return permissions[category] === true;
 }
 
 
 /* =========================
-   OWNER LOGIN
+   LOGIN TABS
 ========================= */
 
-async function ownerLogin(){
+function showLogin(){
 
-    const phone=normalizePhone(
-        document.getElementById("ownerPhone").value
-    );
+ $("loginBox").classList.remove("hidden");
+ $("requestBox").classList.add("hidden");
 
-    const password=
-        document.getElementById("ownerPassword").value;
+ $("loginTab").classList.add("active");
+ $("requestTab").classList.remove("active");
 
-    if(phone!==OWNER_PHONE){
+}
 
-        showMessage(
-            "loginMessage",
-            "رقم المالك غير صحيح.",
-            "error"
-        );
+function showRequest(){
 
-        return;
-    }
+ $("loginBox").classList.add("hidden");
+ $("requestBox").classList.remove("hidden");
 
-    if(!password){
-
-        showMessage(
-            "loginMessage",
-            "اكتب كلمة السر.",
-            "error"
-        );
-
-        return;
-    }
-
-    try{
-
-        await auth.signInWithEmailAndPassword(
-            OWNER_EMAIL,
-            password
-        );
-
-    }catch(error){
-
-        /*
-        أول مرة فقط:
-        يتم إنشاء حساب المالك داخل Firebase
-        باستخدام كلمة السر التي أدخلتها.
-        */
-
-        if(
-            error.code==="auth/user-not-found" ||
-            error.code==="auth/invalid-credential"
-        ){
-
-            try{
-
-                await auth.createUserWithEmailAndPassword(
-                    OWNER_EMAIL,
-                    password
-                );
-
-            }catch(createError){
-
-                showMessage(
-                    "loginMessage",
-                    "تعذر إنشاء حساب المالك: "+
-                    createError.message,
-                    "error"
-                );
-
-            }
-
-        }else{
-
-            showMessage(
-                "loginMessage",
-                "خطأ في تسجيل الدخول: "+
-                error.message,
-                "error"
-            );
-
-        }
-
-    }
+ $("loginTab").classList.remove("active");
+ $("requestTab").classList.add("active");
 
 }
 
 
 /* =========================
-   STAFF PHONE LOGIN
+   LOGIN
 ========================= */
 
-async function sendStaffCode(){
+async function login(){
 
-    const phone=normalizePhone(
-        document.getElementById("staffPhone").value
-    );
+ const phone =
+ normalizePhone($("loginPhone").value);
 
-    if(!phone){
+ const password =
+ $("loginPassword").value;
 
-        alert("اكتب رقم الموبايل.");
+ if(!phone || !password){
 
-        return;
-    }
+  showMessage(
+   "loginMessage",
+   "اكتب رقم الموبايل وكلمة المرور",
+   true
+  );
 
-    try{
+  return;
+ }
 
-        if(!window.recaptchaVerifier){
+ let email = internalEmail(phone);
 
-            window.recaptchaVerifier=
-                new firebase.auth.RecaptchaVerifier(
-                    "recaptcha-container",
-                    {
-                        size:"normal"
-                    }
-                );
-        }
+ try{
 
-        const result=
-            await auth.signInWithPhoneNumber(
-                "+20"+phone.substring(1),
-                window.recaptchaVerifier
-            );
+  /*
+   المالك:
+   01127491224
+   يتحول إلى:
+   201127491224@marketnet.local
+  */
 
-        confirmationResult=result;
+  await auth.signInWithEmailAndPassword(
+   email,
+   password
+  );
 
-        alert("تم إرسال كود التحقق.");
+ }catch(error){
 
-    }catch(error){
+  console.error(error);
 
-        alert(
-            "تعذر إرسال الكود: "+
-            error.message
-        );
+  showMessage(
+   "loginMessage",
+   "بيانات الدخول غير صحيحة أو الحساب غير موجود.",
+   true
+  );
 
-    }
-
-}
-
-
-async function verifyStaffCode(){
-
-    if(!confirmationResult){
-
-        alert("اطلب كود التحقق أولاً.");
-
-        return;
-    }
-
-    const code=
-        document.getElementById("staffCode").value.trim();
-
-    try{
-
-        await confirmationResult.confirm(code);
-
-    }catch(error){
-
-        alert(
-            "كود التحقق غير صحيح."
-        );
-
-    }
+ }
 
 }
 
@@ -1127,1731 +1130,271 @@ async function verifyStaffCode(){
 
 auth.onAuthStateChanged(async user=>{
 
-    if(!user){
+ currentUser = user;
 
-        showLogin();
+ if(!user){
 
-        return;
+  $("loginWrap").style.display = "flex";
+  $("app").style.display = "none";
+
+  return;
+ }
+
+ try{
+
+  if(user.email === OWNER_EMAIL){
+
+   currentAdmin = {
+    uid:user.uid,
+    phone:OWNER_PHONE,
+    name:"مالك المتجر",
+    role:"owner",
+    active:true,
+    permissions:{
+     products:true,
+     orders:true,
+     categories:true,
+     admins:true,
+     ads:true,
+     settings:true,
+     seo:true,
+     stats:true
     }
+   };
 
-    currentUser=user;
+  }else{
 
-    if(user.email===OWNER_EMAIL){
+   const snap =
+    await db.collection("admins")
+    .doc(user.uid)
+    .get();
 
-        isOwner=true;
-        currentAdmin=null;
+   if(!snap.exists){
 
-        showApp();
+    await auth.signOut();
 
-        return;
-    }
+    showMessage(
+     "loginMessage",
+     "الحساب غير معتمد من مالك المتجر.",
+     true
+    );
 
-    isOwner=false;
+    return;
+   }
 
-    const adminDoc=
-        await db.collection("admins")
-        .doc(user.uid)
-        .get();
+   currentAdmin = {
+    uid:user.uid,
+    ...snap.data()
+   };
 
-    if(adminDoc.exists &&
-       adminDoc.data().active===true){
+   if(currentAdmin.active !== true){
 
-        currentAdmin=adminDoc.data();
+    await auth.signOut();
 
-        showApp();
+    showMessage(
+     "loginMessage",
+     "هذا الحساب غير مفعل حاليًا.",
+     true
+    );
 
-    }else{
+    return;
+   }
 
-        await db.collection("adminRequests")
-        .doc(user.uid)
-        .set({
-            uid:user.uid,
-            phone:user.phoneNumber||"",
-            status:"pending",
-            createdAt:firebase.firestore.FieldValue.serverTimestamp()
-        },{merge:true});
+  }
 
-        alert(
-            "تم إرسال طلبك للمالك. انتظر موافقته."
-        );
+  $("loginWrap").style.display = "none";
+  $("app").style.display = "block";
 
-        await auth.signOut();
-    }
+  $("who").textContent =
+   currentAdmin.name ||
+   currentAdmin.phone ||
+   user.email;
+
+  go("dashboard");
+
+ }catch(error){
+
+  console.error(error);
+
+  await auth.signOut();
+
+ }
 
 });
 
 
-function showLogin(){
-
-    document.getElementById("loginScreen")
-        .classList.remove("hidden");
-
-    document.getElementById("app")
-        .classList.add("hidden");
-
-}
-
-
-function showApp(){
-
-    document.getElementById("loginScreen")
-        .classList.add("hidden");
-
-    document.getElementById("app")
-        .classList.remove("hidden");
-
-    document.getElementById("topUser")
-        .textContent=
-        isOwner
-        ? "👑 المالك: 01127491224"
-        : "👨‍💼 أدمن مساعد";
-
-    document.getElementById("roleText")
-        .textContent=
-        isOwner
-        ? "صلاحية كاملة على كل المتجر"
-        : "صلاحيات حسب الأقسام المحددة لك";
-
-    applyPermissions();
-
-    loadAll();
-
-}
-
-
-function logout(){
-
-    auth.signOut();
-
-}
-
-
 /* =========================
-   PANELS
+   REQUEST ADMIN
 ========================= */
 
-function openPanel(name,button){
+async function requestAdmin(){
 
-    document.querySelectorAll(".panel")
-        .forEach(p=>p.classList.remove("active"));
+ const phone =
+  normalizePhone($("requestPhone").value);
 
-    document.getElementById(name)
-        .classList.add("active");
+ const password =
+  $("requestPassword").value;
 
-    document.querySelectorAll(".tab")
-        .forEach(t=>t.classList.remove("active"));
+ if(!/^01\d{9}$/.test(phone)){
 
-    if(button){
-        button.classList.add("active");
-    }
+  showMessage(
+   "loginMessage",
+   "اكتب رقم موبايل مصري صحيح.",
+   true
+  );
 
-}
+  return;
+ }
 
+ if(password.length < 6){
 
-function openPanelByName(name){
+  showMessage(
+   "loginMessage",
+   "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.",
+   true
+  );
 
-    const btn=
-        [...document.querySelectorAll(".tab")]
-        .find(x=>x.getAttribute("onclick")?.includes("'"+name+"'"));
+  return;
+ }
 
-    openPanel(name,btn);
+ try{
 
-}
+  /*
+   نستخدم تطبيق Firebase ثانوي
+   حتى لا يتم تسجيل خروج المالك.
+  */
 
+  let secondary;
 
-/* =========================
-   PERMISSIONS
-========================= */
+  try{
 
-function hasCategoryPermission(category){
+   secondary =
+    firebase.app("staffCreator");
 
-    if(isOwner)return true;
+  }catch(e){
 
-    if(!currentAdmin)return false;
-
-    const allowed=currentAdmin.categories||[];
-
-    return allowed.includes("*") ||
-           allowed.includes(category);
-}
-
-
-function applyPermissions(){
-
-    if(isOwner)return;
-
-    /*
-    الأدمن المساعد يستطيع مشاهدة لوحة التحكم
-    ولكن المنتجات الخاصة بالأقسام المسموحة فقط.
-    */
-
-}
-
-
-/* =========================
-   LOAD ALL
-========================= */
-
-async function loadAll(){
-
-    await loadCategories();
-
-    await loadProducts();
-
-    await loadOrders();
-
-    await loadStoreSettings();
-
-    await loadAds();
-
-    await loadSEO();
-
-    await loadAdmins();
-
-    await loadAdminRequests();
-
-    await loadStats();
-
-}
-
-
-/* =========================
-   CATEGORIES
-========================= */
-
-async function loadCategories(){
-
-    const snap=
-        await db.collection("settings")
-        .doc("categories")
-        .get();
-
-    if(snap.exists){
-
-        categories=
-            snap.data().items||[];
-
-    }else{
-
-        categories=
-            CATEGORIES_DEFAULT.map((name,index)=>({
-                id:String(index+1),
-                name,
-                active:true,
-                order:index
-            }));
-
-        if(isOwner){
-
-            await db.collection("settings")
-            .doc("categories")
-            .set({
-                items:categories
-            });
-
-        }
-
-    }
-
-    const select=
-        document.getElementById("productCategory");
-
-    select.innerHTML="";
-
-    categories
-    .filter(c=>c.active!==false)
-    .forEach(c=>{
-
-        if(
-            isOwner ||
-            hasCategoryPermission(c.name)
-        ){
-
-            select.innerHTML+=
-            `<option value="${escapeHTML(c.name)}">
-                ${escapeHTML(c.name)}
-            </option>`;
-        }
-
-    });
-
-    renderCategories();
-
-}
-
-
-function renderCategories(){
-
-    const el=
-        document.getElementById("categoriesList");
-
-    if(!el)return;
-
-    if(!isOwner){
-
-        el.innerHTML=
-            "<div class='notice notice-info'>إدارة الأقسام للمالك فقط.</div>";
-
-        return;
-    }
-
-    let html="";
-
-    categories
-    .sort((a,b)=>(a.order||0)-(b.order||0))
-    .forEach((c,i)=>{
-
-        html+=`
-        <div class="card" style="border:1px solid #eee">
-
-            <div class="row">
-
-                <input
-                    id="catName_${c.id}"
-                    value="${escapeHTML(c.name)}"
-                >
-
-                <select id="catActive_${c.id}">
-
-                    <option value="true"
-                        ${c.active!==false?"selected":""}>
-                        ظاهر
-                    </option>
-
-                    <option value="false"
-                        ${c.active===false?"selected":""}>
-                        مخفي
-                    </option>
-
-                </select>
-
-            </div>
-
-            <button
-                class="btn"
-                onclick="saveCategory('${c.id}')">
-                حفظ
-            </button>
-
-            <button
-                class="btn btn-red"
-                onclick="deleteCategory('${c.id}')">
-                حذف
-            </button>
-
-        </div>`;
-    });
-
-    el.innerHTML=html;
-
-}
-
-
-async function saveCategory(id){
-
-    if(!ownerOnly())return;
-
-    const cat=
-        categories.find(x=>x.id===id);
-
-    if(!cat)return;
-
-    cat.name=
-        document.getElementById(
-            "catName_"+id
-        ).value.trim();
-
-    cat.active=
-        document.getElementById(
-            "catActive_"+id
-        ).value==="true";
-
-    await db.collection("settings")
-        .doc("categories")
-        .set({
-            items:categories
-        });
-
-    await loadCategories();
-
-}
-
-
-async function addCategory(){
-
-    if(!ownerOnly())return;
-
-    const name=
-        document.getElementById("newCategoryName")
-        .value.trim();
-
-    if(!name)return;
-
-    if(categories.some(c=>c.name===name)){
-
-        alert("القسم موجود بالفعل.");
-
-        return;
-    }
-
-    categories.push({
-        id:"cat_"+Date.now(),
-        name,
-        active:true,
-        order:categories.length
-    });
-
-    await db.collection("settings")
-        .doc("categories")
-        .set({
-            items:categories
-        });
-
-    document.getElementById(
-        "newCategoryName"
-    ).value="";
-
-    loadCategories();
-
-}
-
-
-async function deleteCategory(id){
-
-    if(!ownerOnly())return;
-
-    if(!confirm("حذف القسم؟"))return;
-
-    categories=
-        categories.filter(x=>x.id!==id);
-
-    await db.collection("settings")
-        .doc("categories")
-        .set({
-            items:categories
-        });
-
-    loadCategories();
-
-}
-
-
-/* =========================
-   PRODUCTS
-========================= */
-
-async function loadProducts(){
-
-    const snap=
-        await db.collection("products")
-        .get();
-
-    products=[];
-
-    snap.forEach(doc=>{
-
-        products.push({
-            id:doc.id,
-            ...doc.data()
-        });
-
-    });
-
-    renderProducts();
-
-    document.getElementById("statProducts")
-        .textContent=products.length;
-
-}
-
-
-function renderProducts(){
-
-    const container=
-        document.getElementById("productsList");
-
-    const search=
-        (document.getElementById("productSearch")?.value||"")
-        .toLowerCase()
-        .trim();
-
-    let list=
-        products.filter(p=>{
-
-            if(
-                !isOwner &&
-                !hasCategoryPermission(p.category)
-            ){
-                return false;
-            }
-
-            if(search &&
-               !String(p.name||"")
-               .toLowerCase()
-               .includes(search)){
-                return false;
-            }
-
-            return true;
-        });
-
-    if(!list.length){
-
-        container.innerHTML=
-            "<div class='notice notice-info'>لا توجد منتجات.</div>";
-
-        return;
-    }
-
-    let html="<div class='grid'>";
-
-    list.forEach(p=>{
-
-        html+=`
-        <div class="product-card">
-
-            <img
-                src="${escapeHTML(p.image||"https://via.placeholder.com/500x350?text=MarketNet")}"
-                onerror="this.src='https://via.placeholder.com/500x350?text=MarketNet'"
-            >
-
-            <h3>${escapeHTML(p.name||"بدون اسم")}</h3>
-
-            <div>
-                💰 ${Number(p.price||0)} ج
-            </div>
-
-            <div>
-                📦 المتبقي:
-                <b>${Number(p.stock||0)}</b>
-            </div>
-
-            <div>
-                📂 ${escapeHTML(p.category||"")}
-            </div>
-
-            <div style="margin-top:8px">
-
-                ${
-                    p.featured
-                    ? "<span class='status status-active'>مميز</span>"
-                    : ""
-                }
-
-                ${
-                    p.offer
-                    ? "<span class='status status-new'>عرض</span>"
-                    : ""
-                }
-
-            </div>
-
-            <hr>
-
-            <button
-                class="btn btn-blue"
-                onclick="editProduct('${p.id}')">
-                تعديل
-            </button>
-
-            <button
-                class="btn btn-red"
-                onclick="deleteProduct('${p.id}')">
-                حذف
-            </button>
-
-        </div>`;
-    });
-
-    html+="</div>";
-
-    container.innerHTML=html;
-
-}
-
-
-async function saveProduct(){
-
-    const name=
-        document.getElementById("productName")
-        .value.trim();
-
-    const price=
-        Number(
-            document.getElementById("productPrice")
-            .value
-        );
-
-    const stock=
-        Number(
-            document.getElementById("productStock")
-            .value
-        );
-
-    const category=
-        document.getElementById("productCategory")
-        .value;
-
-    const image=
-        document.getElementById("productImage")
-        .value.trim();
-
-    const description=
-        document.getElementById("productDescription")
-        .value.trim();
-
-    const unit=
-        document.getElementById("productUnit")
-        .value;
-
-    const featured=
-        document.getElementById("productFeatured")
-        .checked;
-
-    const offer=
-        document.getElementById("productOffer")
-        .checked;
-
-    if(!name){
-
-        showMessage(
-            "productMessage",
-            "اكتب اسم المنتج.",
-            "error"
-        );
-
-        return;
-    }
-
-    if(!isOwner &&
-       !hasCategoryPermission(category)){
-
-        alert("ليس لديك صلاحية لهذا القسم.");
-
-        return;
-    }
-
-    const data={
-        name,
-        price,
-        stock,
-        category,
-        image,
-        description,
-        unit,
-        featured,
-        offer,
-        active:true,
-        updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    const id=
-        document.getElementById(
-            "editingProductId"
-        ).value;
-
-    if(id){
-
-        await db.collection("products")
-            .doc(id)
-            .update(data);
-
-    }else{
-
-        data.createdAt=
-            firebase.firestore.FieldValue.serverTimestamp();
-
-        await db.collection("products")
-            .add(data);
-    }
-
-    showMessage(
-        "productMessage",
-        "تم حفظ المنتج بنجاح."
+   secondary =
+    firebase.initializeApp(
+     firebaseConfig,
+     "staffCreator"
     );
 
-    clearProductForm();
+  }
 
-    loadProducts();
+  const secondaryAuth =
+   secondary.auth();
 
-}
+  const credential =
+   await secondaryAuth
+   .createUserWithEmailAndPassword(
+    internalEmail(phone),
+    password
+   );
 
+  const uid = credential.user.uid;
 
-function editProduct(id){
+  await db.collection("adminRequests")
+   .doc(uid)
+   .set({
 
-    const p=
-        products.find(x=>x.id===id);
+    uid:uid,
+    phone:phone,
+    email:internalEmail(phone),
+    createdAt:
+     firebase.firestore.FieldValue.serverTimestamp(),
+    status:"pending"
 
-    if(!p)return;
+   });
 
-    document.getElementById("editingProductId")
-        .value=id;
+  await secondaryAuth.signOut();
 
-    document.getElementById("productName")
-        .value=p.name||"";
+  showMessage(
+   "loginMessage",
+   "تم إرسال طلب الأدمن للمالك. انتظر الموافقة."
+  );
 
-    document.getElementById("productPrice")
-        .value=p.price||0;
+  $("requestPhone").value = "";
+  $("requestPassword").value = "";
 
-    document.getElementById("productStock")
-        .value=p.stock||0;
+ }catch(error){
 
-    document.getElementById("productCategory")
-        .value=p.category||"";
+  console.error(error);
 
-    document.getElementById("productImage")
-        .value=p.image||"";
+  let msg =
+   "حدث خطأ أثناء إنشاء طلب الأدمن.";
 
-    document.getElementById("productDescription")
-        .value=p.description||"";
+  if(error.code ===
+   "auth/email-already-in-use"){
 
-    document.getElementById("productUnit")
-        .value=p.unit||"قطعة";
+   msg =
+    "هذا الرقم لديه حساب بالفعل.";
 
-    document.getElementById("productFeatured")
-        .checked=!!p.featured;
+  }
 
-    document.getElementById("productOffer")
-        .checked=!!p.offer;
+  showMessage(
+   "loginMessage",
+   msg,
+   true
+  );
 
-    openPanelByName("products");
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-}
-
-
-function clearProductForm(){
-
-    [
-        "productName",
-        "productPrice",
-        "productStock",
-        "productImage",
-        "productDescription",
-        "editingProductId"
-    ]
-    .forEach(id=>{
-        document.getElementById(id).value="";
-    });
-
-    document.getElementById("productFeatured")
-        .checked=false;
-
-    document.getElementById("productOffer")
-        .checked=false;
-
-}
-
-
-async function deleteProduct(id){
-
-    const p=
-        products.find(x=>x.id===id);
-
-    if(
-        !isOwner &&
-        !hasCategoryPermission(p?.category)
-    ){
-
-        alert("ليس لديك صلاحية حذف هذا المنتج.");
-
-        return;
-    }
-
-    if(!confirm("هل تريد حذف المنتج نهائيًا؟"))
-        return;
-
-    await db.collection("products")
-        .doc(id)
-        .delete();
-
-    loadProducts();
+ }
 
 }
 
 
 /* =========================
-   ORDERS
+   LOGOUT
 ========================= */
 
-async function loadOrders(){
+async function logout(){
 
-    const snap=
-        await db.collection("orders")
-        .get();
+ await auth.signOut();
 
-    let orders=[];
-
-    snap.forEach(doc=>{
-
-        orders.push({
-            id:doc.id,
-            ...doc.data()
-        });
-
-    });
-
-    orders.sort((a,b)=>{
-
-        const ad=
-            a.createdAt?.seconds||0;
-
-        const bd=
-            b.createdAt?.seconds||0;
-
-        return bd-ad;
-
-    });
-
-    let html=
-    `<div class="table-wrap">
-    <table>
-
-    <tr>
-        <th>العميل</th>
-        <th>الهاتف</th>
-        <th>العنوان</th>
-        <th>المنتجات</th>
-        <th>الإجمالي</th>
-        <th>الحالة</th>
-        <th>التاريخ</th>
-        <th>إجراء</th>
-    </tr>`;
-
-    let newCount=0;
-    let sales=0;
-
-    orders.forEach(o=>{
-
-        const status=o.status||"new";
-
-        if(status==="new")
-            newCount++;
-
-        if(
-            status==="completed" ||
-            status==="done"
-        ){
-            sales+=Number(o.total||0);
-        }
-
-        const items=
-            Array.isArray(o.items)
-            ? o.items.map(item=>
-                `${item.name||""} × ${item.quantity||item.qty||1}`
-              ).join("\n")
-            : String(o.items||"-");
-
-        html+=`
-        <tr>
-
-            <td>
-                <b>${escapeHTML(o.name||o.customerName||"-")}</b>
-            </td>
-
-            <td>
-                ${escapeHTML(o.phone||"-")}
-            </td>
-
-            <td>
-                ${escapeHTML(o.address||o.location||"-")}
-            </td>
-
-            <td>
-                <div class="order-items">
-                    ${escapeHTML(items)}
-                </div>
-            </td>
-
-            <td>
-                <b>${Number(o.total||0)} ج</b>
-            </td>
-
-            <td>
-                ${orderStatusHTML(status)}
-            </td>
-
-            <td>
-                ${formatDate(o.createdAt)}
-            </td>
-
-            <td>
-
-                <button
-                    class="btn"
-                    onclick="completeOrder('${o.id}')">
-                    تم التنفيذ
-                </button>
-
-                <button
-                    class="btn btn-orange"
-                    onclick="cancelOrder('${o.id}')">
-                    إلغاء
-                </button>
-
-                <button
-                    class="btn btn-red"
-                    onclick="deleteOrder('${o.id}')">
-                    حذف
-                </button>
-
-            </td>
-
-        </tr>`;
-    });
-
-    html+="</table></div>";
-
-    document.getElementById("ordersList")
-        .innerHTML=html;
-
-    document.getElementById("statOrders")
-        .textContent=orders.length;
-
-    document.getElementById("statNewOrders")
-        .textContent=newCount;
-
-    document.getElementById("statSales")
-        .textContent=sales+" ج";
-
-}
-
-
-function orderStatusHTML(status){
-
-    if(status==="completed" || status==="done"){
-
-        return `<span class="status status-done">
-                    مكتمل
-                </span>`;
-
-    }
-
-    if(status==="cancelled"){
-
-        return `<span class="status status-cancel">
-                    ملغي
-                </span>`;
-
-    }
-
-    return `<span class="status status-new">
-                جديد
-            </span>`;
-}
-
-
-function formatDate(timestamp){
-
-    if(!timestamp)return "-";
-
-    try{
-
-        return new Date(
-            timestamp.seconds*1000
-        ).toLocaleString("ar-EG");
-
-    }catch(e){
-
-        return "-";
-    }
-
-}
-
-
-async function completeOrder(id){
-
-    await db.collection("orders")
-        .doc(id)
-        .update({
-            status:"completed",
-            completedAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-    loadOrders();
-
-}
-
-
-async function cancelOrder(id){
-
-    if(!confirm("إلغاء الطلب؟"))return;
-
-    await db.collection("orders")
-        .doc(id)
-        .update({
-            status:"cancelled",
-            cancelledAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-    loadOrders();
-
-}
-
-
-async function deleteOrder(id){
-
-    if(!ownerOnly())return;
-
-    if(!confirm("حذف الطلب نهائيًا؟"))return;
-
-    await db.collection("orders")
-        .doc(id)
-        .delete();
-
-    loadOrders();
+ currentUser = null;
+ currentAdmin = null;
 
 }
 
 
 /* =========================
-   ADMINS
+   NAVIGATION
 ========================= */
 
-async function loadAdmins(){
-
-    const snap=
-        await db.collection("admins")
-        .get();
-
-    document.getElementById("statAdmins")
-        .textContent=snap.size;
-
-    if(!isOwner){
-
-        document.getElementById("adminsList")
-            .innerHTML=
-            "<div class='notice notice-info'>إدارة الأدمنز للمالك فقط.</div>";
-
-        return;
-    }
-
-    let html=
-    `<div class="table-wrap">
-    <table>
-    <tr>
-        <th>UID</th>
-        <th>الهاتف</th>
-        <th>الحالة</th>
-        <th>الأقسام</th>
-        <th>إجراء</th>
-    </tr>`;
-
-    snap.forEach(doc=>{
-
-        const a=doc.data();
-
-        const cats=
-            (a.categories||[])
-            .map(c=>
-                `<span class="pill">${escapeHTML(c)}</span>`
-            ).join("");
-
-        html+=`
-        <tr>
-
-            <td style="direction:ltr">
-                ${escapeHTML(doc.id)}
-            </td>
-
-            <td>
-                ${escapeHTML(a.phone||"-")}
-            </td>
-
-            <td>
-                ${
-                    a.active
-                    ? "<span class='status status-active'>مفعل</span>"
-                    : "<span class='status status-off'>موقوف</span>"
-                }
-            </td>
-
-            <td>${cats||"لا يوجد"}</td>
-
-            <td>
-
-                <button
-                    class="btn btn-blue"
-                    onclick="editAdmin('${doc.id}')">
-                    تعديل
-                </button>
-
-                <button
-                    class="btn btn-red"
-                    onclick="deleteAdmin('${doc.id}')">
-                    حذف
-                </button>
-
-            </td>
-
-        </tr>`;
-    });
-
-    html+="</table></div>";
-
-    document.getElementById("adminsList")
-        .innerHTML=html;
-
-}
-
-
-async function loadAdminRequests(){
-
-    const el=
-        document.getElementById("adminRequests");
-
-    if(!isOwner){
-
-        el.innerHTML=
-            "<div class='notice notice-info'>طلبات الأدمن للمالك فقط.</div>";
-
-        return;
-    }
-
-    const snap=
-        await db.collection("adminRequests")
-        .where("status","==","pending")
-        .get();
-
-    if(snap.empty){
-
-        el.innerHTML=
-            "<div class='notice notice-info'>لا توجد طلبات جديدة.</div>";
-
-        return;
-    }
-
-    let html="";
-
-    snap.forEach(doc=>{
-
-        const r=doc.data();
-
-        html+=`
-        <div class="card">
-
-            <b>رقم الموبايل:</b>
-            ${escapeHTML(r.phone||"-")}
-
-            <br>
-
-            <b>UID:</b>
-            <span style="direction:ltr;display:inline-block">
-                ${escapeHTML(doc.id)}
-            </span>
-
-            <div class="permission-box">
-
-                <b>اختر الأقسام:</b>
-
-                <div class="checks">
-
-                    ${categories.map(c=>`
-
-                    <label class="check">
-
-                        <input
-                            type="checkbox"
-                            class="request-cat-${doc.id}"
-                            value="${escapeHTML(c.name)}"
-                        >
-
-                        ${escapeHTML(c.name)}
-
-                    </label>
-
-                    `).join("")}
-
-                </div>
-
-            </div>
-
-            <button
-                class="btn"
-                onclick="approveRequest('${doc.id}','${escapeHTML(r.phone||"")}')">
-                ✅ قبول الأدمن
-            </button>
-
-            <button
-                class="btn btn-red"
-                onclick="rejectRequest('${doc.id}')">
-                ❌ رفض
-            </button>
-
-        </div>`;
-    });
-
-    el.innerHTML=html;
-
-}
-
-
-async function approveRequest(uid,phone){
-
-    if(!ownerOnly())return;
-
-    const boxes=
-        document.querySelectorAll(
-            ".request-cat-"+uid
-        );
-
-    const selected=
-        [...boxes]
-        .filter(x=>x.checked)
-        .map(x=>x.value);
-
-    if(!selected.length){
-
-        alert("اختر قسمًا واحدًا على الأقل.");
-
-        return;
-    }
-
-    await db.collection("admins")
-        .doc(uid)
-        .set({
-            uid,
-            phone,
-            active:true,
-            role:"admin",
-            categories:selected,
-            createdAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-    await db.collection("adminRequests")
-        .doc(uid)
-        .update({
-            status:"approved"
-        });
-
-    loadAdminRequests();
-    loadAdmins();
-
-}
-
-
-async function rejectRequest(uid){
-
-    if(!ownerOnly())return;
-
-    await db.collection("adminRequests")
-        .doc(uid)
-        .update({
-            status:"rejected"
-        });
-
-    loadAdminRequests();
-
-}
-
-
-async function editAdmin(uid){
-
-    if(!ownerOnly())return;
-
-    const doc=
-        await db.collection("admins")
-        .doc(uid)
-        .get();
-
-    if(!doc.exists)return;
-
-    const a=doc.data();
-
-    let text=
-        "أدخل الأقسام المسموحة مفصولة بفاصلة.\n\n"+
-        categories.map(c=>c.name).join("، ");
-
-    const value=
-        prompt(
-            "الأقسام المسموحة:",
-            (a.categories||[]).join(",")
-        );
-
-    if(value===null)return;
-
-    const selected=
-        value.split(",")
-        .map(x=>x.trim())
-        .filter(Boolean);
-
-    const active=
-        confirm(
-            "اضغط موافق ليكون الأدمن مفعلًا.\n"+
-            "إلغاء = إيقاف الأدمن."
-        );
-
-    await db.collection("admins")
-        .doc(uid)
-        .update({
-            categories:selected,
-            active
-        });
-
-    loadAdmins();
-
-}
-
-
-async function deleteAdmin(uid){
-
-    if(!ownerOnly())return;
-
-    if(!confirm("حذف الأدمن نهائيًا؟"))return;
-
-    await db.collection("admins")
-        .doc(uid)
-        .delete();
-
-    loadAdmins();
-
-}
-
-
-/* =========================
-   ADS
-========================= */
-
-async function loadAds(){
-
-    const doc=
-        await db.collection("settings")
-        .doc("ads")
-        .get();
-
-    if(!doc.exists)return;
-
-    const a=doc.data();
-
-    document.getElementById("adTop").value=
-        a.top||"";
-
-    document.getElementById("adMiddle").value=
-        a.middle||"";
-
-    document.getElementById("adBottom").value=
-        a.bottom||"";
-
-    document.getElementById("adBeforeDownload").value=
-        a.beforeDownload||"";
-
-    document.getElementById("adEnabled").checked=
-        a.enabled!==false;
-
-}
-
-
-async function saveAds(){
-
-    if(!ownerOnly())return;
-
-    await db.collection("settings")
-        .doc("ads")
-        .set({
-
-            top:
-                document.getElementById("adTop").value,
-
-            middle:
-                document.getElementById("adMiddle").value,
-
-            bottom:
-                document.getElementById("adBottom").value,
-
-            beforeDownload:
-                document.getElementById("adBeforeDownload").value,
-
-            enabled:
-                document.getElementById("adEnabled").checked,
-
-            updatedAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-
-        });
-
-    alert("تم حفظ إعدادات الإعلانات.");
-
-}
-
-
-/* =========================
-   STORE SETTINGS
-========================= */
-
-async function loadStoreSettings(){
-
-    const doc=
-        await db.collection("settings")
-        .doc("store")
-        .get();
-
-    let s={
-
-        name:"ماركت نت",
-
-        whatsapp:"01127491224",
-
-        slogan:"يا ست البيت، لو محتاجة حاجة ومش موجودة عندنا، إحنا نوفرهالك ❤️",
-
-        deliveryPrice:25,
-
-        counterMin:10,
-
-        counterMax:40,
-
-        successMessage:"تم استلام طلبك بنجاح ❤️",
-
-        missingMessage:"لو المنتج مش موجود عندنا، ابعتي لنا وإحنا نوفرهولك.",
-
-        allowOrders:true,
-
-        showStock:true,
-
-        showPrices:true,
-
-        enableWhatsapp:true,
-
-        logo:"",
-
-        primaryColor:"#0ca678"
-
-    };
-
-    if(doc.exists){
-
-        s={
-            ...s,
-            ...doc.data()
-        };
-
-    }else if(isOwner){
-
-        await db.collection("settings")
-            .doc("store")
-            .set(s);
-    }
-
-    document.getElementById("storeName").value=s.name||"";
-
-    document.getElementById("storeWhatsapp").value=
-        s.whatsapp||"";
-
-    document.getElementById("storeSlogan").value=
-        s.slogan||"";
-
-    document.getElementById("deliveryPrice").value=
-        s.deliveryPrice??25;
-
-    document.getElementById("counterMin").value=
-        s.counterMin??10;
-
-    document.getElementById("counterMax").value=
-        s.counterMax??40;
-
-    document.getElementById("successMessage").value=
-        s.successMessage||"";
-
-    document.getElementById("missingMessage").value=
-        s.missingMessage||"";
-
-    document.getElementById("allowOrders").checked=
-        s.allowOrders!==false;
-
-    document.getElementById("showStock").checked=
-        s.showStock!==false;
-
-    document.getElementById("showPrices").checked=
-        s.showPrices!==false;
-
-    document.getElementById("enableWhatsapp").checked=
-        s.enableWhatsapp!==false;
-
-    document.getElementById("storeLogo").value=
-        s.logo||"";
-
-    document.getElementById("logoPreview").src=
-        s.logo||"https://via.placeholder.com/100?text=Logo";
-
-    document.getElementById("primaryColor").value=
-        s.primaryColor||"#0ca678";
-
-    document.getElementById("quickStoreInfo").innerHTML=`
-        <div class="grid">
-
-            <div>
-                <b>اسم المتجر</b>
-                <br>${escapeHTML(s.name)}
-            </div>
-
-            <div>
-                <b>واتساب</b>
-                <br>${escapeHTML(s.whatsapp)}
-            </div>
-
-            <div>
-                <b>التوصيل</b>
-                <br>${Number(s.deliveryPrice)} ج
-            </div>
-
-            <div>
-                <b>حالة الطلبات</b>
-                <br>
-                ${
-                    s.allowOrders
-                    ? "مفتوحة ✅"
-                    : "مغلقة ❌"
-                }
-            </div>
-
-        </div>`;
-}
-
-
-async function saveStoreSettings(){
-
-    if(!ownerOnly())return;
-
-    const data={
-
-        name:
-            document.getElementById("storeName").value.trim(),
-
-        whatsapp:
-            document.getElementById("storeWhatsapp").value.trim(),
-
-        slogan:
-            document.getElementById("storeSlogan").value.trim(),
-
-        deliveryPrice:
-            Number(
-                document.getElementById("deliveryPrice").value
-            ),
-
-        counterMin:
-            Number(
-                document.getElementById("counterMin").value
-            ),
-
-        counterMax:
-            Number(
-                document.getElementById("counterMax").value
-            ),
-
-        successMessage:
-            document.getElementById("successMessage").value,
-
-        missingMessage:
-            document.getElementById("missingMessage").value,
-
-        allowOrders:
-            document.getElementById("allowOrders").checked,
-
-        showStock:
-            document.getElementById("showStock").checked,
-
-        showPrices:
-            document.getElementById("showPrices").checked,
-
-        enableWhatsapp:
-            document.getElementById("enableWhatsapp").checked,
-
-        updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    await db.collection("settings")
-        .doc("store")
-        .set(data,{merge:true});
-
-    alert("تم حفظ إعدادات المتجر.");
-
-    loadStoreSettings();
-
-}
-
-
-async function saveBranding(){
-
-    if(!ownerOnly())return;
-
-    const logo=
-        document.getElementById("storeLogo").value.trim();
-
-    const primaryColor=
-        document.getElementById("primaryColor").value;
-
-    await db.collection("settings")
-        .doc("store")
-        .set({
-
-            logo,
-            primaryColor,
-
-            updatedAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-
-        },{merge:true});
-
-    document.getElementById("logoPreview").src=
-        logo||"https://via.placeholder.com/100?text=Logo";
-
-    alert("تم حفظ هوية المتجر.");
-
-}
-
-
-/* =========================
-   SEO
-========================= */
-
-async function loadSEO(){
-
-    const doc=
-        await db.collection("settings")
-        .doc("seo")
-        .get();
-
-    if(!doc.exists)return;
-
-    const s=doc.data();
-
-    document.getElementById("seoTitle").value=
-        s.title||"ماركت نت";
-
-    document.getElementById("seoDescription").value=
-        s.description||"";
-
-    document.getElementById("seoKeywords").value=
-        s.keywords||"";
-
-    document.getElementById("seoSiteName").value=
-        s.siteName||"ماركت نت";
-
-    document.getElementById("seoUrl").value=
-        s.url||"";
-
-}
-
-
-async function saveSEO(){
-
-    if(!ownerOnly())return;
-
-    await db.collection("settings")
-        .doc("seo")
-        .set({
-
-            title:
-                document.getElementById("seoTitle").value,
-
-            description:
-                document.getElementById("seoDescription").value,
-
-            keywords:
-                document.getElementById("seoKeywords").value,
-
-            siteName:
-                document.getElementById("seoSiteName").value,
-
-            url:
-                document.getElementById("seoUrl").value,
-
-            updatedAt:
-                firebase.firestore.FieldValue.serverTimestamp()
-
-        });
-
-    alert("تم حفظ إعدادات SEO.");
-
-}
-
-
-/* =========================
-   STATS
-========================= */
-
-async function loadStats(){
-
-    try{
-
-        const doc=
-            await db.collection("siteStats")
-            .doc("main")
-            .get();
-
-        const data=
-            doc.exists
-            ? doc.data()
-            : {};
-
-        const visitors=
-            Number(data.visitors||0);
-
-        document.getElementById("statVisitors")
-            .textContent=visitors;
-
-        document.getElementById("statsVisitors")
-            .textContent=visitors;
-
-        document.getElementById("statsToday")
-            .textContent=
-            Number(data.today||0);
-
-        document.getElementById("statsMonth")
-            .textContent=
-            Number(data.month||0);
-
-    }catch(error){
-
-        console.log(error);
-
-    }
-
-}
-
-
-async function resetVisitors(){
-
-    if(!ownerOnly())return;
-
-    if(!confirm("تصفير عداد الزوار؟"))return;
-
-    await db.collection("siteStats")
-        .doc("main")
-        .set({
-
-            visitors:0,
-            today:0,
-            month:0
-
-        },{merge:true});
-
-    loadStats();
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-document.getElementById("logoPreview")
-    .addEventListener("error",function(){
-
-        this.src=
-        "https://via.placeholder.com/100?text=Logo";
-
-    });
-
-</script>
-
-</body>
-</html>
+function go(page){
+
+ currentPage = page;
+
+ document
+  .querySelectorAll("#nav button")
+  .forEach(btn=>{
+   btn.classList.toggle(
+    "active",
+    btn.dataset.page === page
+   );
+  });
+
+ if(page === "dashboard"){
+  renderDashboard();
+ }
+
+ else if(page === "products"){
+  renderProducts();
+ }
+
+ else if(page === "orders"){
+  renderOrders();
+ }
+
+ else if(page === "categories"){
+  renderCategories();
+ }
+
+ else if(page === "admins"){
+  renderAdmins();
+ }
+
+ else if(page === "ads"){
+  renderAds();
+ }
+
+ e
