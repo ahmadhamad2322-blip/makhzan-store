@@ -1,1400 +1,193 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>لوحة تحكم متجر نت</title>
-<meta name="robots" content="noindex,nofollow">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
-<style>
-*{box-sizing:border-box}
-body{
- margin:0;
- font-family:Tahoma,Arial,sans-serif;
- background:#f3f6f4;
- color:#18231d
-}
-button,input,select,textarea{font-family:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-
-.login-wrap{
- min-height:100vh;
- display:flex;
- align-items:center;
- justify-content:center;
- padding:18px;
- background:linear-gradient(135deg,#e4fff1,#f7faf8)
-}
-
-.login{
- width:min(440px,100%);
- background:#fff;
- border-radius:20px;
- padding:24px;
- box-shadow:0 10px 35px #0002
-}
-
-.logo{
- text-align:center;
- color:#07894f;
- font-size:27px;
- font-weight:900;
- margin-bottom:5px
-}
-
-.muted{
- color:#718078;
- font-size:13px;
- line-height:1.8
-}
-
-.input{
- width:100%;
- padding:12px;
- border:1px solid #d7e1dc;
- border-radius:10px;
- margin-top:8px;
- margin-bottom:10px;
- outline:none;
- background:#fff
-}
-
-.input:focus{
- border-color:#07894f;
- box-shadow:0 0 0 3px #07894f18
-}
-
-.btn{
- border:0;
- border-radius:10px;
- padding:11px 14px;
- font-weight:800
-}
-
-.primary{background:#07894f;color:#fff}
-.dark{background:#18231d;color:#fff}
-.gray{background:#edf1ef;color:#25322b}
-.red{background:#dc3545;color:#fff}
-.orange{background:#f59f00;color:#fff}
-.green{background:#198754;color:#fff}
-.full{width:100%;margin-top:10px}
-
-.tabs{
- display:flex;
- gap:7px;
- margin:14px 0;
- flex-wrap:wrap
-}
-
-.tab{
- border:0;
- background:#edf1ef;
- padding:10px 12px;
- border-radius:10px;
- font-weight:bold
-}
-
-.tab.active{
- background:#07894f;
- color:#fff
-}
-
-.message{
- padding:10px;
- border-radius:10px;
- margin-top:10px;
- background:#eef8f2;
- color:#17623d;
- display:none
-}
-
-.message.error{
- background:#fff0f0;
- color:#a61b1b
-}
-
-.admin-layout{
- display:none;
- min-height:100vh
-}
-
-.sidebar{
- position:fixed;
- right:0;
- top:0;
- bottom:0;
- width:240px;
- background:#15221c;
- color:#fff;
- padding:15px;
- overflow:auto;
- z-index:30
-}
-
-.brand{
- font-size:21px;
- font-weight:900;
- padding:10px 5px 16px
-}
-
-.nav{
- display:grid;
- gap:6px
-}
-
-.nav button{
- border:0;
- background:transparent;
- color:#dce9e1;
- text-align:right;
- padding:11px;
- border-radius:9px
-}
-
-.nav button.active,
-.nav button:hover{
- background:#07894f;
- color:#fff
-}
-
-.main{
- margin-right:240px;
- padding:20px;
- max-width:1500px
-}
-
-.topbar{
- background:#fff;
- border-radius:15px;
- padding:12px 15px;
- display:flex;
- justify-content:space-between;
- align-items:center;
- gap:10px;
- box-shadow:0 2px 12px #0000000a;
- margin-bottom:15px
-}
-
-.cards{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:12px
-}
-
-.card{
- background:#fff;
- border-radius:15px;
- padding:17px;
- box-shadow:0 2px 12px #00000008
-}
-
-.card .num{
- font-size:28px;
- font-weight:900;
- color:#07894f;
- margin-top:8px
-}
-
-.panel{
- background:#fff;
- border-radius:15px;
- padding:16px;
- margin-bottom:15px;
- box-shadow:0 2px 12px #00000008
-}
-
-.panel h2,
-.panel h3{
- margin-top:0
-}
-
-.grid2{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:12px
-}
-
-.grid3{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:12px
-}
-
-.form-grid{
- display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:10px
-}
-
-.form-grid .wide{
- grid-column:1/-1
-}
-
-label{
- font-size:12px;
- color:#5f6d65;
- font-weight:bold
-}
-
-.table-wrap{
- overflow:auto
-}
-
-table{
- width:100%;
- border-collapse:collapse;
- min-width:760px
-}
-
-th,td{
- padding:10px;
- border-bottom:1px solid #e8ece9;
- text-align:right;
- vertical-align:middle
-}
-
-th{
- background:#f7faf8
-}
-
-.badge{
- display:inline-block;
- padding:5px 8px;
- border-radius:20px;
- background:#edf1ef;
- font-size:11px
-}
-
-.badge.green{
- background:#e7f8ee;
- color:#08733f
-}
-
-.badge.red{
- background:#ffe9e9;
- color:#a61c1c
-}
-
-.badge.orange{
- background:#fff2d6;
- color:#8a5a00
-}
-
-.product-thumb{
- width:55px;
- height:55px;
- object-fit:cover;
- border-radius:9px;
- background:#eef5f1
-}
-
-.preview{
- width:90px;
- height:90px;
- border-radius:12px;
- object-fit:cover;
- background:#eef5f1;
- display:block;
- margin-top:8px
-}
-
-.actions{
- display:flex;
- gap:6px;
- flex-wrap:wrap
-}
-
-.checks{
- display:flex;
- flex-wrap:wrap;
- gap:7px;
- margin-top:8px
-}
-
-.check{
- background:#f4f7f5;
- padding:8px;
- border-radius:8px
-}
-
-.statline{
- display:flex;
- justify-content:space-between;
- padding:9px 0;
- border-bottom:1px solid #eee
-}
-
-.request{
- border:1px solid #e4e9e6;
- padding:12px;
- border-radius:12px;
- margin-bottom:9px
-}
-
-.modal{
- position:fixed;
- inset:0;
- background:#0008;
- z-index:100;
- display:none;
- align-items:center;
- justify-content:center;
- padding:15px
-}
-
-.modal.show{
- display:flex
-}
-
-.modal-box{
- background:#fff;
- border-radius:17px;
- padding:18px;
- width:min(850px,100%);
- max-height:92vh;
- overflow:auto
-}
-
-.close{
- float:left;
- border:0;
- background:#eee;
- border-radius:8px;
- padding:7px 10px
-}
-
-.file{
- padding:9px;
- background:#f6f8f7;
- border:1px dashed #cdd8d2;
- border-radius:9px;
- width:100%
-}
-
-pre.rules{
- white-space:pre-wrap;
- background:#15221c;
- color:#e8fff0;
- padding:14px;
- border-radius:12px;
- direction:ltr;
- text-align:left;
- max-height:400px;
- overflow:auto;
- font-size:11px
-}
-
-.small{
- font-size:11px;
- color:#718078
-}
-
-.empty{
- text-align:center;
- padding:30px;
- color:#718078
-}
-
-.success-box{
- background:#e7f8ee;
- color:#08733f;
- border-radius:10px;
- padding:12px;
- margin-top:10px
-}
-
-.warning-box{
- background:#fff4d8;
- color:#7c5700;
- border-radius:10px;
- padding:12px;
- margin-top:10px
-}
-
-.danger-box{
- background:#ffeaea;
- color:#a61c1c;
- border-radius:10px;
- padding:12px;
- margin-top:10px
-}
-
-@media(max-width:900px){
- .sidebar{
-  width:72px;
-  padding:8px
- }
-
- .sidebar .nav button{
-  font-size:0;
-  text-align:center
- }
-
- .sidebar .nav button::first-letter{
-  font-size:20px
- }
-
- .brand{
-  font-size:0;
-  text-align:center
- }
-
- .brand::after{
-  content:"MN";
-  font-size:18px
- }
-
- .main{
-  margin-right:72px;
-  padding:10px
- }
-
- .cards{
-  grid-template-columns:repeat(2,1fr)
- }
-
- .grid3{
-  grid-template-columns:1fr 1fr
- }
-}
-
-@media(max-width:600px){
- .cards,
- .grid2,
- .grid3,
- .form-grid{
-  grid-template-columns:1fr
- }
-
- .topbar{
-  align-items:flex-start;
-  flex-direction:column
- }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم في المتجر</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #219150;
+        }
+        .btn-delete {
+            background-color: #e74c3c;
+            padding: 5px 10px;
+            width: auto;
+            font-size: 0.85rem;
+        }
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            text-align: right;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.9rem;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #fff;
+        }
+        .status-pending { background-color: #f39c12; }
+        .status-completed { background-color: #27ae60; }
+    </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="loginWrap" class="login-wrap">
-
- <div class="login">
-
-  <div class="logo">MarketNet</div>
-
-  <div style="text-align:center;font-weight:bold">
-   لوحة تحكم متجر نت
-  </div>
-
-  <p class="muted" style="text-align:center">
-   دخول المالك أو الأدمن المعتمد
-  </p>
-
-  <div class="tabs">
-
-   <button
-    id="loginTab"
-    class="tab active"
-    type="button"
-    onclick="showLogin()">
-    دخول
-   </button>
-
-   <button
-    id="requestTab"
-    class="tab"
-    type="button"
-    onclick="showRequest()">
-    طلب أدمن جديد
-   </button>
-
-  </div>
-
-  <div id="loginBox">
-
-   <label>رقم الموبايل</label>
-
-   <input
-    id="loginPhone"
-    class="input"
-    type="tel"
-    placeholder="01127491224"
-    inputmode="tel">
-
-   <label>كلمة المرور</label>
-
-   <input
-    id="loginPassword"
-    class="input"
-    type="password"
-    placeholder="كلمة المرور">
-
-   <button
-    class="btn primary full"
-    type="button"
-    onclick="login()">
-    دخول لوحة التحكم
-   </button>
-
-  </div>
-
-  <div id="requestBox" class="hidden">
-
-   <p class="muted">
-    أنشئ حسابًا ليتم إرساله للمالك للموافقة عليه.
-    لن يستطيع الحساب التحكم في المتجر قبل الموافقة.
-   </p>
-
-   <label>رقم الموبايل</label>
-
-   <input
-    id="requestPhone"
-    class="input"
-    type="tel"
-    placeholder="01xxxxxxxxx"
-    inputmode="tel">
-
-   <label>كلمة المرور</label>
-
-   <input
-    id="requestPassword"
-    class="input"
-    type="password"
-    placeholder="6 أحرف/أرقام على الأقل">
-
-   <button
-    class="btn primary full"
-    type="button"
-    onclick="requestAdmin()">
-    إرسال طلب الدخول
-   </button>
-
-  </div>
-
-  <div id="loginMessage" class="message"></div>
-
- </div>
-</div>
-
-
-<!-- APP -->
-<div id="app" class="admin-layout">
-
- <aside class="sidebar">
-
-  <div class="brand">
-   MarketNet
-  </div>
-
-  <div id="nav" class="nav">
-
-   <button data-page="dashboard" onclick="go('dashboard')">
-    📊 الرئيسية
-   </button>
-
-   <button data-page="products" onclick="go('products')">
-    📦 المنتجات
-   </button>
-
-   <button data-page="orders" onclick="go('orders')">
-    🧾 الطلبات
-   </button>
-
-   <button data-page="categories" onclick="go('categories')">
-    🗂️ الأقسام
-   </button>
-
-   <button data-page="admins" onclick="go('admins')">
-    👥 الأدمنز
-   </button>
-
-   <button data-page="ads" onclick="go('ads')">
-    📢 الإعلانات
-   </button>
-
-   <button data-page="settings" onclick="go('settings')">
-    ⚙️ إعدادات المتجر
-   </button>
-
-   <button data-page="seo" onclick="go('seo')">
-    🔎 SEO
-   </button>
-
-   <button data-page="stats" onclick="go('stats')">
-    📈 الإحصائيات
-   </button>
-
-   <button data-page="rules" onclick="go('rules')">
-    🔐 قواعد الحماية
-   </button>
-
-  </div>
-
- </aside>
-
-
- <main class="main">
-
-  <div class="topbar">
-
-   <div>
-    <strong>لوحة تحكم متجر نت</strong>
-    <div id="who" class="muted"></div>
-   </div>
-
-   <button
-    class="btn red"
-    type="button"
-    onclick="logout()">
-    خروج
-   </button>
-
-  </div>
-
-  <div id="content"></div>
-
- </main>
-
-</div>
-
-
-<!-- PRODUCT MODAL -->
-<div id="productModal" class="modal">
-
- <div class="modal-box">
-
-  <button
-   class="close"
-   type="button"
-   onclick="closeProduct()">
-   ✕
-  </button>
-
-  <h2 id="productModalTitle">
-   إضافة منتج
-  </h2>
-
-  <input id="productId" type="hidden">
-
-  <div class="form-grid">
-
-   <div>
-    <label>اسم المنتج</label>
-
-    <input
-     id="pName"
-     class="input"
-     placeholder="مثال: تونة 140 جم">
-   </div>
-
-
-   <div>
-    <label>القسم</label>
-
-    <select id="pCategory" class="input"></select>
-   </div>
-
-
-   <div>
-    <label>السعر</label>
-
-    <input
-     id="pPrice"
-     class="input"
-     type="number"
-     min="0"
-     step="0.01">
-   </div>
-
-
-   <div>
-    <label>سعر العرض (اختياري)</label>
-
-    <input
-     id="pSalePrice"
-     class="input"
-     type="number"
-     min="0"
-     step="0.01">
-   </div>
-
-
-   <div>
-    <label>الكمية/المخزون</label>
-
-    <input
-     id="pStock"
-     class="input"
-     type="number"
-     min="0"
-     step="1"
-     value="0">
-   </div>
-
-
-   <div>
-    <label>الوحدة/الحجم</label>
-
-    <input
-     id="pUnit"
-     class="input"
-     placeholder="1 كيلو / 500 جم">
-   </div>
-
-
-   <div class="wide">
-
-    <label>رابط الصورة (اختياري)</label>
-
-    <input
-     id="pImage"
-     class="input"
-     placeholder="https://...">
-
-   </div>
-
-
-   <div class="wide">
-
-    <label>رفع صورة من الهاتف</label>
-
-    <input
-     id="pFile"
-     class="file"
-     type="file"
-     accept="image/*"
-     onchange="previewImage()">
-
-    <img
-     id="imagePreview"
-     class="preview hidden"
-     alt="معاينة">
-
-   </div>
-
-
-   <div>
-
-    <label>إيموجي بديل لو لا توجد صورة</label>
-
-    <input
-     id="pEmoji"
-     class="input"
-     placeholder="🥫">
-
-   </div>
-
-
-   <div>
-
-    <label>ترتيب المنتج</label>
-
-    <input
-     id="pSort"
-     class="input"
-     type="number"
-     value="0">
-
-   </div>
-
-
-   <div class="wide">
-
-    <label>وصف المنتج</label>
-
-    <textarea
-     id="pDescription"
-     class="input"
-     rows="3"></textarea>
-
-   </div>
-
-
-   <div>
-
-    <label>التقييم</label>
-
-    <input
-     id="pRating"
-     class="input"
-     type="number"
-     min="0"
-     max="5"
-     step="0.1"
-     value="4.5">
-
-   </div>
-
-
-   <div>
-
-    <label>الحالة</label>
-
-    <select id="pActive" class="input">
-
-     <option value="true">
-      ظاهر في المتجر
-     </option>
-
-     <option value="false">
-      مخفي
-     </option>
-
-    </select>
-
-   </div>
-
-
-   <div class="wide">
-
-    <div class="checks">
-
-     <label class="check">
-      <input id="pFeatured" type="checkbox">
-      ⭐ تثبيت المنتج
-     </label>
-
-     <label class="check">
-      <input id="pOffer" type="checkbox">
-      🔥 منتج عرض
-     </label>
-
+<div class="container">
+    <h1>لوحة التحكم وإدارة المتجر</h1>
+
+    <div class="grid-layout">
+        <!-- قسم إضافة منتج جديد -->
+        <div class="card">
+            <h2>إضافة منتج جديد</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>اسم المنتج</label>
+                    <input type="text" id="productName" placeholder="مثال: شاي أخضر" required>
+                </div>
+                <div class="form-group">
+                    <label>السعر (جنيه)</label>
+                    <input type="number" id="productPrice" placeholder="50" required>
+                </div>
+                <div class="form-group">
+                    <label>القسم</label>
+                    <select id="productCategory">
+                        <option value="بقالة">بقالة</option>
+                        <option value="منظفات">منظفات</option>
+                        <option value="مشروبات">مشروبات</option>
+                    </select>
+                </div>
+                <button type="submit">إضافة للمتجر</button>
+            </form>
+        </div>
+
+        <!-- قسم قائمة المنتجات المتاحة -->
+        <div class="card">
+            <h2>قائمة المنتجات الحالية</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المنتج</th>
+                        <th>السعر</th>
+                        <th>القسم</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="productList">
+                    <!-- يتم إدراج المنتجات هنا تلقائياً -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-   </div>
-
-  </div>
-
-
-  <div class="actions" style="margin-top:15px">
-
-   <button
-    class="btn primary"
-    type="button"
-    onclick="saveProduct()">
-    💾 حفظ المنتج
-   </button>
-
-   <button
-    class="btn gray"
-    type="button"
-    onclick="closeProduct()">
-    إلغاء
-   </button>
-
-  </div>
-
-  <div id="productMessage" class="message"></div>
-
- </div>
+    <!-- قسم إدارة الطلبات الواردة -->
+    <div class="card">
+        <h2>أحدث طلبات الشراء</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>اسم العميل</th>
+                    <th>إجمالي المبلغ</th>
+                    <th>الحالة</th>
+                    <th>تغيير الحالة</th>
+                </tr>
+            </thead>
+            <tbody id="orderList">
+                <!-- يتم إدراج الطلبات هنا تلقائياً -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
-
 <script>
-
-/* =========================
-   FIREBASE
-========================= */
-
-const firebaseConfig = {
- apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4",
- authDomain: "makhzan-9eb1f.firebaseapp.com",
- projectId: "makhzan-9eb1f",
- storageBucket: "makhzan-9eb1f.appspot.com",
- messagingSenderId: "695067759501",
- appId: "1:695067759501:web:df932ff7bac0b1470523c4"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-
-/* =========================
-   CONSTANTS
-========================= */
-
-const OWNER_PHONE = "01127491224";
-
-const OWNER_EMAIL =
- "201127491224@marketnet.local";
-
-const OWNER_PASSWORD = "1378";
-
-const WHATSAPP =
- "201127491224";
-
-
-/* =========================
-   STATE
-========================= */
-
-let currentUser = null;
-let currentAdmin = null;
-let currentPage = "dashboard";
-
-let productsCache = [];
-let ordersCache = [];
-let adminsCache = [];
-let categoriesCache = [];
-
-
-/* =========================
-   HELPERS
-========================= */
-
-function $(id){
- return document.getElementById(id);
-}
-
-function esc(value){
- return String(value ?? "")
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;");
-}
-
-function money(value){
- return Number(value || 0).toLocaleString("ar-EG") + " ج.م";
-}
-
-function showMessage(id,text,error=false){
-
- const el = $(id);
-
- if(!el) return;
-
- el.textContent = text;
- el.style.display = "block";
-
- el.classList.toggle("error",error);
-
- setTimeout(()=>{
-  el.style.display = "none";
- },5000);
-}
-
-function normalizePhone(phone){
-
- let p = String(phone || "").trim();
-
- p = p.replace(/\s+/g,"");
-
- if(p.startsWith("+20")){
-  p = "0" + p.slice(3);
- }
-
- if(p.startsWith("20") && p.length === 12){
-  p = "0" + p.slice(2);
- }
-
- return p;
-}
-
-function internalEmail(phone){
-
- const p = normalizePhone(phone);
-
- return p.replace(/\D/g,"") + "@marketnet.local";
-}
-
-function isOwner(){
-
- return currentUser &&
- currentUser.email === OWNER_EMAIL;
-}
-
-function hasPermission(permission){
-
- if(isOwner()) return true;
-
- if(!currentAdmin) return false;
-
- return currentAdmin.active === true &&
- currentAdmin.permissions &&
- currentAdmin.permissions[permission] === true;
-}
-
-function categoryAllowed(category){
-
- if(isOwner()) return true;
-
- if(!currentAdmin || !currentAdmin.active){
-  return false;
- }
-
- const permissions =
- currentAdmin.categoryPermissions || {};
-
- if(permissions.all === true){
-  return true;
- }
-
- return permissions[category] === true;
-}
-
-
-/* =========================
-   LOGIN TABS
-========================= */
-
-function showLogin(){
-
- $("loginBox").classList.remove("hidden");
- $("requestBox").classList.add("hidden");
-
- $("loginTab").classList.add("active");
- $("requestTab").classList.remove("active");
-
-}
-
-function showRequest(){
-
- $("loginBox").classList.add("hidden");
- $("requestBox").classList.remove("hidden");
-
- $("loginTab").classList.remove("active");
- $("requestTab").classList.add("active");
-
-}
-
-
-/* =========================
-   LOGIN
-========================= */
-
-async function login(){
-
- const phone =
- normalizePhone($("loginPhone").value);
-
- const password =
- $("loginPassword").value;
-
- if(!phone || !password){
-
-  showMessage(
-   "loginMessage",
-   "اكتب رقم الموبايل وكلمة المرور",
-   true
-  );
-
-  return;
- }
-
- let email = internalEmail(phone);
-
- try{
-
-  /*
-   المالك:
-   01127491224
-   يتحول إلى:
-   201127491224@marketnet.local
-  */
-
-  await auth.signInWithEmailAndPassword(
-   email,
-   password
-  );
-
- }catch(error){
-
-  console.error(error);
-
-  showMessage(
-   "loginMessage",
-   "بيانات الدخول غير صحيحة أو الحساب غير موجود.",
-   true
-  );
-
- }
-
-}
-
-
-/* =========================
-   AUTH STATE
-========================= */
-
-auth.onAuthStateChanged(async user=>{
-
- currentUser = user;
-
- if(!user){
-
-  $("loginWrap").style.display = "flex";
-  $("app").style.display = "none";
-
-  return;
- }
-
- try{
-
-  if(user.email === OWNER_EMAIL){
-
-   currentAdmin = {
-    uid:user.uid,
-    phone:OWNER_PHONE,
-    name:"مالك المتجر",
-    role:"owner",
-    active:true,
-    permissions:{
-     products:true,
-     orders:true,
-     categories:true,
-     admins:true,
-     ads:true,
-     settings:true,
-     seo:true,
-     stats:true
-    }
-   };
-
-  }else{
-
-   const snap =
-    await db.collection("admins")
-    .doc(user.uid)
-    .get();
-
-   if(!snap.exists){
-
-    await auth.signOut();
-
-    showMessage(
-     "loginMessage",
-     "الحساب غير معتمد من مالك المتجر.",
-     true
-    );
-
-    return;
-   }
-
-   currentAdmin = {
-    uid:user.uid,
-    ...snap.data()
-   };
-
-   if(currentAdmin.active !== true){
-
-    await auth.signOut();
-
-    showMessage(
-     "loginMessage",
-     "هذا الحساب غير مفعل حاليًا.",
-     true
-    );
-
-    return;
-   }
-
-  }
-
-  $("loginWrap").style.display = "none";
-  $("app").style.display = "block";
-
-  $("who").textContent =
-   currentAdmin.name ||
-   currentAdmin.phone ||
-   user.email;
-
-  go("dashboard");
-
- }catch(error){
-
-  console.error(error);
-
-  await auth.signOut();
-
- }
-
-});
-
-
-/* =========================
-   REQUEST ADMIN
-========================= */
-
-async function requestAdmin(){
-
- const phone =
-  normalizePhone($("requestPhone").value);
-
- const password =
-  $("requestPassword").value;
-
- if(!/^01\d{9}$/.test(phone)){
-
-  showMessage(
-   "loginMessage",
-   "اكتب رقم موبايل مصري صحيح.",
-   true
-  );
-
-  return;
- }
-
- if(password.length < 6){
-
-  showMessage(
-   "loginMessage",
-   "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.",
-   true
-  );
-
-  return;
- }
-
- try{
-
-  /*
-   نستخدم تطبيق Firebase ثانوي
-   حتى لا يتم تسجيل خروج المالك.
-  */
-
-  let secondary;
-
-  try{
-
-   secondary =
-    firebase.app("staffCreator");
-
-  }catch(e){
-
-   secondary =
-    firebase.initializeApp(
-     firebaseConfig,
-     "staffCreator"
-    );
-
-  }
-
-  const secondaryAuth =
-   secondary.auth();
-
-  const credential =
-   await secondaryAuth
-   .createUserWithEmailAndPassword(
-    internalEmail(phone),
-    password
-   );
-
-  const uid = credential.user.uid;
-
-  await db.collection("adminRequests")
-   .doc(uid)
-   .set({
-
-    uid:uid,
-    phone:phone,
-    email:internalEmail(phone),
-    createdAt:
-     firebase.firestore.FieldValue.serverTimestamp(),
-    status:"pending"
-
-   });
-
-  await secondaryAuth.signOut();
-
-  showMessage(
-   "loginMessage",
-   "تم إرسال طلب الأدمن للمالك. انتظر الموافقة."
-  );
-
-  $("requestPhone").value = "";
-  $("requestPassword").value = "";
-
- }catch(error){
-
-  console.error(error);
-
-  let msg =
-   "حدث خطأ أثناء إنشاء طلب الأدمن.";
-
-  if(error.code ===
-   "auth/email-already-in-use"){
-
-   msg =
-    "هذا الرقم لديه حساب بالفعل.";
-
-  }
-
-  showMessage(
-   "loginMessage",
-   msg,
-   true
-  );
-
- }
-
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-async function logout(){
-
- await auth.signOut();
-
- currentUser = null;
- currentAdmin = null;
-
-}
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-function go(page){
-
- currentPage = page;
-
- document
-  .querySelectorAll("#nav button")
-  .forEach(btn=>{
-   btn.classList.toggle(
-    "active",
-    btn.dataset.page === page
-   );
-  });
-
- if(page === "dashboard"){
-  renderDashboard();
- }
-
- else if(page === "products"){
-  renderProducts();
- }
-
- else if(page === "orders"){
-  renderOrders();
- }
-
- else if(page === "categories"){
-  renderCategories();
- }
-
- else if(page === "admins"){
-  renderAdmins();
- }
-
- else if(page === "ads"){
-  renderAds();
- }
-
- e
+    // بيانات أولية تجريبية
+    let products = [
+        { id: 1, name: "منظف أرضيات 1 لتر", price: 45, category: "منظفات" },
+        { id: 2, name: "زيت طعام 800 مل", price: 65, category: "بقالة" }
+    ];
+
+    let orders = [
+        { id: 101, customer: "أحمد محمود", total: 110, status: "pending" },
+        { id: 102, customer: "سارة علي", total: 45, status: "completed" }
+    ];
+
+    // عرض المنتجات
