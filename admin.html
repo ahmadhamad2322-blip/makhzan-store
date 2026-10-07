@@ -13,13 +13,20 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background-color: #f1f5f9; color: #1e293b; padding: 20px; }
         
-        .admin-header { background: #0f172a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        /* شاشة تسجيل الدخول */
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .login-box h2 { color: #0284c7; margin-bottom: 15px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
+        .login-box button { background: #0284c7; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
+        .admin-header { background: #0f172a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .admin-title { font-size: 22px; font-weight: 900; color: #38bdf8; }
 
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
         
         .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .card h3 { margin-bottom: 15px; color: #0284c7; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .card h3 { margin-bottom: 15px; color: #0284c7; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
@@ -28,23 +35,48 @@
         .btn-submit { background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; margin-top: 10px; }
         .btn-submit:hover { background: #15803d; }
 
-        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .product-info { display: flex; align-items: center; gap: 10px; }
-        .product-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; background: #e2e8f0; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
+        .product-info { display: flex; align-items: center; gap: 12px; }
         
-        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-edit { background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-left: 5px; }
+        /* عارض الصورة الطبيعي */
+        .product-img-wrapper { width: 60px; height: 60px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .badge-pinned { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .badge-cat { background: #0284c7; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px; }
+
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-edit { background: #0284c7; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-left: 3px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { text-align: right; padding: 10px; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; color: #475569; }
+
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-approved { background: #dcfce7; color: #15803d; }
+        .status-blocked { background: #fee2e2; color: #b91c1c; }
+
+        .btn-approve { background: #16a34a; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-block { background: #f59e0b; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
 
+<!-- شاشة تسجيل الدخول للحماية -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <h2>🔒 تسجيل دخول الأدمن</h2>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">أدخل رقم الهاتف للوصول للوحة التحكم</p>
+        <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الموبايل (مثال: 01012517345)">
+        <button onclick="attemptLogin()">دخول 🔑</button>
+        <p id="loginStatusMsg" style="margin-top:15px; font-size:13px; font-weight:bold;"></p>
+    </div>
+</div>
+
 <div class="admin-header">
     <div class="admin-title">⚙️ لوحة إدارة متجر ماركت نت</div>
-    <div><span>مرحباً بالأدمن</span></div>
+    <div><span id="currentAdminDisplay">مرحباً بالأدمن</span> <button onclick="logoutAdmin()" style="margin-right:10px; background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;">خروج</button></div>
 </div>
 
 <div class="admin-grid">
@@ -54,15 +86,16 @@
         <form id="addProductForm" onsubmit="saveProduct(event)">
             <div class="form-group">
                 <label>اسم المنتج:</label>
-                <input type="text" id="pName" required placeholder="مثال: كيلو فراخ بانيه">
+                <input type="text" id="pName" required placeholder="مثال: زيت عباد الشمس 1 ليتر">
             </div>
             <div class="form-group">
                 <label>السعر (بالجنيه):</label>
-                <input type="number" id="pPrice" required placeholder="مثال: 180">
+                <input type="number" id="pPrice" required placeholder="مثال: 65">
             </div>
             <div class="form-group">
-                <label>القسم:</label>
+                <label>تحديد القسم الخاص بالمنتج (ينزل فيه فقط):</label>
                 <select id="pCat" required>
+                    <option value="grocery">🛒 بقالة</option>
                     <option value="offers">🔥 العروض اليومية</option>
                     <option value="poultry">🍗 طيور</option>
                     <option value="frozen">🧊 مجمدات</option>
@@ -76,14 +109,49 @@
                 <label>رابط الصورة (URL):</label>
                 <input type="url" id="pImg" placeholder="https://example.com/image.jpg">
             </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="pPinned" style="width: auto;">
+                <label for="pPinned" style="margin: 0; cursor: pointer;">📌 تثبيت المنتج في أول القائمة</label>
+            </div>
             <button type="submit" class="btn-submit">حفظ المنتج 💾</button>
         </form>
     </div>
 
     <!-- قائمة المنتجات المضافة -->
     <div class="card">
-        <h3>📦 المنتجات المتاحة بالمتجر</h3>
+        <h3>
+            <span>📦 المنتجات المتاحة</span>
+            <select id="filterCategoryAdmin" onchange="loadAdminProducts()" style="padding: 4px 8px; font-size: 12px; border-radius: 6px;">
+                <option value="all">عرض جميع الأقسام</option>
+                <option value="grocery">🛒 بقالة</option>
+                <option value="offers">🔥 العروض اليومية</option>
+                <option value="poultry">🍗 طيور</option>
+                <option value="frozen">🧊 مجمدات</option>
+                <option value="cleaning">✨ منظفات</option>
+                <option value="spices">🧂 عطارة</option>
+                <option value="beauty">💄 مستحضرات تجميل</option>
+                <option value="accessories">💍 اكسسوارات بنات</option>
+            </select>
+        </h3>
         <div id="adminProductsList">جاري التحميل...</div>
+    </div>
+
+    <!-- إدارة طلبت واستئذان الدخول (طلبات المستخدمين) -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <h3>👥 طلبات الدخول وإدارة المشرفين / المستخدمين</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>رقم الهاتف</th>
+                    <th>حالة الحساب</th>
+                    <th>تاريخ الطلب</th>
+                    <th>الإجراءات والتحكم</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr><td colspan="4" style="text-align: center;">جاري التحميل...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- سجل مكافآت نظام الإحالة -->
@@ -106,6 +174,8 @@
 </div>
 
 <script>
+  const MAIN_ADMIN_PHONE = "01012517345";
+
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
     authDomain: "makhzan-9eb1f.firebaseapp.com",
@@ -120,13 +190,110 @@
   }
   const db = firebase.firestore();
 
-  // إضافة منتج جديد
+  const categoryNames = {
+      grocery: "بقالة",
+      offers: "عروض يومية",
+      poultry: "طيور",
+      frozen: "مجمدات",
+      cleaning: "منظفات",
+      spices: "عطارة",
+      beauty: "تجميل",
+      accessories: "اكسسوارات"
+  };
+
+  window.onload = function() {
+      checkAdminAuth();
+  };
+
+  // نظام تسجيل الدخول والصلاحيات
+  async function attemptLogin() {
+      const phoneInput = document.getElementById('adminPhoneInput').value.trim();
+      const statusMsg = document.getElementById('loginStatusMsg');
+
+      if (!phoneInput) {
+          statusMsg.style.color = '#ef4444';
+          statusMsg.innerText = 'الرجاء إدخال رقم الهاتف!';
+          return;
+      }
+
+      // إذا كان الأدمن الرئيسي
+      if (phoneInput === MAIN_ADMIN_PHONE) {
+          localStorage.setItem('admin_logged_phone', phoneInput);
+          document.getElementById('loginOverlay').style.display = 'none';
+          initAdminDashboard();
+          return;
+      }
+
+      // إذا كان مستخدم/مشرف آخر يطلب الدخول
+      statusMsg.style.color = '#0284c7';
+      statusMsg.innerText = 'جاري التحقق من حالة الحساب...';
+
+      const userDoc = await db.collection('admin_access_requests').doc(phoneInput).get();
+      if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData.status === 'approved') {
+              localStorage.setItem('admin_logged_phone', phoneInput);
+              document.getElementById('loginOverlay').style.display = 'none';
+              initAdminDashboard();
+          } else if (userData.status === 'blocked') {
+              statusMsg.style.color = '#ef4444';
+              statusMsg.innerText = '❌ تم حظر هذا الرقم من الوصول للوحة التحكم!';
+          } else {
+              statusMsg.style.color = '#d97706';
+              statusMsg.innerText = '⏳ طلبك بانتظار موافقة الأدمن الرئيسي (01012517345)';
+          }
+      } else {
+          // تسجيل طلب دخول جديد
+          await db.collection('admin_access_requests').doc(phoneInput).set({
+              phone: phoneInput,
+              status: 'pending',
+              requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          statusMsg.style.color = '#d97706';
+          statusMsg.innerText = '📩 تم إرسال طلب الدخول للـ الأدمن الرئيسي للموافقة عليه.';
+      }
+  }
+
+  function checkAdminAuth() {
+      const loggedPhone = localStorage.getItem('admin_logged_phone');
+      if (loggedPhone) {
+          if (loggedPhone === MAIN_ADMIN_PHONE) {
+              document.getElementById('loginOverlay').style.display = 'none';
+              initAdminDashboard();
+          } else {
+              db.collection('admin_access_requests').doc(loggedPhone).get().then((doc) => {
+                  if (doc.exists && doc.data().status === 'approved') {
+                      document.getElementById('loginOverlay').style.display = 'none';
+                      initAdminDashboard();
+                  } else {
+                      logoutAdmin();
+                  }
+              });
+          }
+      }
+  }
+
+  function logoutAdmin() {
+      localStorage.removeItem('admin_logged_phone');
+      document.getElementById('loginOverlay').style.display = 'flex';
+  }
+
+  function initAdminDashboard() {
+      const loggedPhone = localStorage.getItem('admin_logged_phone');
+      document.getElementById('currentAdminDisplay').innerText = `المستخدم الحالي: ${loggedPhone}`;
+      loadAdminProducts();
+      listenAccessRequests();
+      listenRewards();
+  }
+
+  // حفظ منتج جديد
   async function saveProduct(e) {
       e.preventDefault();
       const name = document.getElementById('pName').value.trim();
       const price = parseFloat(document.getElementById('pPrice').value);
       const cat = document.getElementById('pCat').value;
       const img = document.getElementById('pImg').value.trim();
+      const isPinned = document.getElementById('pPinned').checked;
 
       try {
           await db.collection('products').add({
@@ -134,46 +301,82 @@
               price: price,
               cat: cat,
               img: img,
+              isPinned: isPinned,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          alert('تم إضافة المنتج بنجاح! 🎉');
+          alert('تم إضافة المنتج بنجاح وتخصيصه للقسم المحدد! 🎉');
           document.getElementById('addProductForm').reset();
       } catch (err) {
           alert('حدث خطأ أثناء حفظ المنتج: ' + err.message);
       }
   }
 
-  // المتابعة اللحظية للمنتجات
-  db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-      const container = document.getElementById('adminProductsList');
-      if (snapshot.empty) {
-          container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات حالياً.</p>';
-          return;
-      }
-      let html = '';
-      snapshot.forEach((doc) => {
-          const p = doc.data();
-          const imgSrc = p.img || 'https://via.placeholder.com/50?text=لا+صورة';
-          html += `
-              <div class="product-item">
-                  <div class="product-info">
-                      <img src="${imgSrc}" class="product-img" onerror="this.src='https://via.placeholder.com/50?text=خطأ'">
+  // جلب وعرض المنتجات مخصصة حسب الأقسام والتثبيت
+  function loadAdminProducts() {
+      const selectedCat = document.getElementById('filterCategoryAdmin').value;
+      
+      db.collection('products').onSnapshot((snapshot) => {
+          const container = document.getElementById('adminProductsList');
+          if (snapshot.empty) {
+              container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات حالياً.</p>';
+              return;
+          }
+
+          let products = [];
+          snapshot.forEach((doc) => {
+              products.push({ id: doc.id, ...doc.data() });
+          });
+
+          // تصفية المنتجات حسب القسم المختار
+          if (selectedCat !== 'all') {
+              products = products.filter(p => p.cat === selectedCat);
+          }
+
+          // ترتيب المنتجات: المثبتة أولاً ثم حسب الأحدث
+          products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+
+          if (products.length === 0) {
+              container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات في هذا القسم.</p>';
+              return;
+          }
+
+          let html = '';
+          products.forEach((p) => {
+              const imgSrc = p.img || 'https://via.placeholder.com/100?text=لا+صورة';
+              const catLabel = categoryNames[p.cat] || p.cat;
+              
+              html += `
+                  <div class="product-item">
+                      <div class="product-info">
+                          <div class="product-img-wrapper">
+                              <img src="${imgSrc}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/100?text=خطأ'">
+                          </div>
+                          <div>
+                              <strong>${p.name}</strong> 
+                              ${p.isPinned ? '<span class="badge-pinned">📌 مثبت</span>' : ''}
+                              <br>
+                              <span class="badge-cat">${catLabel}</span>
+                              <small style="color:#16a34a; font-weight:bold;">${p.price} جنيه</small>
+                          </div>
+                      </div>
                       <div>
-                          <strong>${p.name}</strong><br>
-                          <small style="color:#16a34a; font-weight:bold;">${p.price} جنيه</small>
+                          <button class="btn-edit" onclick="togglePin('${p.id}', ${!p.isPinned})">${p.isPinned ? 'إلغاء التثبيت' : 'تثبيت 📌'}</button>
+                          <button class="btn-edit" onclick="editPrice('${p.id}', ${p.price})">السعر</button>
+                          <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف</button>
                       </div>
                   </div>
-                  <div>
-                      <button class="btn-edit" onclick="editPrice('${doc.id}', ${p.price})">تعديل السعر</button>
-                      <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف</button>
-                  </div>
-              </div>
-          `;
+              `;
+          });
+          container.innerHTML = html;
       });
-      container.innerHTML = html;
-  });
+  }
 
-  // تعديل سعر المنتج
+  async function togglePin(id, pinStatus) {
+      await db.collection('products').doc(id).update({
+          isPinned: pinStatus
+      });
+  }
+
   async function editPrice(id, oldPrice) {
       const newPrice = prompt('أدخل السعر الجديد:', oldPrice);
       if (newPrice && !isNaN(newPrice)) {
@@ -183,35 +386,83 @@
       }
   }
 
-  // حذف منتج
   async function deleteProduct(id) {
-      if (confirm('هل أنت تأكد من رغبتك في حذف هذا المنتج؟')) {
+      if (confirm('هل أنت تأكد من رغبتك في حذف هذا المنتج نهائياً؟')) {
           await db.collection('products').doc(id).delete();
       }
   }
 
-  // جلب بيانات سِجل المكافآت للإحالات
-  db.collection('user_rewards').onSnapshot((snapshot) => {
-      const tbody = document.getElementById('rewardsTableBody');
-      if (snapshot.empty) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد إحالات مسجلة حتى الآن.</td></tr>';
-          return;
-      }
-      let html = '';
-      snapshot.forEach((doc) => {
-          const data = doc.data();
-          const dateStr = data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
-          html += `
-              <tr>
-                  <td><strong>${doc.id}</strong></td>
-                  <td><span style="color:#16a34a; font-weight:bold;">${data.pendingRewards || 0} طلبات</span></td>
-                  <td>${data.lastReferredPhone || 'غير متوفر'}</td>
-                  <td><small>${dateStr}</small></td>
-              </tr>
-          `;
+  // إدارة طلبات الدخول للمستخدمين/الأدمن الفرعيين
+  function listenAccessRequests() {
+      db.collection('admin_access_requests').onSnapshot((snapshot) => {
+          const tbody = document.getElementById('usersTableBody');
+          if (snapshot.empty) {
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات دخول مسجلة.</td></tr>';
+              return;
+          }
+          let html = '';
+          snapshot.forEach((doc) => {
+              const u = doc.data();
+              const dateStr = u.requestedAt ? new Date(u.requestedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
+              
+              let statusBadge = '';
+              if (u.status === 'approved') statusBadge = '<span class="status-badge status-approved">مقبول ✅</span>';
+              else if (u.status === 'blocked') statusBadge = '<span class="status-badge status-blocked">محظور 🚫</span>';
+              else statusBadge = '<span class="status-badge status-pending">بانتظار الموافقة ⏳</span>';
+
+              html += `
+                  <tr>
+                      <td><strong>${u.phone}</strong></td>
+                      <td>${statusBadge}</td>
+                      <td><small>${dateStr}</small></td>
+                      <td>
+                          <button class="btn-approve" onclick="updateUserStatus('${u.phone}', 'approved')">قبول ✅</button>
+                          <button class="btn-block" onclick="updateUserStatus('${u.phone}', 'blocked')">حظر 🚫</button>
+                          <button class="btn-delete" onclick="deleteUserRequest('${u.phone}')">مسح 🗑️</button>
+                      </td>
+                  </tr>
+              `;
+          });
+          tbody.innerHTML = html;
       });
-      tbody.innerHTML = html;
-  });
+  }
+
+  async function updateUserStatus(phone, newStatus) {
+      await db.collection('admin_access_requests').doc(phone).update({
+          status: newStatus
+      });
+  }
+
+  async function deleteUserRequest(phone) {
+      if (confirm(`هل أنت تأكد من حذف بيانات المستخدم (${phone})؟`)) {
+          await db.collection('admin_access_requests').doc(phone).delete();
+      }
+  }
+
+  // متابعة سجل المكافآت
+  function listenRewards() {
+      db.collection('user_rewards').onSnapshot((snapshot) => {
+          const tbody = document.getElementById('rewardsTableBody');
+          if (snapshot.empty) {
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد إحالات مسجلة حتى الآن.</td></tr>';
+              return;
+          }
+          let html = '';
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              const dateStr = data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
+              html += `
+                  <tr>
+                      <td><strong>${doc.id}</strong></td>
+                      <td><span style="color:#16a34a; font-weight:bold;">${data.pendingRewards || 0} طلبات</span></td>
+                      <td>${data.lastReferredPhone || 'غير متوفر'}</td>
+                      <td><small>${dateStr}</small></td>
+                  </tr>
+              `;
+          });
+          tbody.innerHTML = html;
+      });
+  }
 </script>
 </body>
 </html>
