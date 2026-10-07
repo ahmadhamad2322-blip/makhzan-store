@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة تحكم الأدمن | متجر نت</title>
 
-<!-- Firebase SDK -->
+<!-- Firebase App & Firestore SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -15,14 +15,12 @@ body { margin: 0; font-family: Tahoma, Arial, sans-serif; background: #f4f7f5; c
 header { background: #07894f; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
 .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
 
-/* Dynamic Auth Boxes */
 .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
 .stat-box { background: #eaf6f0; border-right: 4px solid #07894f; padding: 15px; border-radius: 8px; }
 .stat-box h3 { margin: 0 0 5px 0; font-size: 14px; color: #555; }
 .stat-box div { font-size: 24px; font-weight: bold; color: #07894f; }
 
-/* Forms & Tables */
 input, select, button, textarea { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; }
 button { background: #07894f; color: white; font-weight: bold; border: none; cursor: pointer; }
 button:hover { background: #05683c; }
@@ -79,7 +77,7 @@ th { background: #07894f; color: white; }
 
   <!-- موافقات دخول المستخدمين -->
   <div class="card">
-    <h3>طلب الانضمام للأدمن (الموافقات المعلقة) 👥</h3>
+    <h3>طلبات انضمام الأدمن (الموافقات المعلقة) 👥</h3>
     <table>
       <thead>
         <tr>
@@ -156,6 +154,199 @@ th { background: #07894f; color: white; }
 </div>
 
 <script>
-// إعدادات Firebase (نفس إعدادات متجرك)
 const firebaseConfig = {
-  apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1
+  apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4",
+  authDomain: "makhzan-9eb1f.firebaseapp.com",
+  projectId: "makhzan-9eb1f",
+  storageBucket: "makhzan-9eb1f.appspot.com",
+  messagingSenderId: "695067759501",
+  appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+};
+
+let db;
+
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    if (typeof firebase !== 'undefined') {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.firestore();
+    } else {
+      console.error("لم يتم تحميل Firebase بشكل صحيح.");
+    }
+  } catch (e) {
+    console.error("خطأ أثناء إعداد Firebase:", e);
+  }
+});
+
+const OWNER_PHONE = "01012517345";
+
+async function handleLogin() {
+  const phone = document.getElementById("adminPhoneInput").value.trim();
+  const msg = document.getElementById("loginMsg");
+  
+  if(!phone) {
+    msg.innerText = "برجاء كتابة رقم الهاتف";
+    return;
+  }
+
+  if(phone === OWNER_PHONE) {
+    grantAccess(phone);
+    return;
+  }
+
+  if(!db) {
+    msg.innerText = "جاري الاتصال بقاعدة البيانات... حاول مرة أخرى.";
+    return;
+  }
+
+  try {
+    const userDoc = await db.collection("admin_users").doc(phone).get();
+    
+    if(userDoc.exists) {
+      const data = userDoc.data();
+      if(data.status === "approved") {
+        grantAccess(phone);
+      } else {
+        msg.innerText = "طلب دخولك قيد الانتظار لموافقة المالك.";
+      }
+    } else {
+      await db.collection("admin_users").doc(phone).set({
+        phone: phone,
+        status: "pending",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      msg.innerText = "تم إرسال طلب الدخول للمالك (01012517345) للقبول.";
+    }
+  } catch(err) {
+    msg.innerText = "حدث خطأ أثناء الدخول: " + err.message;
+  }
+}
+
+function grantAccess(phone) {
+  document.getElementById("loginOverlay").style.display = "none";
+  document.getElementById("userStatus").innerText = "أهلاً: " + phone;
+  if(db) loadData();
+}
+
+function loadData() {
+  fetchProducts();
+  fetchUserRequests();
+  fetchStats();
+}
+
+function fetchProducts() {
+  db.collection("products").onSnapshot(snapshot => {
+    const tbody = document.getElementById("productsTable");
+    tbody.innerHTML = "";
+    document.getElementById("statProducts").innerText = snapshot.size;
+
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      tbody.innerHTML += `
+        <tr>
+          <td><span style="font-size:24px;">${p.image || '📦'}</span></td>
+          <td>${p.name || ''}</td>
+          <td>${p.category || ''}</td>
+          <td>${p.price || 0} ج.م</td>
+          <td>${p.stock || 0} قطعة</td>
+          <td>${p.pinned ? '<span class="badge badge-pinned">مثبت📌</span>' : 'عادي'}</td>
+          <td>
+            <button onclick="editProduct('${doc.id}', '${p.name}', '${p.category}', ${p.price}, ${p.stock || 0}, '${p.image}', ${p.pinned || false})">تعديل</button>
+            <button class="danger" onclick="deleteProduct('${doc.id}')" style="margin-top:4px;">حذف</button>
+          </td>
+        </tr>
+      `;
+    });
+  }, err => console.log(err));
+}
+
+async function saveProduct(e) {
+  e.preventDefault();
+  if(!db) return;
+  const id = document.getElementById("pId").value;
+  const productData = {
+    name: document.getElementById("pName").value,
+    category: document.getElementById("pCat").value,
+    price: Number(document.getElementById("pPrice").value),
+    stock: Number(document.getElementById("pStock").value),
+    image: document.getElementById("pImg").value,
+    pinned: document.getElementById("pPinned").checked
+  };
+
+  if(id) {
+    await db.collection("products").doc(id).update(productData);
+  } else {
+    await db.collection("products").add(productData);
+  }
+  
+  resetForm();
+}
+
+function editProduct(id, name, cat, price, stock, img, pinned) {
+  document.getElementById("pId").value = id;
+  document.getElementById("pName").value = name;
+  document.getElementById("pCat").value = cat;
+  document.getElementById("pPrice").value = price;
+  document.getElementById("pStock").value = stock;
+  document.getElementById("pImg").value = img;
+  document.getElementById("pPinned").checked = pinned;
+  document.getElementById("formTitle").innerText = "تعديل المنتج ✏️";
+}
+
+function resetForm() {
+  document.getElementById("pId").value = "";
+  document.getElementById("productForm").reset();
+  document.getElementById("formTitle").innerText = "إضافة منتج جديد 📦";
+}
+
+async function deleteProduct(id) {
+  if(confirm("هل أنت تأكد من حذف هذا المنتج؟")) {
+    await db.collection("products").doc(id).delete();
+  }
+}
+
+function fetchUserRequests() {
+  db.collection("admin_users").where("status", "==", "pending").onSnapshot(snapshot => {
+    const tbody = document.getElementById("usersTable");
+    tbody.innerHTML = "";
+    if(snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="3">لا توجد طلبات جديدة</td></tr>';
+      return;
+    }
+    snapshot.forEach(doc => {
+      const u = doc.data();
+      tbody.innerHTML += `
+        <tr>
+          <td>${u.phone}</td>
+          <td>قيد الانتظار</td>
+          <td>
+            <button onclick="approveUser('${doc.id}')">قبول</button>
+            <button class="danger" onclick="rejectUser('${doc.id}')">رفض</button>
+          </td>
+        </tr>
+      `;
+    });
+  }, err => console.log(err));
+}
+
+async function approveUser(phone) {
+  await db.collection("admin_users").doc(phone).update({ status: "approved" });
+}
+
+async function rejectUser(phone) {
+  await db.collection("admin_users").doc(phone).delete();
+}
+
+function fetchStats() {
+  db.collection("orders").onSnapshot(snap => {
+    document.getElementById("statOrders").innerText = snap.size;
+  }, err => console.log(err));
+  
+  document.getElementById("statVisitors").innerText = Math.floor(Math.random() * 10) + 1;
+}
+</script>
+
+</body>
+</html>
