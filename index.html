@@ -1,100 +1,530 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ماركت نت</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f6f9; padding-bottom: 60px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ماركت نت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    header { background: #0084c7; color: white; padding: 15px 20px; text-align: center; font-size: 20px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    
-    .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
-    
-    .section-title { font-size: 18px; margin-bottom: 15px; color: #333; border-right: 4px solid #0084c7; padding-right: 10px; }
-    
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    
-    .product-card { background: white; border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    .product-title { font-size: 15px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-    .product-price { font-size: 14px; color: #27ae60; font-weight: bold; margin-bottom: 10px; }
-    
-    .btn-add { background: #0084c7; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-    .btn-add:hover { background: #00699e; }
-    
-    .checkout-section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 20px; }
-    .payment-options { display: flex; gap: 10px; margin: 15px 0; }
-    .payment-btn { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; cursor: pointer; text-align: center; font-weight: bold; }
-    .payment-btn.active { border-color: #0084c7; background: #e0f2fe; color: #0084c7; }
-    
-    .payment-details { background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 14px; color: #334155; margin-bottom: 15px; text-align: center; font-weight: bold; }
-  </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f8fafc; color: #1e293b; padding-bottom: 80px; }
+        
+        header { background: #0f172a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .logo-container { display: flex; flex-direction: column; align-items: flex-start; }
+        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
+        
+        .user-code-header-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; color: #38bdf8; padding: 2px 8px; border-radius: 12px; margin-top: 2px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .user-code-header-badge:hover { background: rgba(56, 189, 248, 0.25); }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        
+        .share-btn { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
+
+        .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background: #0284c7; color: white; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
+        .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
+        .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; }
+        .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
+        .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+        .payment-info { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: #166534; display: none; }
+
+        .whatsapp-float { position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white; width: 60px; height: 60px; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); z-index: 1000; display: flex; justify-content: center; align-items: center; text-decoration: none; }
+        .whatsapp-float:hover { background-color: #128c7e; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-top: 5px; font-size: 14px; }
+        
+        .promo-box { display: flex; gap: 8px; margin-bottom: 8px; }
+        .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    </style>
 </head>
 <body>
 
-  <header>🛒 ماركت نت</header>
-
-  <div class="container">
-    <div class="section-title">قسم البقالة</div>
-    
-    <!-- عرض المنتجات مباشرة دون تقسيم فرعي -->
-    <div class="products-grid" id="grocery-products">
-      <!-- يتم تحميل منتجات البقالة هنا -->
-    </div>
-
-    <div class="checkout-section">
-      <div class="section-title">طريقة الدفع</div>
-      <div class="payment-options">
-        <button class="payment-btn active" onclick="selectPayment('instapay')">InstaPay</button>
-        <button class="payment-btn" onclick="selectPayment('vodafone')">فودافون كاش</button>
-      </div>
-
-      <div class="payment-details" id="payment-info">
-        برجاء التحويل على رقم الانستا باي: <span style="color:#0084c7;">01127491224</span>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // قائمة منتجات البقالة المباشرة
-    const groceryProducts = [
-      { id: 1, name: "ارز مصري 1كجم", price: "30 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 2, name: "زيت عباد الشمس 1 ليتر", price: "65 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 3, name: "سكر أبيض 1كجم", price: "27 ج.م", img: "https://via.placeholder.com/150" },
-      { id: 4, name: "مكرونة 400 جرام", price: "12 ج.م", img: "https://via.placeholder.com/150" }
-    ];
-
-    function renderProducts() {
-      const container = document.getElementById('grocery-products');
-      container.innerHTML = groceryProducts.map(p => `
-        <div class="product-card">
-          <img src="${p.img}" alt="${p.name}">
-          <div class="product-title">${p.name}</div>
-          <div class="product-price">${p.price}</div>
-          <button class="btn-add">إضافة للسلة</button>
+<header>
+    <div class="logo-container">
+        <div class="logo">🛒 ماركت نت</div>
+        <div class="user-code-header-badge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
+            🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
         </div>
-      `).join('');
-    }
+    </div>
+    <div class="header-actions">
+        <button class="share-btn" onclick="shareStore()">مشاركة 🔗</button>
+        <button class="cart-icon-btn" onclick="openCart()">
+            السلة 🛍️
+            <span class="cart-count" id="cartCount">0</span>
+        </button>
+    </div>
+</header>
 
-    function selectPayment(type) {
-      const btns = document.querySelectorAll('.payment-btn');
-      const infoBox = document.getElementById('payment-info');
+<div class="categories">
+    <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
+    <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
+    <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
+    <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
+    <button class="cat-btn" onclick="filterCategory('spices')">🧂 عطارة</button>
+    <button class="cat-btn" onclick="filterCategory('beauty')">💄 مستحضرات تجميل</button>
+    <button class="cat-btn" onclick="filterCategory('accessories')">💍 اكسسوارات بنات</button>
+</div>
 
-      btns.forEach(btn => btn.classList.remove('active'));
+<div class="container">
+    <div class="banner">
+        <h2>أهلاً بك في ماركت نت! 🎁</h2>
+        <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
+    </div>
 
-      if (type === 'instapay') {
-        btns[0].classList.add('active');
-        infoBox.innerHTML = 'برجاء التحويل على رقم الانستا باي: <span style="color:#0084c7;">01127491224</span>';
-      } else if (type === 'vodafone') {
-        btns[1].classList.add('active');
-        infoBox.innerHTML = 'برجاء التحويل على رقم فودافون كاش: <span style="color:#e11d48;">01012517345</span>';
+    <h3 style="margin-bottom: 15px;">المنتجات المتاحة</h3>
+    <div class="products-grid" id="productsContainer">
+        <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
+    </div>
+</div>
+
+<a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
+
+<!-- نافذة السلة وإكمال الطلب -->
+<div class="modal" id="cartModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>سلة الشراء 🛒</h3>
+            <button class="close-btn" onclick="closeCart()">✕</button>
+        </div>
+        
+        <div id="cartItemsList"></div>
+        <hr style="margin: 15px 0;">
+        
+        <!-- كود الخصم -->
+        <div class="form-group">
+            <label>كود الخصم أو الإحالة:</label>
+            <div class="promo-box">
+                <input type="text" id="promoCodeInput" placeholder="مثال: 5678B" style="text-transform: uppercase;">
+                <button type="button" class="promo-btn" onclick="applyPromoCode()">تطبيق</button>
+            </div>
+            <small id="promoMsg" style="display:none; font-weight:bold;"></small>
+        </div>
+
+        <div class="form-group">
+            <label>اختر المنطقة/المسافة:</label>
+            <select id="distanceZone" onchange="updateCartUI()">
+                <option value="0">منطقة قريبة (العادية)</option>
+                <option value="10">منطقة متوسطة (+10 ج)</option>
+                <option value="20">منطقة بعيدة (+20 ج)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>إكرامية إضافية لعامل التوصيل (اختياري):</label>
+            <select id="tipAmount" onchange="updateCartUI()">
+                <option value="0">بدون إكرامية إضافية 🚴</option>
+                <option value="10">10 جنيه 💙</option>
+                <option value="15">15 جنيه 💛</option>
+                <option value="20">20 جنيه ❤️</option>
+            </select>
+        </div>
+
+        <hr style="margin: 10px 0;">
+
+        <div class="summary-row">
+            <span>إجمالي المنتجات:</span>
+            <span id="subTotal">0 جنيه</span>
+        </div>
+        <div class="summary-row" id="discountRow" style="color: #ef4444; display: none;">
+            <span>خصم كود الإحالة (5%):</span>
+            <span id="discountTotal">-0 جنيه</span>
+        </div>
+        <div class="summary-row" style="color: #0284c7;">
+            <span>خدمة التوصيل (محسوبة تلقائياً):</span>
+            <span id="deliveryTotal">30 جنيه</span>
+        </div>
+        <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
+            <span>إكرامية الديلفري:</span>
+            <span id="tipTotal">0 جنيه</span>
+        </div>
+        <hr style="margin: 10px 0;">
+        <h4 style="display: flex; justify-content: space-between; color: #16a34a;">
+            <span>الإجمالي النهائي:</span>
+            <span id="cartTotal">0 جنيه</span>
+        </h4>
+
+        <form id="checkoutForm" style="margin-top: 15px;" onsubmit="sendOrderToWhatsApp(event)">
+            <h4>بيانات التوصيل والدفع 📝</h4>
+            <div class="form-group">
+                <label>الاسم الكامل:</label>
+                <input type="text" id="custName" required placeholder="أدخل اسمك">
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف:</label>
+                <input type="tel" id="custPhone" required placeholder="01xxxxxxxx" oninput="handlePhoneInput()">
+            </div>
+            
+            <div class="form-group" style="margin-top: 10px;">
+                <label>العنوان التفصيلي:</label>
+                <input type="text" id="custAddress" required placeholder="المنطقة، الشارع، رقم الشقة">
+            </div>
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <select id="payMethod" required onchange="togglePaymentInfo()">
+                    <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
+                    <option value="فودافون كاش">📱 فودافون كاش</option>
+                    <option value="إنستاباي InstaPay">💳 إنستاباي (InstaPay)</option>
+                </select>
+
+                <div id="paymentNotice" class="payment-info"></div>
+            </div>
+            <button type="submit" class="send-btn">إرسال الطلب عبر الواتساب 💬</button>
+        </form>
+    </div>
+</div>
+
+<script>
+  const ADMIN_WHATSAPP_NUMBER = "201127491224";
+  
+  let currentDeliveryFee = 30;
+  let isDiscountApplied = false;
+  let referrerCode = "";
+  let userMyCode = "";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
+    authDomain: "makhzan-9eb1f.firebaseapp.com",
+    projectId: "makhzan-9eb1f",
+    storageBucket: "makhzan-9eb1f.appspot.com",
+    messagingSenderId: "695067759501",
+    appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+  };
+
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+
+  let allProducts = [];
+  let cart = [];
+
+  window.onload = function() {
+      initUserCode();
+      checkUrlReferral();
+  };
+
+  function initUserCode() {
+      let savedCode = localStorage.getItem('marketnet_user_code');
+      if (!savedCode) {
+          const randNum = Math.floor(1000 + Math.random() * 9000);
+          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          const randChar = letters.charAt(Math.floor(Math.random() * letters.length));
+          savedCode = randNum + randChar;
+          localStorage.setItem('marketnet_user_code', savedCode);
       }
-    }
+      userMyCode = savedCode;
+      document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
+  }
 
-    renderProducts();
-  </script>
+  function checkUrlReferral() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+      if (refCode) {
+          document.getElementById('promoCodeInput').value = refCode.toUpperCase();
+          setTimeout(() => {
+              applyPromoCode();
+          }, 800);
+      }
+  }
 
+  db.collection('products').onSnapshot((snapshot) => {
+      allProducts = [];
+      snapshot.forEach((doc) => {
+          allProducts.push({ id: doc.id, ...doc.data() });
+      });
+      renderProducts(allProducts);
+  });
+
+  function renderProducts(products) {
+      const container = document.getElementById('productsContainer');
+      if (products.length === 0) {
+          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد.</p>';
+          return;
+      }
+      let html = '';
+      products.forEach((p) => {
+          const imgSrc = p.img || 'https://via.placeholder.com/150?text=لا+توجد+صورة';
+          html += `
+              <div class="product-card">
+                  <img src="${imgSrc}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=خطأ+بالصورة'">
+                  <div>
+                      <div class="product-title">${p.name}</div>
+                      <div class="product-price">${p.price} جنيه</div>
+                  </div>
+                  <button class="add-btn" onclick="addToCart('${p.id}')">إضافة للسلة 🛒</button>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
+  }
+
+  function filterCategory(cat) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      if (cat === 'all') {
+          renderProducts(allProducts);
+      } else {
+          const filtered = allProducts.filter(p => p.cat === cat);
+          renderProducts(filtered);
+      }
+  }
+
+  function addToCart(id) {
+      const prod = allProducts.find(p => p.id === id);
+      const exist = cart.find(item => item.id === id);
+      if (exist) {
+          exist.qty += 1;
+      } else {
+          cart.push({ ...prod, qty: 1 });
+      }
+      updateCartUI();
+      alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
+  }
+
+  function openCart() {
+      document.getElementById('cartModal').style.display = 'flex';
+      updateCartUI();
+  }
+
+  function closeCart() {
+      document.getElementById('cartModal').style.display = 'none';
+  }
+
+  function shareStore() {
+      let baseUrl = window.location.origin + window.location.pathname;
+      const storeUrl = `${baseUrl}?ref=${userMyCode}`;
+      const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واستخدم كود الخصم الخاص بي (${userMyCode}) للحصول على خصم 5% على طلبك الأول!\n\nرابط المتجر مباشر:\n${storeUrl}`;
+      
+      if (navigator.share) {
+          navigator.share({
+              title: 'ماركت نت',
+              text: shareText,
+              url: storeUrl
+          }).catch(() => {});
+      } else {
+          navigator.clipboard.writeText(storeUrl);
+          alert(`تم نسخ رابط الدعوة وكود الخصم (${userMyCode}) بنجاح! يمكنك إرساله لأصدقائك الآن.`);
+      }
+  }
+
+  function handlePhoneInput() {
+      const phone = document.getElementById('custPhone').value.trim();
+      if (phone.length >= 10) {
+          const last4 = phone.slice(-4);
+          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          const char = letters.charAt(Math.floor(Math.random() * letters.length));
+          userMyCode = last4 + char;
+          localStorage.setItem('marketnet_user_code', userMyCode);
+          document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
+      }
+  }
+
+  async function applyPromoCode() {
+      const codeInput = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const msg = document.getElementById('promoMsg');
+      const codeRegex = /^[0-9]{4}[A-Z]{1}$/;
+
+      if (!codeRegex.test(codeInput)) {
+          isDiscountApplied = false;
+          referrerCode = "";
+          msg.style.display = 'block';
+          msg.style.color = '#ef4444';
+          msg.innerText = '⚠️ الكود غير صحيح! يتكون الكود من 4 أرقام وحرف (مثال: 1234A)';
+          updateCartUI();
+          return;
+      }
+
+      isDiscountApplied = true;
+      referrerCode = codeInput;
+      msg.style.display = 'block';
+      msg.style.color = '#16a34a';
+      msg.innerText = `🎉 تم تطبيق كود الخصم بنجاح (خصم 5%)!`;
+      updateCartUI();
+  }
+
+  function updateCartUI() {
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCount').innerText = count;
+
+      const itemsList = document.getElementById('cartItemsList');
+      let subtotal = 0;
+      
+      if (cart.length === 0) {
+          itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
+          document.getElementById('subTotal').innerText = '0 جنيه';
+          document.getElementById('cartTotal').innerText = '0 جنيه';
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('tipRow').style.display = 'none';
+          document.getElementById('deliveryTotal').innerText = '30 جنيه';
+      } else {
+          let html = '';
+          cart.forEach((item) => {
+              const itemTotal = item.price * item.qty;
+              subtotal += itemTotal;
+              html += `
+                  <div class="cart-item">
+                      <div>
+                          <strong>${item.name}</strong><br>
+                          <small>${item.price} × ${item.qty} = ${itemTotal} جنيه</small>
+                      </div>
+                      <div>
+                          <button onclick="changeQty('${item.id}', -1)">-</button>
+                          <span style="margin: 0 5px;">${item.qty}</span>
+                          <button onclick="changeQty('${item.id}', 1)">+</button>
+                      </div>
+                  </div>
+              `;
+          });
+          itemsList.innerHTML = html;
+
+          // تحديث قاعدة الشحن الجديدة: تبدأ من 30 ج وتصبح 40 ج للطلبات أكبر من 300 ج
+          let baseDelivery = 30;
+          if (subtotal > 300) {
+              baseDelivery = 40;
+          } else {
+              baseDelivery = 30;
+          }
+
+          const zoneExtra = parseFloat(document.getElementById('distanceZone').value) || 0;
+          currentDeliveryFee = baseDelivery + zoneExtra;
+
+          const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+          let discountAmount = 0;
+
+          if (isDiscountApplied) {
+              discountAmount = Math.round(subtotal * 0.05);
+              document.getElementById('discountRow').style.display = 'flex';
+              document.getElementById('discountTotal').innerText = `-${discountAmount} جنيه`;
+          } else {
+              document.getElementById('discountRow').style.display = 'none';
+          }
+
+          if (tipFee > 0) {
+              document.getElementById('tipRow').style.display = 'flex';
+              document.getElementById('tipTotal').innerText = `${tipFee} جنيه`;
+          } else {
+              document.getElementById('tipRow').style.display = 'none';
+          }
+
+          const finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
+          document.getElementById('subTotal').innerText = subtotal + ' جنيه';
+          document.getElementById('deliveryTotal').innerText = currentDeliveryFee + ' جنيه';
+          document.getElementById('cartTotal').innerText = finalTotal + ' جنيه';
+      }
+  }
+
+  function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+          item.qty += delta;
+          if (item.qty <= 0) {
+              cart = cart.filter(i => i.id !== id);
+          }
+          updateCartUI();
+      }
+  }
+
+  function togglePaymentInfo() {
+      const method = document.getElementById('payMethod').value;
+      const notice = document.getElementById('paymentNotice');
+      if (method === 'فودافون كاش') {
+          notice.style.display = 'block';
+          notice.innerHTML = '📱 تحويل المبلغ على رقم فودافون كاش: <strong>01127491224</strong> وإرسال إيصال التحويل عبر الواتساب.';
+      } else if (method === 'إنستاباي InstaPay') {
+          notice.style.display = 'block';
+          notice.innerHTML = '💳 التحويل على عنوان الدفع اللحظي (InstaPay): <strong>marketnet@instapay</strong>';
+      } else {
+          notice.style.display = 'none';
+      }
+  }
+
+  async function sendOrderToWhatsApp(event) {
+      event.preventDefault();
+      if (cart.length === 0) {
+          alert('السلة فارغة!');
+          return;
+      }
+
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+      const payMethod = document.getElementById('payMethod').value;
+      const zoneSelect = document.getElementById('distanceZone');
+      const zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+
+      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
+      let finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
+
+      if (isDiscountApplied && referrerCode) {
+          try {
+              await db.collection('user_rewards').doc(referrerCode).set({
+                  pendingRewards: firebase.firestore.FieldValue.increment(1),
+                  lastReferredPhone: phone,
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+          } catch (e) {
+              console.log("Error saving reward:", e);
+          }
+      }
+
+      let orderText = `🛒 *طلب شراء جديد - ماركت نت*\n\n`;
+      orderText += `👤 *الاسم:* ${name}\n`;
+      orderText += `📞 *الهاتف:* ${phone}\n`;
+      orderText += `📍 *العنوان:* ${address}\n`;
+      orderText += `🚚 *طبيعة المنطقة:* ${zoneText}\n`;
+      orderText += `💳 *طريقة الدفع:* ${payMethod}\n`;
+      if (isDiscountApplied) {
+          orderText += `🎟️ *كود الخصم المستخدم:* ${referrerCode} (خصم 5%)\n`;
+      }
+      orderText += `\n📦 *تفاصيل المنتجات:*\n`;
+      
+      cart.forEach((item, index) => {
+          orderText += `${index + 1}. ${item.name} (${item.price}ج) × ${item.qty} = ${item.price * item.qty}ج\n`;
+      });
+
+      orderText += `\n------------------\n`;
+      orderText += `🏷️ إجمالي المنتجات: ${subtotal} جنيه\n`;
+      if (isDiscountApplied) {
+          orderText += `🎁 خصم الإحالة: -${discountAmount} جنيه\n`;
+      }
+      orderText += `🚀 التوصيل المحسوب: ${currentDeliveryFee} جنيه\n`;
+      if (tipFee > 0) {
+          orderText += `🚴 إكرامية الديلفري: ${tipFee} جنيه\n`;
+      }
+      orderText += `💰 *الإجمالي النهائي: ${finalTotal} جنيه*\n`;
+
+      const encodedMessage = encodeURIComponent(orderText);
+      const waURL = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`;
+      
+      window.open(waURL, '_blank');
+  }
+</script>
 </body>
 </html>
