@@ -3,229 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم | ماركت نت - MarketNet</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Firebase SDK v8.10.1 -->
+    <title>لوحة التحكم | MarketNet - ماركت نت 🛠️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <style>
-        :root {
-            --primary-color: #10b981;
-            --primary-dark: #059669;
-            --primary-light: #d1fae5;
-            --bg-body: #f3f4f6;
-            --bg-card: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb;
-            --sidebar-width: 260px;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --featured-color: #8b5cf6;
-        }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background: #0f172a; color: #f8fafc; padding: 15px; min-height: 100vh; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-        }
+        header { max-width: 1000px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; }
+        
+        /* شعار لوحة التحكم بنفس ستايل الفرانكو/العربي */
+        .logo { font-size: 18px; font-weight: 900; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+        .logo-en { background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Segoe UI', sans-serif; }
+        .logo-ar { color: #f8fafc; font-size: 15px; background: rgba(56, 189, 248, 0.15); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3); }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
-        }
+        .admin-title { font-size: 14px; background: #38bdf8; color: #0f172a; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: #065f46;
-            color: #ffffff;
-            min-height: 100vh;
-            position: fixed;
-            right: 0;
-            top: 0;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-        }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 768px) { .container { grid-template-columns: 350px 1fr; } }
 
-        .sidebar-header {
-            padding: 1.5rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; height: fit-content; }
+        .card h2 { font-size: 16px; margin-bottom: 15px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
 
-        .sidebar-header h3 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #ffffff;
-        }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #38bdf8; }
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-            flex-grow: 1;
-        }
+        .btn-submit { background: #0284c7; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-submit:hover { background: #0369a1; }
+        .btn-cancel { background: #475569; color: white; border: none; width: 100%; padding: 8px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; margin-top: 5px; display: none; }
 
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            padding: 0.85rem 1.5rem;
-            color: #d1fae5;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.2s;
-            gap: 12px;
-        }
+        /* شريط البحث السريع في لوحة الإدارة */
+        .admin-search { margin-bottom: 15px; position: relative; }
+        .admin-search input { width: 100%; padding: 8px 35px 8px 12px; border-radius: 20px; border: 1px solid #38bdf8; background: #0f172a; color: white; font-size: 13px; outline: none; }
+        .admin-search .search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 14px; }
 
-        .sidebar-menu li a:hover,
-        .sidebar-menu li.active a {
-            background-color: var(--primary-dark);
-            color: #ffffff;
-            border-right: 4px solid var(--primary-light);
-        }
+        .product-list { display: flex; flex-direction: column; gap: 10px; max-height: 650px; overflow-y: auto; padding-left: 5px; }
+        .product-item { background: #0f172a; border: 1px solid #334155; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .product-item img { width: 45px; height: 45px; object-fit: contain; background: white; border-radius: 6px; padding: 2px; }
+        .prod-details { flex-grow: 1; }
+        .prod-name { font-size: 13px; font-weight: bold; color: #f8fafc; }
+        .prod-meta { font-size: 11px; color: #94a3b8; display: flex; gap: 10px; margin-top: 2px; }
+        .prod-price { color: #4ade80; font-weight: bold; }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .btn-edit { background: #f59e0b; color: white; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 5px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-        /* Main Content Wrapper */
-        .main-wrapper {
-            margin-right: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+<header>
+    <a href="#" class="logo">
+        <span>🛒</span>
+        <span class="logo-en">MarketNet</span>
+        <span class="logo-ar">ماركت نت</span>
+    </a>
+    <span class="admin-title">⚙️ لوحة الإدارة</span>
+</header>
 
-        .header {
-            background-color: var(--bg-card);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
+<div class="container">
+    <!-- نموذج إضافة/تعديل منتج -->
+    <div class="card">
+        <h2 id="formTitle">➕ إضافة منتج جديد</h2>
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="editProdId">
 
-        .mobile-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-main);
-            cursor: pointer;
-        }
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="pName" placeholder="مثال: أرز الساعة 1 كجم" required>
+            </div>
 
-        .container {
-            padding: 2rem;
-            flex-grow: 1;
-        }
+            <div class="form-group">
+                <label>القسم / التصنيف:</label>
+                <select id="pCat" required>
+                    <option value="grocery">🧺 بقالة</option>
+                    <option value="offers">🔥 العروض اليومية</option>
+                    <option value="poultry">🍗 طيور</option>
+                    <option value="frozen">🧊 مجمدات</option>
+                    <option value="cleaning">✨ منظفات</option>
+                    <option value="spices">🧂 عطارة</option>
+                    <option value="beauty">💄 مستحضرات تجميل</option>
+                    <option value="accessories">💍 اكسسوارات بنات</option>
+                </select>
+            </div>
 
-        .page-section {
-            display: none;
-        }
+            <div class="form-group">
+                <label>السعر (بالجنيه):</label>
+                <input type="number" step="0.01" id="pPrice" placeholder="0.00" required>
+            </div>
 
-        .page-section.active {
-            display: block;
-        }
+            <div class="form-group">
+                <label>الكمية المتاحة بالمخزن (Stock):</label>
+                <input type="number" id="pStock" placeholder="10" value="10" required>
+            </div>
 
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+            <div class="form-group">
+                <label>رابط الصورة (URL):</label>
+                <input type="url" id="pImg" placeholder="https://..." required>
+            </div>
 
-        .stat-card {
-            background-color: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
+            <div class="form-group">
+                <label>الوزن / الحجم (اختياري):</label>
+                <input type="text" id="pWeight" placeholder="مثال: 1 كجم / 500 مل">
+            </div>
 
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--primary-light);
-            color: var(--primary-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-        }
+            <div class="form-group">
+                <label>وصف المنتج (اختياري):</label>
+                <textarea id="pDesc" rows="2" placeholder="اكتب تفاصيل إضافية للمنتج..."></textarea>
+            </div>
 
-        .stat-info h4 {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+            <button type="submit" class="btn-submit" id="saveBtn">حفظ المنتج 💾</button>
+            <button type="button" class="btn-cancel" id="cancelBtn" onclick="resetForm()">إلغاء التعديل ✕</button>
+        </form>
+    </div>
 
-        .stat-info span {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
+    <!-- قائمة المنتجات الحالية -->
+    <div class="card">
+        <h2>📦 المنتجات المتاحة بالمتجر</h2>
+        
+        <div class="admin-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="adminSearchInput" oninput="handleAdminSearchDebounced()" placeholder="بحث سريع في المخزن...">
+        </div>
 
-        /* Form Controls & Cards */
-        .card {
-            background-color: var(--bg-card);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
+        <div class="product-list" id="adminProductList">
+            <p style="text-align: center; color: #94a3b8; padding: 20px;">جاري تحميل البيانات...</p>
+        </div>
+    </div>
+</div>
 
-        .card-header {
-            margin-bottom: 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
+    authDomain: "makhzan-9eb1f.firebaseapp.com",
+    projectId: "makhzan-9eb1f",
+    storageBucket: "makhzan-9eb1f.appspot.com",
+    messagingSenderId: "695067759501",
+    appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+  };
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+  let adminProductsList = [];
+  let adminSearchTimeout = null;
 
-        .form-control {
-            width: 100%;
-            padding: 0.65rem 0.85rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+  window.onload = function() {
+      loadAdminProducts();
+  };
 
-        .form-control:focus {
-            border-color: var(--primary-color);
-        }
+  function loadAdminProducts() {
+      db.collection('products').onSnapshot(snapshot => {
+          adminProductsList = [];
+          snapshot.forEach(doc => {
+              adminProductsList.push({ id: doc.id, ...doc.data() });
+          });
+          renderAdminProducts();
+      });
+  }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(
+  function renderAdminProducts(query = '') {
+      const container = document.getElementById('adminProductList');
+
+      let filtered = adminProductsList;
+      if (query.trim() !== '') {
+          const q = query.toLowerCase().trim();
+          filtered = filtered.filter(p => p.name && p.name.toLowerCase().includes(q));
+      }
+
+      if (filtered.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد منتجات مطابقة.</p>';
+          return;
+      }
+
+      let html = '';
+      filtered.forEach(p => {
+          const stock = (p.stock !== undefined && p.stock !== null) ? p.stock : 10;
+          html += `
+              <div class="product-item">
+                  <img src="${p.img || 'https://via.placeholder.com/50'}" alt="">
+                  <div class="prod-details">
+                      <div class="prod-name">${p.name}</div>
+                      <div class="prod-meta">
+                          <span class="prod-price">${p.price} ج.م</span>
+                          <span>المخزون: <strong>${stock}</strong></span>
+                      </div>
+                  </div>
+                  <div class="action-btns">
+                      <button class="btn-edit" onclick="editProduct('${p.id}')">تعديل ✏️</button>
+                      <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>
+                  </div>
+              </div>
+          `;
+      });
+
+      container.innerHTML = html;
+  }
+
+  function handleAdminSearchDebounced() {
+      clearTimeout(adminSearchTimeout);
+      adminSearchTimeout = setTimeout(() => {
+          const q = document.getElementById('adminSearchInput').value;
+          renderAdminProducts(q);
+      }, 150);
+  }
+
+  async function saveProduct(e) {
+      e.preventDefault();
+
+      const editId = document.getElementById('editProdId').value;
+      const productData = {
+          name: document.getElementById('pName').value.trim(),
+          cat: document.getElementById('pCat').value,
+          price: parseFloat(document.getElementById('pPrice').value),
+          stock: parseInt(document.getElementById('pStock').value),
+          img: document.getElementById('pImg').value.trim(),
+          weight: document.getElementById('pWeight').value.trim() || 'حسب الطلب',
+          desc: document.getElementById('pDesc').value.trim() || '',
+          rating: 5
+      };
+
+      try {
+          if (editId) {
+              await db.collection('products').doc(editId).update(productData);
+              alert('تم تعديل بيانات المنتج بنجاح! ✅');
+          } else {
+              await db.collection('products').add(productData);
+              alert('تمت إضافة المنتج بنجاح! 🎉');
+          }
+          resetForm();
+      } catch (error) {
+          alert('حدث خطأ أثناء الحفظ: ' + error.message);
+      }
+  }
+
+  function editProduct(id) {
+      const p = adminProductsList.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('editProdId').value = p.id;
+      document.getElementById('pName').value = p.name || '';
+      document.getElementById('pCat').value = p.cat || 'grocery';
+      document.getElementById('pPrice').value = p.price || '';
+      document.getElementById('pStock').value = (p.stock !== undefined) ? p.stock : 10;
+      document.getElementById('pImg').value = p.img || '';
+      document.getElementById('pWeight').value = p.weight || '';
+      document.getElementById('pDesc').value = p.desc || '';
+
+      document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
+      document.getElementById('saveBtn').innerText = 'حفظ التعديلات 🔄';
+      document.getElementById('cancelBtn').style.display = 'block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+      document.getElementById('productForm').reset();
+      document.getElementById('editProdId').value = '';
+      document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
+      document.getElementById('saveBtn').innerText = 'حفظ المنتج 💾';
+      document.getElementById('cancelBtn').style.display = 'none';
+  }
+
+  async function deleteProduct(id) {
+      if (confirm('هل أنت تأكد من إزالة هذا المنتج نهائياً من المتجر؟')) {
+          try {
+              await db.collection('products').doc(id).delete();
+              alert('تم حذف المنتج بنجاح! 🗑️');
+          } catch (error) {
+              alert('خطأ أثناء الحذف: ' + error.message);
+          }
+      }
+  }
+</script>
+</body>
+</html>
