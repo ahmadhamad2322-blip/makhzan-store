@@ -32,13 +32,16 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
         
+        /* معاينة الصورة المختارة */
+        .img-preview { width: 100%; height: 120px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 8px; overflow: hidden; background: #f8fafc; }
+        .img-preview img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+
         .btn-submit { background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; margin-top: 10px; }
         .btn-submit:hover { background: #15803d; }
 
         .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
         .product-info { display: flex; align-items: center; gap: 12px; }
         
-        /* عارض الصورة الطبيعي */
         .product-img-wrapper { width: 60px; height: 60px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
@@ -57,7 +60,7 @@
         .status-approved { background: #dcfce7; color: #15803d; }
         .status-blocked { background: #fee2e2; color: #b91c1c; }
 
-        .btn-approve { background: #16a34a; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-approve { background: #16a34a; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: font-size: 12px; }
         .btn-block { background: #f59e0b; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
@@ -68,7 +71,7 @@
     <div class="login-box">
         <h2>🔒 تسجيل دخول الأدمن</h2>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">أدخل رقم الهاتف للوصول للوحة التحكم</p>
-        <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الموبايل (مثال: 01012517345)">
+        <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الهاتف">
         <button onclick="attemptLogin()">دخول 🔑</button>
         <p id="loginStatusMsg" style="margin-top:15px; font-size:13px; font-weight:bold;"></p>
     </div>
@@ -106,14 +109,18 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>رابط الصورة (URL):</label>
-                <input type="url" id="pImg" placeholder="https://example.com/image.jpg">
+                <label>اختيار صورة المنتج من جهازك 🖼️:</label>
+                <input type="file" id="pImgFile" accept="image/*" onchange="previewSelectedImage(this)">
+                <div class="img-preview" id="previewContainer">
+                    <span id="previewText" style="color: #94a3b8; font-size: 13px;">لم يتم اختيار صورة بعد</span>
+                    <img id="imgPreview" alt="معاينة الصورة">
+                </div>
             </div>
             <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="pPinned" style="width: auto;">
                 <label for="pPinned" style="margin: 0; cursor: pointer;">📌 تثبيت المنتج في أول القائمة</label>
             </div>
-            <button type="submit" class="btn-submit">حفظ المنتج 💾</button>
+            <button type="submit" class="btn-submit" id="saveBtn">حفظ المنتج 💾</button>
         </form>
     </div>
 
@@ -136,7 +143,7 @@
         <div id="adminProductsList">جاري التحميل...</div>
     </div>
 
-    <!-- إدارة طلبت واستئذان الدخول (طلبات المستخدمين) -->
+    <!-- إدارة طلبات واستئذان الدخول -->
     <div class="card" style="grid-column: 1 / -1;">
         <h3>👥 طلبات الدخول وإدارة المشرفين / المستخدمين</h3>
         <table>
@@ -175,6 +182,7 @@
 
 <script>
   const MAIN_ADMIN_PHONE = "01012517345";
+  let currentBase64Image = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -205,6 +213,53 @@
       checkAdminAuth();
   };
 
+  // معاينة تحويل الصورة المرفوعة إلى Base64
+  function previewSelectedImage(input) {
+      const previewImg = document.getElementById('imgPreview');
+      const previewText = document.getElementById('previewText');
+
+      if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              // ضغط وإعداد الصورة
+              compressAndBase64(e.target.result, 600, 0.7, function(compressedBase64) {
+                  currentBase64Image = compressedBase64;
+                  previewImg.src = compressedBase64;
+                  previewImg.style.display = 'block';
+                  previewText.style.display = 'none';
+              });
+          };
+          reader.readAsDataURL(input.files[0]);
+      } else {
+          currentBase64Image = "";
+          previewImg.style.display = 'none';
+          previewText.style.display = 'inline';
+      }
+  }
+
+  // أداة لضغط حجم الصورة للرفع السريع وحفظ مساحة القواعد
+  function compressAndBase64(src, maxWidth, quality, callback) {
+      const img = new Image();
+      img.src = src;
+      img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', quality));
+      };
+  }
+
   // نظام تسجيل الدخول والصلاحيات
   async function attemptLogin() {
       const phoneInput = document.getElementById('adminPhoneInput').value.trim();
@@ -216,7 +271,6 @@
           return;
       }
 
-      // إذا كان الأدمن الرئيسي
       if (phoneInput === MAIN_ADMIN_PHONE) {
           localStorage.setItem('admin_logged_phone', phoneInput);
           document.getElementById('loginOverlay').style.display = 'none';
@@ -224,7 +278,6 @@
           return;
       }
 
-      // إذا كان مستخدم/مشرف آخر يطلب الدخول
       statusMsg.style.color = '#0284c7';
       statusMsg.innerText = 'جاري التحقق من حالة الحساب...';
 
@@ -240,17 +293,16 @@
               statusMsg.innerText = '❌ تم حظر هذا الرقم من الوصول للوحة التحكم!';
           } else {
               statusMsg.style.color = '#d97706';
-              statusMsg.innerText = '⏳ طلبك بانتظار موافقة الأدمن الرئيسي (01012517345)';
+              statusMsg.innerText = '⏳ طلبك بانتظار موافقة المسؤول.';
           }
       } else {
-          // تسجيل طلب دخول جديد
           await db.collection('admin_access_requests').doc(phoneInput).set({
               phone: phoneInput,
               status: 'pending',
               requestedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           statusMsg.style.color = '#d97706';
-          statusMsg.innerText = '📩 تم إرسال طلب الدخول للـ الأدمن الرئيسي للموافقة عليه.';
+          statusMsg.innerText = '📩 تم إرسال طلب الدخول للمسؤول للموافقة عليه.';
       }
   }
 
@@ -286,32 +338,41 @@
       listenRewards();
   }
 
-  // حفظ منتج جديد
+  // حفظ منتج جديد بالصورة المرفوعة
   async function saveProduct(e) {
       e.preventDefault();
+      const saveBtn = document.getElementById('saveBtn');
       const name = document.getElementById('pName').value.trim();
       const price = parseFloat(document.getElementById('pPrice').value);
       const cat = document.getElementById('pCat').value;
-      const img = document.getElementById('pImg').value.trim();
       const isPinned = document.getElementById('pPinned').checked;
+
+      saveBtn.innerText = "جاري الحفظ والرفع... ⏳";
+      saveBtn.disabled = true;
 
       try {
           await db.collection('products').add({
               name: name,
               price: price,
               cat: cat,
-              img: img,
+              img: currentBase64Image, // حفظ كود الصورة المرفوعة
               isPinned: isPinned,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          alert('تم إضافة المنتج بنجاح وتخصيصه للقسم المحدد! 🎉');
+          
+          alert('تم إضافة المنتج وبث الصورة بنجاح! 🎉');
           document.getElementById('addProductForm').reset();
+          currentBase64Image = "";
+          document.getElementById('imgPreview').style.display = 'none';
+          document.getElementById('previewText').style.display = 'inline';
       } catch (err) {
           alert('حدث خطأ أثناء حفظ المنتج: ' + err.message);
+      } finally {
+          saveBtn.innerText = "حفظ المنتج 💾";
+          saveBtn.disabled = false;
       }
   }
 
-  // جلب وعرض المنتجات مخصصة حسب الأقسام والتثبيت
   function loadAdminProducts() {
       const selectedCat = document.getElementById('filterCategoryAdmin').value;
       
@@ -327,12 +388,10 @@
               products.push({ id: doc.id, ...doc.data() });
           });
 
-          // تصفية المنتجات حسب القسم المختار
           if (selectedCat !== 'all') {
               products = products.filter(p => p.cat === selectedCat);
           }
 
-          // ترتيب المنتجات: المثبتة أولاً ثم حسب الأحدث
           products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
 
           if (products.length === 0) {
@@ -392,7 +451,6 @@
       }
   }
 
-  // إدارة طلبات الدخول للمستخدمين/الأدمن الفرعيين
   function listenAccessRequests() {
       db.collection('admin_access_requests').onSnapshot((snapshot) => {
           const tbody = document.getElementById('usersTableBody');
@@ -439,7 +497,6 @@
       }
   }
 
-  // متابعة سجل المكافآت
   function listenRewards() {
       db.collection('user_rewards').onSnapshot((snapshot) => {
           const tbody = document.getElementById('rewardsTableBody');
