@@ -1,203 +1,217 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ماركت نت - طلب الدخول</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background-color: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .card {
-      background: #ffffff;
-      padding: 30px 25px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
-    }
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #0084c7;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .subtitle {
-      color: #6b7280;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-    .tabs {
-      display: flex;
-      border-bottom: 2px solid #e5e7eb;
-      margin-bottom: 20px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: none;
-      border: none;
-      font-size: 14px;
-      font-weight: bold;
-      color: #6b7280;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.3s ease;
-    }
-    .tab-btn.active {
-      color: #0084c7;
-      border-bottom: 2px solid #0084c7;
-    }
-    .form-group {
-      margin-bottom: 16px;
-      text-align: right;
-    }
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      color: #374151;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    .input-field {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .input-field:focus {
-      border-color: #0084c7;
-    }
-    .btn-submit {
-      width: 100%;
-      padding: 12px;
-      background-color: #25D366;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background-color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-submit:hover {
-      background-color: #1ebc57;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - ماركت نت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f1f5f9; color: #1e293b; padding: 20px; }
+        
+        .admin-header { background: #0f172a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-title { font-size: 22px; font-weight: 900; color: #38bdf8; }
+
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card h3 { margin-bottom: 15px; color: #0284c7; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        
+        .btn-submit { background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; margin-top: 10px; }
+        .btn-submit:hover { background: #15803d; }
+
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .product-info { display: flex; align-items: center; gap: 10px; }
+        .product-img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; background: #e2e8f0; }
+        
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-edit { background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; margin-left: 5px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { text-align: right; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; color: #475569; }
+    </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="logo">🛒 ماركت نت</div>
-    <div class="subtitle" id="form-subtitle">طلب موافقة دخول النظام</div>
+<div class="admin-header">
+    <div class="admin-title">⚙️ لوحة إدارة متجر ماركت نت</div>
+    <div><span>مرحباً بالأدمن</span></div>
+</div>
 
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">تسجيل الدخول</button>
-      <button class="tab-btn" onclick="switchTab('register')">طلب حساب جديد</button>
+<div class="admin-grid">
+    <!-- نموذج إضافة منتج -->
+    <div class="card">
+        <h3>➕ إضافة منتج جديد</h3>
+        <form id="addProductForm" onsubmit="saveProduct(event)">
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="pName" required placeholder="مثال: كيلو فراخ بانيه">
+            </div>
+            <div class="form-group">
+                <label>السعر (بالجنيه):</label>
+                <input type="number" id="pPrice" required placeholder="مثال: 180">
+            </div>
+            <div class="form-group">
+                <label>القسم:</label>
+                <select id="pCat" required>
+                    <option value="offers">🔥 العروض اليومية</option>
+                    <option value="poultry">🍗 طيور</option>
+                    <option value="frozen">🧊 مجمدات</option>
+                    <option value="cleaning">✨ منظفات</option>
+                    <option value="spices">🧂 عطارة</option>
+                    <option value="beauty">💄 مستحضرات تجميل</option>
+                    <option value="accessories">💍 اكسسوارات بنات</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>رابط الصورة (URL):</label>
+                <input type="url" id="pImg" placeholder="https://example.com/image.jpg">
+            </div>
+            <button type="submit" class="btn-submit">حفظ المنتج 💾</button>
+        </form>
     </div>
 
-    <!-- نموذج تسجيل الدخول -->
-    <form id="login-form" onsubmit="handleAuth(event, 'تسجيل دخول')">
-      <div class="form-group">
-        <label>الاسم بالكامل</label>
-        <input type="text" id="login-name" class="input-field" placeholder="أدخل اسمك" required>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="login-phone" class="input-field" placeholder="أدخل رقم الهاتف" required>
-      </div>
-      <button type="submit" class="btn-submit">📲 إرسال طلب الدخول للآدمن</button>
-    </form>
+    <!-- قائمة المنتجات المضافة -->
+    <div class="card">
+        <h3>📦 المنتجات المتاحة بالمتجر</h3>
+        <div id="adminProductsList">جاري التحميل...</div>
+    </div>
 
-    <!-- نموذج حساب جديد -->
-    <form id="register-form" class="hidden" onsubmit="handleAuth(event, 'حساب جديد')">
-      <div class="form-group">
-        <label>الاسم بالكامل</label>
-        <input type="text" id="reg-name" class="input-field" placeholder="أدخل اسمك الكامل" required>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="reg-phone" class="input-field" placeholder="أدخل رقم الهاتف الخاص بك" required>
-      </div>
-      <button type="submit" class="btn-submit">✨ إرسال طلب التسجيل للآدمن</button>
-    </form>
-  </div>
+    <!-- سجل مكافآت نظام الإحالة -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <h3>🎁 متابعة مكافآت كروت الإحالة (دعوة الأصدقاء)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>كود العميل</th>
+                    <th>عدد الإحالات الناجحة</th>
+                    <th>آخر رقم هاتف تم دعوته</th>
+                    <th>تاريخ آخر الطلب</th>
+                </tr>
+            </thead>
+            <tbody id="rewardsTableBody">
+                <tr><td colspan="4" style="text-align: center;">جاري تحضير البيانات...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-  <script>
-    const ADMIN_PHONE = "201012517345"; // الرقم بصيغة دولية
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
+    authDomain: "makhzan-9eb1f.firebaseapp.com",
+    projectId: "makhzan-9eb1f",
+    storageBucket: "makhzan-9eb1f.appspot.com",
+    messagingSenderId: "695067759501",
+    appId: "1:695067759501:web:df932ff7bac0b1470523c4"
+  };
 
-    function switchTab(tab) {
-      const loginForm = document.getElementById('login-form');
-      const registerForm = document.getElementById('register-form');
-      const subtitle = document.getElementById('form-subtitle');
-      const tabs = document.querySelectorAll('.tab-btn');
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
 
-      if (tab === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        tabs[0].classList.add('active');
-        tabs[1].classList.remove('active');
-        subtitle.textContent = "طلب موافقة دخول النظام";
-      } else {
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-        tabs[0].classList.remove('active');
-        tabs[1].classList.add('active');
-        subtitle.textContent = "طلب إنشاء حساب جديد";
-      }
-    }
-
-    function handleAuth(e, type) {
+  // إضافة منتج جديد
+  async function saveProduct(e) {
       e.preventDefault();
-      
-      const name = type === 'تسجيل دخول' 
-        ? document.getElementById('login-name').value 
-        : document.getElementById('reg-name').value;
-        
-      const phone = type === 'تسجيل دخول' 
-        ? document.getElementById('login-phone').value 
-        : document.getElementById('reg-phone').value;
+      const name = document.getElementById('pName').value.trim();
+      const price = parseFloat(document.getElementById('pPrice').value);
+      const cat = document.getElementById('pCat').value;
+      const img = document.getElementById('pImg').value.trim();
 
-      // تجهيز نص الرسالة للواتساب
-      const message = `مرحباً آدمن، هناك طلب (${type}) جديد:%0A` +
-                      `👤 الاسم: ${encodeURIComponent(name)}%0A` +
-                      `📱 الرقم: ${encodeURIComponent(phone)}%0A` +
-                      `يرجى المراجعة والموافقة على الدخول.`;
+      try {
+          await db.collection('products').add({
+              name: name,
+              price: price,
+              cat: cat,
+              img: img,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          alert('تم إضافة المنتج بنجاح! 🎉');
+          document.getElementById('addProductForm').reset();
+      } catch (err) {
+          alert('حدث خطأ أثناء حفظ المنتج: ' + err.message);
+      }
+  }
 
-      // فتح الواتساب مباشرة لرقمك
-      const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${message}`;
-      
-      alert("سيتم تحويلك الآن إلى الواتساب لإرسال طلب الموافقة إلى المسؤول.");
-      window.open(whatsappUrl, '_blank');
-    }
-  </script>
+  // المتابعة اللحظية للمنتجات
+  db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
+      const container = document.getElementById('adminProductsList');
+      if (snapshot.empty) {
+          container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات حالياً.</p>';
+          return;
+      }
+      let html = '';
+      snapshot.forEach((doc) => {
+          const p = doc.data();
+          const imgSrc = p.img || 'https://via.placeholder.com/50?text=لا+صورة';
+          html += `
+              <div class="product-item">
+                  <div class="product-info">
+                      <img src="${imgSrc}" class="product-img" onerror="this.src='https://via.placeholder.com/50?text=خطأ'">
+                      <div>
+                          <strong>${p.name}</strong><br>
+                          <small style="color:#16a34a; font-weight:bold;">${p.price} جنيه</small>
+                      </div>
+                  </div>
+                  <div>
+                      <button class="btn-edit" onclick="editPrice('${doc.id}', ${p.price})">تعديل السعر</button>
+                      <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف</button>
+                  </div>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
+  });
 
+  // تعديل سعر المنتج
+  async function editPrice(id, oldPrice) {
+      const newPrice = prompt('أدخل السعر الجديد:', oldPrice);
+      if (newPrice && !isNaN(newPrice)) {
+          await db.collection('products').doc(id).update({
+              price: parseFloat(newPrice)
+          });
+      }
+  }
+
+  // حذف منتج
+  async function deleteProduct(id) {
+      if (confirm('هل أنت تأكد من رغبتك في حذف هذا المنتج؟')) {
+          await db.collection('products').doc(id).delete();
+      }
+  }
+
+  // جلب بيانات سِجل المكافآت للإحالات
+  db.collection('user_rewards').onSnapshot((snapshot) => {
+      const tbody = document.getElementById('rewardsTableBody');
+      if (snapshot.empty) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد إحالات مسجلة حتى الآن.</td></tr>';
+          return;
+      }
+      let html = '';
+      snapshot.forEach((doc) => {
+          const data = doc.data();
+          const dateStr = data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
+          html += `
+              <tr>
+                  <td><strong>${doc.id}</strong></td>
+                  <td><span style="color:#16a34a; font-weight:bold;">${data.pendingRewards || 0} طلبات</span></td>
+                  <td>${data.lastReferredPhone || 'غير متوفر'}</td>
+                  <td><small>${dateStr}</small></td>
+              </tr>
+          `;
+      });
+      tbody.innerHTML = html;
+  });
+</script>
 </body>
 </html>
