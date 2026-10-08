@@ -17,7 +17,7 @@
         .logo-container { display: flex; flex-direction: column; align-items: flex-start; }
         .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
         
-        .user-code-header-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; color: #38bdf8; padding: 2px 8px; border-radius: 12px; margin-top: 2px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .user-code-header-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; color: #38bdf8; padding: 2px 8px; border-radius: 12px; margin-top: 2px; cursor: pointer; display: none; align-items: center; gap: 4px; }
         .user-code-header-badge:hover { background: rgba(56, 189, 248, 0.25); }
 
         .header-actions { display: flex; gap: 10px; align-items: center; }
@@ -59,6 +59,7 @@
         
         .promo-box { display: flex; gap: 8px; margin-bottom: 8px; }
         .promo-btn { background: #0284c7; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .reward-alert { background: #f0fdf4; border: 1px solid #16a34a; color: #15803d; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-top: 8px; display: none; }
     </style>
 </head>
 <body>
@@ -66,7 +67,7 @@
 <header>
     <div class="logo-container">
         <div class="logo">🛒 ماركت نت</div>
-        <div class="user-code-header-badge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
+        <div class="user-code-header-badge" id="userBadge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
             🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
         </div>
     </div>
@@ -82,6 +83,7 @@
 <div class="categories">
     <button class="cat-btn active" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
     <button class="cat-btn" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" onclick="filterCategory('grocery')">🥫 بقالة</button>
     <button class="cat-btn" onclick="filterCategory('poultry')">🍗 طيور</button>
     <button class="cat-btn" onclick="filterCategory('frozen')">🧊 مجمدات</button>
     <button class="cat-btn" onclick="filterCategory('cleaning')">✨ منظفات</button>
@@ -151,7 +153,7 @@
             <span id="subTotal">0 جنيه</span>
         </div>
         <div class="summary-row" id="discountRow" style="color: #ef4444; display: none;">
-            <span>خصم كود الإحالة (5%):</span>
+            <span>خصم الخصم/الإحالة (5%):</span>
             <span id="discountTotal">-0 جنيه</span>
         </div>
         <div class="summary-row" style="color: #0284c7;">
@@ -177,6 +179,9 @@
             <div class="form-group">
                 <label>رقم الهاتف:</label>
                 <input type="tel" id="custPhone" required placeholder="01xxxxxxxx" oninput="handlePhoneInput()">
+                <div id="rewardAlert" class="reward-alert">
+                    🎉 تم إنشاء كود الخصم الخاص بك (<span id="alertCode"></span>) وتم تطبيق خصم 5% على طلبك تلقائياً! شارك كودك مع أصدقائك للحصول على خصومات مستمرة.
+                </div>
             </div>
             
             <div class="form-group" style="margin-top: 10px;">
@@ -204,7 +209,7 @@
   let currentDeliveryFee = 30;
   let isDiscountApplied = false;
   let referrerCode = "";
-  let userMyCode = "";
+  let userMyCode = localStorage.getItem('marketnet_user_code') || "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -224,21 +229,38 @@
   let cart = [];
 
   window.onload = function() {
-      initUserCode();
+      if (userMyCode) {
+          showUserBadge();
+      }
       checkUrlReferral();
   };
 
-  function initUserCode() {
-      let savedCode = localStorage.getItem('marketnet_user_code');
-      if (!savedCode) {
-          const randNum = Math.floor(1000 + Math.random() * 9000);
-          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-          const randChar = letters.charAt(Math.floor(Math.random() * letters.length));
-          savedCode = randNum + randChar;
-          localStorage.setItem('marketnet_user_code', savedCode);
-      }
-      userMyCode = savedCode;
+  function showUserBadge() {
       document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
+      document.getElementById('userBadge').style.display = 'flex';
+  }
+
+  function generateUserCode() {
+      const randNum = Math.floor(1000 + Math.random() * 9000);
+      const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+      const randChar = letters.charAt(Math.floor(Math.random() * letters.length));
+      return randNum + randChar;
+  }
+
+  function handlePhoneInput() {
+      const phone = document.getElementById('custPhone').value.trim();
+      if (phone.length >= 10 && !userMyCode) {
+          userMyCode = generateUserCode();
+          localStorage.setItem('marketnet_user_code', userMyCode);
+          showUserBadge();
+          
+          // عرض تنبيه الهدية وتطبيق الخصم
+          document.getElementById('alertCode').innerText = userMyCode;
+          document.getElementById('rewardAlert').style.display = 'block';
+          
+          isDiscountApplied = true;
+          updateCartUI();
+      }
   }
 
   function checkUrlReferral() {
@@ -306,6 +328,17 @@
       alert(`تم إضافة "${prod.name}" للسلة بنجاح!`);
   }
 
+  function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+          item.qty += delta;
+          if (item.qty <= 0) {
+              cart = cart.filter(i => i.id !== id);
+          }
+          updateCartUI();
+      }
+  }
+
   function openCart() {
       document.getElementById('cartModal').style.display = 'flex';
       updateCartUI();
@@ -316,6 +349,12 @@
   }
 
   function shareStore() {
+      if (!userMyCode) {
+          userMyCode = generateUserCode();
+          localStorage.setItem('marketnet_user_code', userMyCode);
+          showUserBadge();
+      }
+      
       let baseUrl = window.location.origin + window.location.pathname;
       const storeUrl = `${baseUrl}?ref=${userMyCode}`;
       const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واستخدم كود الخصم الخاص بي (${userMyCode}) للحصول على خصم 5% على طلبك الأول!\n\nرابط المتجر مباشر:\n${storeUrl}`;
@@ -327,20 +366,8 @@
               url: storeUrl
           }).catch(() => {});
       } else {
-          navigator.clipboard.writeText(storeUrl);
-          alert(`تم نسخ رابط الدعوة وكود الخصم (${userMyCode}) بنجاح! يمكنك إرساله لأصدقائك الآن.`);
-      }
-  }
-
-  function handlePhoneInput() {
-      const phone = document.getElementById('custPhone').value.trim();
-      if (phone.length >= 10) {
-          const last4 = phone.slice(-4);
-          const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-          const char = letters.charAt(Math.floor(Math.random() * letters.length));
-          userMyCode = last4 + char;
-          localStorage.setItem('marketnet_user_code', userMyCode);
-          document.getElementById('headerUserCodeDisplay').innerText = userMyCode;
+          navigator.clipboard.writeText(shareText);
+          alert(`تم نسخ نص الدعوة وكود الخصم (${userMyCode}) بنجاح! يمكنك لصقها وإرسالها لأصدقائك عبر الواتساب أو الفيسبوك.`);
       }
   }
 
@@ -365,6 +392,20 @@
       msg.style.color = '#16a34a';
       msg.innerText = `🎉 تم تطبيق كود الخصم بنجاح (خصم 5%)!`;
       updateCartUI();
+  }
+
+  function togglePaymentInfo() {
+      const method = document.getElementById('payMethod').value;
+      const notice = document.getElementById('paymentNotice');
+      if (method === 'فودافون كاش') {
+          notice.innerText = '📱 يرجى التحويل على رقم فودافون كاش: 01127491224 وإرفاق اللقطة مع الطلب.';
+          notice.style.display = 'block';
+      } else if (method === 'إنستاباي InstaPay') {
+          notice.innerText = '💳 يرجى التحويل عبر إنستاباي على المعرف الخاص بنا قبل الاستلام.';
+          notice.style.display = 'block';
+      } else {
+          notice.style.display = 'none';
+      }
   }
 
   function updateCartUI() {
@@ -393,25 +434,19 @@
                           <small>${item.price} × ${item.qty} = ${itemTotal} جنيه</small>
                       </div>
                       <div>
-                          <button onclick="changeQty('${item.id}', -1)">-</button>
+                          <button onclick="changeQty('${item.id}', -1)" style="padding: 2px 8px;">-</button>
                           <span style="margin: 0 5px;">${item.qty}</span>
-                          <button onclick="changeQty('${item.id}', 1)">+</button>
+                          <button onclick="changeQty('${item.id}', 1)" style="padding: 2px 8px;">+</button>
                       </div>
                   </div>
               `;
           });
           itemsList.innerHTML = html;
 
-          // تحديث قاعدة الشحن الجديدة: تبدأ من 30 ج وتصبح 40 ج للطلبات أكبر من 300 ج
-          let baseDelivery = 30;
-          if (subtotal > 300) {
-              baseDelivery = 40;
-          } else {
-              baseDelivery = 30;
-          }
-
+          let baseDelivery = subtotal > 300 ? 40 : 30;
           const zoneExtra = parseFloat(document.getElementById('distanceZone').value) || 0;
           currentDeliveryFee = baseDelivery + zoneExtra;
+          document.getElementById('deliveryTotal').innerText = `${currentDeliveryFee} جنيه`;
 
           const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
           let discountAmount = 0;
@@ -431,40 +466,14 @@
               document.getElementById('tipRow').style.display = 'none';
           }
 
-          const finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
-          document.getElementById('subTotal').innerText = subtotal + ' جنيه';
-          document.getElementById('deliveryTotal').innerText = currentDeliveryFee + ' جنيه';
-          document.getElementById('cartTotal').innerText = finalTotal + ' جنيه';
+          const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
+          document.getElementById('subTotal').innerText = `${subtotal} جنيه`;
+          document.getElementById('cartTotal').innerText = `${finalTotal} جنيه`;
       }
   }
 
-  function changeQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      if (item) {
-          item.qty += delta;
-          if (item.qty <= 0) {
-              cart = cart.filter(i => i.id !== id);
-          }
-          updateCartUI();
-      }
-  }
-
-  function togglePaymentInfo() {
-      const method = document.getElementById('payMethod').value;
-      const notice = document.getElementById('paymentNotice');
-      if (method === 'فودافون كاش') {
-          notice.style.display = 'block';
-          notice.innerHTML = '📱 تحويل المبلغ على رقم فودافون كاش: <strong>01127491224</strong> وإرسال إيصال التحويل عبر الواتساب.';
-      } else if (method === 'إنستاباي InstaPay') {
-          notice.style.display = 'block';
-          notice.innerHTML = '💳 التحويل على عنوان الدفع اللحظي (InstaPay): <strong>marketnet@instapay</strong>';
-      } else {
-          notice.style.display = 'none';
-      }
-  }
-
-  async function sendOrderToWhatsApp(event) {
-      event.preventDefault();
+  function sendOrderToWhatsApp(e) {
+      e.preventDefault();
       if (cart.length === 0) {
           alert('السلة فارغة!');
           return;
@@ -474,57 +483,38 @@
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
       const payMethod = document.getElementById('payMethod').value;
-      const zoneSelect = document.getElementById('distanceZone');
-      const zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
-      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
-
-      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
-      let finalTotal = subtotal - discountAmount + currentDeliveryFee + tipFee;
-
-      if (isDiscountApplied && referrerCode) {
-          try {
-              await db.collection('user_rewards').doc(referrerCode).set({
-                  pendingRewards: firebase.firestore.FieldValue.increment(1),
-                  lastReferredPhone: phone,
-                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-              }, { merge: true });
-          } catch (e) {
-              console.log("Error saving reward:", e);
-          }
-      }
-
-      let orderText = `🛒 *طلب شراء جديد - ماركت نت*\n\n`;
-      orderText += `👤 *الاسم:* ${name}\n`;
-      orderText += `📞 *الهاتف:* ${phone}\n`;
-      orderText += `📍 *العنوان:* ${address}\n`;
-      orderText += `🚚 *طبيعة المنطقة:* ${zoneText}\n`;
-      orderText += `💳 *طريقة الدفع:* ${payMethod}\n`;
-      if (isDiscountApplied) {
-          orderText += `🎟️ *كود الخصم المستخدم:* ${referrerCode} (خصم 5%)\n`;
-      }
-      orderText += `\n📦 *تفاصيل المنتجات:*\n`;
       
+      let message = `🛒 *طلب جديد من متجر ماركت نت*\n\n`;
+      message += `👤 *الاسم:* ${name}\n`;
+      message += `📞 *الهاتف:* ${phone}\n`;
+      message += `📍 *العنوان:* ${address}\n`;
+      message += `💳 *طريقة الدفع:* ${payMethod}\n`;
+      if (userMyCode) message += `🔑 *كود العميل:* ${userMyCode}\n`;
+      if (referrerCode) message += `🎁 *كود خصم الإحالة المستخدم:* ${referrerCode}\n`;
+      
+      message += `\n📦 *المنتجات المطلوبة:*\n`;
+      let subtotal = 0;
       cart.forEach((item, index) => {
-          orderText += `${index + 1}. ${item.name} (${item.price}ج) × ${item.qty} = ${item.price * item.qty}ج\n`;
+          const itemTotal = item.price * item.qty;
+          subtotal += itemTotal;
+          message += `${index + 1}. ${item.name} (${item.qty} × ${item.price} ج) = ${itemTotal} ج\n`;
       });
 
-      orderText += `\n------------------\n`;
-      orderText += `🏷️ إجمالي المنتجات: ${subtotal} جنيه\n`;
-      if (isDiscountApplied) {
-          orderText += `🎁 خصم الإحالة: -${discountAmount} جنيه\n`;
-      }
-      orderText += `🚀 التوصيل المحسوب: ${currentDeliveryFee} جنيه\n`;
-      if (tipFee > 0) {
-          orderText += `🚴 إكرامية الديلفري: ${tipFee} جنيه\n`;
-      }
-      orderText += `💰 *الإجمالي النهائي: ${finalTotal} جنيه*\n`;
+      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
+      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+      const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
 
-      const encodedMessage = encodeURIComponent(orderText);
-      const waURL = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`;
-      
-      window.open(waURL, '_blank');
+      message += `\n------------------\n`;
+      message += `إجمالي المنتجات: ${subtotal} ج\n`;
+      if (discountAmount > 0) message += `الخصم (5%): -${discountAmount} ج\n`;
+      message += `التوصيل: ${currentDeliveryFee} ج\n`;
+      if (tipFee > 0) message += `إكرامية الديلفري: ${tipFee} ج\n`;
+      message += `*الإجمالي النهائي:* ${finalTotal} ج\n`;
+
+      const encodedMessage = encodeURIComponent(message);
+      window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
   }
 </script>
+
 </body>
 </html>
