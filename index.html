@@ -15,7 +15,7 @@
         
         header { background: #0f172a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .logo-container { display: flex; flex-direction: column; align-items: flex-start; }
-        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; }
+        .logo { font-size: 20px; font-weight: 900; color: #38bdf8; text-decoration: none; cursor: pointer; user-select: none; }
         
         .user-code-header-badge { font-size: 11px; background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; color: #38bdf8; padding: 2px 8px; border-radius: 12px; margin-top: 2px; cursor: pointer; display: none; align-items: center; gap: 4px; }
         .user-code-header-badge:hover { background: rgba(56, 189, 248, 0.25); }
@@ -25,66 +25,62 @@
         .share-btn { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; transition: 0.2s; }
         .share-btn:hover { background: #15803d; }
         
-        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; position: relative; transition: transform 0.2s; }
+        .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; position: relative; transition: transform 0.2s, background 0.2s; }
         .cart-icon-btn:hover { background: #0369a1; }
         .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
 
-        /* الأقسام مع صور خلفية تعبيرية ومعتمة قليلاً لوضوح النص */
-        .categories { display: flex; gap: 12px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
-        .cat-btn { 
-            padding: 10px 18px; 
-            border: none; 
-            border-radius: 14px; 
-            font-size: 14px; 
-            font-weight: 700; 
-            color: #fff; 
-            cursor: pointer; 
-            white-space: nowrap; 
-            background-size: cover; 
-            background-position: center; 
-            position: relative; 
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .cat-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.65);
-            z-index: 1;
-            transition: background 0.2s;
-        }
-        .cat-btn:hover::before { background: rgba(15, 23, 42, 0.45); }
-        .cat-btn.active::before { background: rgba(2, 132, 199, 0.75); }
-        .cat-btn span { position: relative; z-index: 2; }
-        .cat-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        /* الأقسام بتصميمها الأصلي المرتب */
+        .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-btn.active { background: #0284c7; color: white; }
+        .cat-btn:hover:not(.active) { background: #e2e8f0; }
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        
+        /* بانر الترحيب الافتراضي */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
 
+        /* غلاف القسم - صورة تعبيرية بأعلى الشاشة عند اختيار قسم */
+        .category-hero-banner { 
+            width: 100%; 
+            height: 180px; 
+            border-radius: 16px; 
+            background-size: cover; 
+            background-position: center; 
+            margin-bottom: 25px; 
+            display: none; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .category-hero-overlay { 
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background: linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.3)); 
+            display: flex; 
+            align-items: flex-end; 
+            padding: 20px; 
+            color: white; 
+        }
+        .category-hero-title { font-size: 22px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; transition: transform 0.3s ease; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; transition: transform 0.2s; }
         .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
         .product-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #0f172a; }
         .product-price { color: #16a34a; font-weight: 900; font-size: 16px; margin-bottom: 10px; }
         .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
         .add-btn:hover { background: #0369a1; }
 
-        /* تأثير الطيران المائل نحو أيقونة السلة (Fly to Cart Animation) */
-        @keyframes flyToCart {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            50% { transform: scale(0.4) translateY(-150px) rotate(20deg); opacity: 0.7; }
-            100% { transform: scale(0.1) translateY(-300px) rotate(45deg); opacity: 0; }
-        }
+        /* عنصر الصورة المتطايرة نحو السلة */
         .flying-img {
             position: fixed;
             z-index: 9999;
             object-fit: cover;
-            border-radius: 50%;
+            border-radius: 12px;
             pointer-events: none;
-            animation: flyToCart 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
@@ -117,7 +113,8 @@
 
 <header>
     <div class="logo-container">
-        <a href="#" class="logo">🛒 ماركت نت</a>
+        <!-- الضغط على ماركت نت يعيد العميل للصفحة الرئيسية -->
+        <div class="logo" onclick="goHome()" title="الرجوع للصفحة الرئيسية">🛒 ماركت نت</div>
         <div class="user-code-header-badge" id="userBadge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
             🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
         </div>
@@ -131,26 +128,34 @@
     </div>
 </header>
 
-<!-- الأقسام مزودة بصور تعبيرية خلفية -->
-<div class="categories" id="categoriesContainer">
-    <button class="cat-btn active" style="background-image: url('https://images.unsplash.com/photo-1607349913338-fca6f7fc04d0?w=150')" onclick="filterCategory('offers', this)"><span>🔥 العروض</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=150')" onclick="filterCategory('all', this)"><span>🏠 الكل</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=150')" onclick="filterCategory('grocery', this)"><span>🥫 بقالة</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=150')" onclick="filterCategory('poultry', this)"><span>🍗 طيور</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=150')" onclick="filterCategory('frozen', this)"><span>🧊 مجمدات</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=150')" onclick="filterCategory('cleaning', this)"><span>✨ منظفات</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=150')" onclick="filterCategory('spices', this)"><span>🧂 عطارة</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=150')" onclick="filterCategory('beauty', this)"><span>💄 تجميل</span></button>
-    <button class="cat-btn" style="background-image: url('https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=150')" onclick="filterCategory('accessories', this)"><span>💍 اكسسوارات</span></button>
+<!-- الخانات بأسماؤها الأصلية التلقائية -->
+<div class="categories">
+    <button class="cat-btn active" id="btn-offers" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
+    <button class="cat-btn" id="btn-all" onclick="filterCategory('all')">🏠 الكل</button>
+    <button class="cat-btn" id="btn-grocery" onclick="filterCategory('grocery')">🥫 بقالة</button>
+    <button class="cat-btn" id="btn-poultry" onclick="filterCategory('poultry')">🍗 طيور</button>
+    <button class="cat-btn" id="btn-frozen" onclick="filterCategory('frozen')">🧊 مجمدات</button>
+    <button class="cat-btn" id="btn-cleaning" onclick="filterCategory('cleaning')">✨ منظفات</button>
+    <button class="cat-btn" id="btn-spices" onclick="filterCategory('spices')">🧂 عطارة</button>
+    <button class="cat-btn" id="btn-beauty" onclick="filterCategory('beauty')">💄 مستحضرات تجميل</button>
+    <button class="cat-btn" id="btn-accessories" onclick="filterCategory('accessories')">💍 اكسسوارات بنات</button>
 </div>
 
 <div class="container">
-    <div class="banner">
+    <!-- بانر الترحيب -->
+    <div class="banner" id="mainBanner">
         <h2>أهلاً بك في ماركت نت! 🎁</h2>
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
-    <h3 style="margin-bottom: 15px;">المنتجات المتاحة</h3>
+    <!-- البانر التعبيري للأقسام (يظهر جزء ممتاز أعلى الشاشة مع صوره يعبر عن الخانة) -->
+    <div class="category-hero-banner" id="categoryHero">
+        <div class="category-hero-overlay">
+            <div class="category-hero-title" id="categoryHeroTitle">اسم القسم</div>
+        </div>
+    </div>
+
+    <h3 style="margin-bottom: 15px;" id="sectionTitle">المنتجات المتاحة</h3>
     <div class="products-grid" id="productsContainer">
         <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
     </div>
@@ -201,7 +206,7 @@
         </div>
         <div class="summary-row" style="color: #0284c7;">
             <span>خدمة التوصيل (تلقائي حسب الموقع):</span>
-            <span id="deliveryTotal">غير محدد (حدد موقعك)</span>
+            <span id="deliveryTotal">حدد موقعك</span>
         </div>
         <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
             <span>إكرامية الديلفري:</span>
@@ -252,12 +257,23 @@
 <script>
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
   
-  // إحداثيات المتجر الافتراضية (يمكنك تعديلها لخط الطول والعرض الخاص بمتجرك بدقة)
+  // إحداثيات المتجر
   const STORE_LAT = 30.0131; 
   const STORE_LNG = 31.2089;
 
-  let currentDeliveryFee = 20; // الحد الأدنى الافتراضي
-  let isDistanceCalculated = false;
+  // صور الأقسام عالية الجودة للجزء العلوي من الشاشة
+  const categoryImages = {
+      'offers': { title: '🔥 العروض اليومية', img: 'https://images.unsplash.com/photo-1607349913338-fca6f7fc04d0?w=1000' },
+      'grocery': { title: '🥫 قسم البقالة والمواد الغذائية', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1000' },
+      'poultry': { title: '🍗 قسم الطيور والدواجن الطازجة', img: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=1000' },
+      'frozen': { title: '🧊 قسم المجمدات والأغذية المحفوظة', img: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=1000' },
+      'cleaning': { title: '✨ قسم المنظفات والمستلزمات المنزلية', img: 'https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=1000' },
+      'spices': { title: '🧂 قسم العطارة والبهارات الطازجة', img: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1000' },
+      'beauty': { title: '💄 قسم مستحضرات التجميل والعناية', img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1000' },
+      'accessories': { title: '💍 قسم اكسسوارات البنات', img: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=1000' }
+  };
+
+  let currentDeliveryFee = 20; 
   let isDiscountApplied = false;
   let referrerCode = "";
   let userMyCode = localStorage.getItem('marketnet_user_code') || "";
@@ -333,7 +349,7 @@
   function renderProducts(products) {
       const container = document.getElementById('productsContainer');
       if (products.length === 0) {
-          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد.</p>';
+          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد في هذا القسم.</p>';
           return;
       }
       let html = '';
@@ -353,18 +369,39 @@
       container.innerHTML = html;
   }
 
-  function filterCategory(cat, btnElement) {
+  // عند الضغط على ماركت نت نعود للصفحة الرئيسية
+  function goHome() {
+      filterCategory('all');
+  }
+
+  function filterCategory(cat) {
+      // تعديل حالة الأزرار
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
-      if (cat === 'all') {
+      const activeBtn = document.getElementById(`btn-${cat}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const heroBanner = document.getElementById('categoryHero');
+      const mainBanner = document.getElementById('mainBanner');
+      const heroTitle = document.getElementById('categoryHeroTitle');
+
+      if (cat === 'all' || !categoryImages[cat]) {
+          heroBanner.style.display = 'none';
+          mainBanner.style.display = 'block';
+          document.getElementById('sectionTitle').innerText = 'جميع المنتجات المتاحة';
           renderProducts(allProducts);
       } else {
+          mainBanner.style.display = 'none';
+          heroBanner.style.backgroundImage = `url('${categoryImages[cat].img}')`;
+          heroTitle.innerText = categoryImages[cat].title;
+          heroBanner.style.display = 'block';
+          document.getElementById('sectionTitle').innerText = categoryImages[cat].title;
+
           const filtered = allProducts.filter(p => p.cat === cat);
           renderProducts(filtered);
       }
   }
 
-  // تأثير طيران المنتج للسلة وإضافة العنصر بدون رسالة تنبيه منفرة
+  // تأثير تحرك المنتج وتصاغره بسلاسة متجهاً ناحية سلة الشراء
   function addToCart(id, event) {
       const prod = allProducts.find(p => p.id === id);
       const exist = cart.find(item => item.id === id);
@@ -387,33 +424,34 @@
       const imgRect = img.getBoundingClientRect();
       const cartRect = cartIcon.getBoundingClientRect();
 
-      const flyingElement = document.createElement('img');
-      flyingElement.src = img.src;
-      flyingElement.className = 'flying-img';
+      const flyingImg = document.createElement('img');
+      flyingImg.src = img.src;
+      flyingImg.className = 'flying-img';
       
-      flyingElement.style.left = `${imgRect.left}px`;
-      flyingElement.style.top = `${imgRect.top}px`;
-      flyingElement.style.width = `${imgRect.width}px`;
-      flyingElement.style.height = `${imgRect.height}px`;
+      flyingImg.style.left = `${imgRect.left}px`;
+      flyingImg.style.top = `${imgRect.top}px`;
+      flyingImg.style.width = `${imgRect.width}px`;
+      flyingImg.style.height = `${imgRect.height}px`;
 
-      document.body.appendChild(flyingElement);
+      document.body.appendChild(flyingImg);
 
-      // حساب المسافة للتحريك نحو أيقونة السلة
-      const xDist = cartRect.left - imgRect.left + (cartRect.width / 2) - (imgRect.width / 2);
-      const yDist = cartRect.top - imgRect.top + (cartRect.height / 2) - (imgRect.height / 2);
+      const targetX = cartRect.left + (cartRect.width / 2) - (imgRect.width / 2);
+      const targetY = cartRect.top + (cartRect.height / 2) - (imgRect.height / 2);
 
-      flyingElement.style.setProperty('--target-x', `${xDist}px`);
-      flyingElement.style.setProperty('--target-y', `${yDist}px`);
+      // بدء تحريك وتصغير الصورة نحو السلة
+      requestAnimationFrame(() => {
+          flyingImg.style.left = `${targetX}px`;
+          flyingImg.style.top = `${targetY}px`;
+          flyingImg.style.transform = 'scale(0.1) rotate(15deg)';
+          flyingImg.style.opacity = '0.2';
+      });
 
-      // تأثير حركة الانيميشن برمجياً
+      // اهتزاز خفيف للسلة عند وصول المنتج
       setTimeout(() => {
-          flyingElement.style.transform = `translate(${xDist}px, ${yDist}px) scale(0.1) rotate(45deg)`;
-          flyingElement.style.opacity = '0.3';
-      }, 10);
-
-      setTimeout(() => {
-          flyingElement.remove();
-      }, 800);
+          cartIcon.style.transform = 'scale(1.2)';
+          setTimeout(() => { cartIcon.style.transform = 'scale(1)'; }, 200);
+          flyingImg.remove();
+      }, 750);
   }
 
   function changeQty(id, delta) {
@@ -455,7 +493,7 @@
       }
   }
 
-  // حساب المسافة بالبوصة الجغرافية (Haversine Formula) وتحديد سعر التوصيل من 20 إلى 45 جنيهاً
+  // حساب المسافة وتكلفة التوصيل بين 20 إلى 45 جنيهاً
   function getStoreLocationByGPS() {
       const statusSmall = document.getElementById('gpsStatus');
       if (!navigator.geolocation) {
@@ -471,27 +509,24 @@
           
           const distanceKm = calculateDistance(STORE_LAT, STORE_LNG, userLat, userLng);
           
-          // معادلة التسعير الذكي: يبدأ من 20 جنيه ويزيد تدريجياً ليصل أقصاه إلى 45 جنيه للبعد
-          // نفترض كل كيلومتر بـ 7 جنيهات إضافية، بحد أدنى 20 وبحد أقصى 45
-          let calculatedFee = Math.round(20 + (distanceKm * 7));
+          let calculatedFee = Math.round(20 + (distanceKm * 6));
           if (calculatedFee < 20) calculatedFee = 20;
           if (calculatedFee > 45) calculatedFee = 45;
 
           currentDeliveryFee = calculatedFee;
-          isDistanceCalculated = true;
 
           statusSmall.style.color = '#16a34a';
-          statusSmall.innerText = `✅ تم تحديث موقعك بنجاح! مسافة التوصيل تقريبية (${distanceKm.toFixed(1)} كم) - رسوم التوصيل: ${currentDeliveryFee} جنيه`;
+          statusSmall.innerText = `✅ تم تحديد موقعك! المسافة تقريباً (${distanceKm.toFixed(1)} كم) - رسوم التوصيل: ${currentDeliveryFee} جنيه`;
           
           updateCartUI();
-      }, (error) => {
+      }, () => {
           statusSmall.style.color = '#ef4444';
-          statusSmall.innerText = '⚠️ تعذر تحديد الموقع. يرجى السماح للمتصفح بالوصول للـ GPS أو كتابة العنوان بالتفصيل.';
+          statusSmall.innerText = '⚠️ تعذر الوصول للموقع. يرجى تفعيل الـ GPS أو كتابة العنوان بالتفصيل.';
       }, { timeout: 10000 });
   }
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // نصف قطر الأرض بالكيلومتر
+      const R = 6371; 
       const dLat = deg2rad(lat2 - lat1);
       const dLon = deg2rad(lon2 - lon1);
       const a = 
@@ -499,12 +534,10 @@
           Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
           Math.sin(dLon/2) * Math.sin(dLon/2); 
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-      return R * c; // المسافة بالكيلومتر
+      return R * c; 
   }
 
-  function deg2rad(deg) {
-      return deg * (Math.PI/180);
-  }
+  function deg2rad(deg) { return deg * (Math.PI/180); }
 
   async function applyPromoCode() {
       const codeInput = document.getElementById('promoCodeInput').value.trim().toUpperCase();
@@ -536,7 +569,7 @@
           notice.innerText = '📱 يرجى التحويل على رقم فودافون كاش: 01127491224 وإرفاق لقطة التحويل مع الطلب.';
           notice.style.display = 'block';
       } else if (method === 'إنستاباي InstaPay') {
-          notice.innerText = '💳 يرجى التحويل على حساب / رقم إنستاباي: 01127491224 (أو المعرف الخاص بنا) وإرفاق لقطة التحويل.';
+          notice.innerText = '💳 يرجى التحويل على حساب / رقم إنستاباي: 01127491224 وإرفاق لقطة التحويل مع الطلب.';
           notice.style.display = 'block';
       } else {
           notice.style.display = 'none';
