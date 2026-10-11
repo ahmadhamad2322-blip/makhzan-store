@@ -29,7 +29,7 @@
         .cart-icon-btn:hover { background: #0369a1; }
         .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
 
-        /* الأقسام بتصميمها الأصلي المرتب */
+        /* الأقسام */
         .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; }
         .cat-btn { padding: 8px 16px; background: #f1f5f9; border: none; border-radius: 20px; font-size: 14px; font-weight: 600; color: #475569; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .cat-btn.active { background: #0284c7; color: white; }
@@ -37,10 +37,15 @@
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         
-        /* بانر الترحيب الافتراضي */
+        /* خانة البحث عن المنتجات */
+        .search-container { margin-bottom: 20px; display: flex; justify-content: center; }
+        .search-input { width: 100%; max-width: 600px; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 25px; font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .search-input:focus { border-color: #0284c7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.2); }
+
+        /* بانر الترحيب */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
 
-        /* غلاف القسم - صورة تعبيرية بأعلى الشاشة عند اختيار قسم */
+        /* غلاف القسم */
         .category-hero-banner { 
             width: 100%; 
             height: 180px; 
@@ -72,7 +77,6 @@
         .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; }
         .add-btn:hover { background: #0369a1; }
 
-        /* عنصر الصورة المتطايرة نحو السلة */
         .flying-img {
             position: fixed;
             z-index: 9999;
@@ -91,7 +95,7 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
         
-        .gps-btn { background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 5px; display: flex; align-items: center; gap: 5px; width: 100%; justify-content: center; }
+        .gps-btn { background: #0284c7; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 5px; display: flex; align-items: center; gap: 5px; width: 100%; justify-content: center; transition: background 0.2s; }
         .gps-btn:hover { background: #0369a1; }
 
         .send-btn { background: #25D366; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
@@ -113,7 +117,6 @@
 
 <header>
     <div class="logo-container">
-        <!-- الضغط على ماركت نت يعيد العميل للصفحة الرئيسية -->
         <div class="logo" onclick="goHome()" title="الرجوع للصفحة الرئيسية">🛒 ماركت نت</div>
         <div class="user-code-header-badge" id="userBadge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
             🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
@@ -128,7 +131,6 @@
     </div>
 </header>
 
-<!-- الخانات بأسماؤها الأصلية التلقائية -->
 <div class="categories">
     <button class="cat-btn active" id="btn-offers" onclick="filterCategory('offers')">🔥 العروض اليومية</button>
     <button class="cat-btn" id="btn-all" onclick="filterCategory('all')">🏠 الكل</button>
@@ -142,13 +144,18 @@
 </div>
 
 <div class="container">
+    <!-- خانة البحث عن المنتجات -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أي منتج هنا..." oninput="handleSearch()">
+    </div>
+
     <!-- بانر الترحيب -->
     <div class="banner" id="mainBanner">
         <h2>أهلاً بك في ماركت نت! 🎁</h2>
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
-    <!-- البانر التعبيري للأقسام (يظهر جزء ممتاز أعلى الشاشة مع صوره يعبر عن الخانة) -->
+    <!-- بانر القسم -->
     <div class="category-hero-banner" id="categoryHero">
         <div class="category-hero-overlay">
             <div class="category-hero-title" id="categoryHeroTitle">اسم القسم</div>
@@ -205,7 +212,7 @@
             <span id="discountTotal">-0 جنيه</span>
         </div>
         <div class="summary-row" style="color: #0284c7;">
-            <span>خدمة التوصيل (تلقائي حسب الموقع):</span>
+            <span>خدمة التوصيل (حسب الموقع):</span>
             <span id="deliveryTotal">حدد موقعك</span>
         </div>
         <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
@@ -257,11 +264,12 @@
 <script>
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
   
-  // إحداثيات المتجر
+  // إحداثيات موقع المتجر الافتراضية
   const STORE_LAT = 30.0131; 
   const STORE_LNG = 31.2089;
 
-  // صور الأقسام عالية الجودة للجزء العلوي من الشاشة
+  let userLocationUrl = ""; // رابط خريطة موقع العميل
+
   const categoryImages = {
       'offers': { title: '🔥 العروض اليومية', img: 'https://images.unsplash.com/photo-1607349913338-fca6f7fc04d0?w=1000' },
       'grocery': { title: '🥫 قسم البقالة والمواد الغذائية', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=1000' },
@@ -274,6 +282,7 @@
   };
 
   let currentDeliveryFee = 20; 
+  let currentCategory = 'offers';
   let isDiscountApplied = false;
   let referrerCode = "";
   let userMyCode = localStorage.getItem('marketnet_user_code') || "";
@@ -343,13 +352,13 @@
       snapshot.forEach((doc) => {
           allProducts.push({ id: doc.id, ...doc.data() });
       });
-      renderProducts(allProducts);
+      filterCategory(currentCategory);
   });
 
   function renderProducts(products) {
       const container = document.getElementById('productsContainer');
       if (products.length === 0) {
-          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مضافة بعد في هذا القسم.</p>';
+          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مطابقة للبحث.</p>';
           return;
       }
       let html = '';
@@ -369,13 +378,26 @@
       container.innerHTML = html;
   }
 
-  // عند الضغط على ماركت نت نعود للصفحة الرئيسية
+  // البحث الفوري في المنتجات
+  function handleSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (query === "") {
+          filterCategory(currentCategory);
+          return;
+      }
+      const filtered = allProducts.filter(p => p.name && p.name.toLowerCase().includes(query));
+      renderProducts(filtered);
+  }
+
   function goHome() {
+      document.getElementById('searchInput').value = "";
       filterCategory('all');
   }
 
   function filterCategory(cat) {
-      // تعديل حالة الأزرار
+      currentCategory = cat;
+      document.getElementById('searchInput').value = "";
+
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       const activeBtn = document.getElementById(`btn-${cat}`);
       if (activeBtn) activeBtn.classList.add('active');
@@ -401,7 +423,6 @@
       }
   }
 
-  // تأثير تحرك المنتج وتصاغره بسلاسة متجهاً ناحية سلة الشراء
   function addToCart(id, event) {
       const prod = allProducts.find(p => p.id === id);
       const exist = cart.find(item => item.id === id);
@@ -438,7 +459,6 @@
       const targetX = cartRect.left + (cartRect.width / 2) - (imgRect.width / 2);
       const targetY = cartRect.top + (cartRect.height / 2) - (imgRect.height / 2);
 
-      // بدء تحريك وتصغير الصورة نحو السلة
       requestAnimationFrame(() => {
           flyingImg.style.left = `${targetX}px`;
           flyingImg.style.top = `${targetY}px`;
@@ -446,7 +466,6 @@
           flyingImg.style.opacity = '0.2';
       });
 
-      // اهتزاز خفيف للسلة عند وصول المنتج
       setTimeout(() => {
           cartIcon.style.transform = 'scale(1.2)';
           setTimeout(() => { cartIcon.style.transform = 'scale(1)'; }, 200);
@@ -493,7 +512,7 @@
       }
   }
 
-  // حساب المسافة وتكلفة التوصيل بين 20 إلى 45 جنيهاً
+  // الحصول على الموقع عبر GPS وإنشاء رابط Google Maps وتحديد التكلفة بين 20 و 45 جنيه
   function getStoreLocationByGPS() {
       const statusSmall = document.getElementById('gpsStatus');
       if (!navigator.geolocation) {
@@ -501,14 +520,18 @@
           return;
       }
 
-      statusSmall.innerText = '🛰️ جاري تحديد موقعك عبر الـ GPS...';
+      statusSmall.innerText = '🛰️ جاري فتح وتحديد موقعك عبر الـ GPS...';
       
       navigator.geolocation.getCurrentPosition((position) => {
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
           
+          // حفظ رابط الموقع على خرائط جوجل لإرساله في الواتساب
+          userLocationUrl = `https://maps.google.com/?q=${userLat},${userLng}`;
+
           const distanceKm = calculateDistance(STORE_LAT, STORE_LNG, userLat, userLng);
           
+          // حساب التكلفة بناءً على القرب والبعد (من 20 ج إلى 45 ج)
           let calculatedFee = Math.round(20 + (distanceKm * 6));
           if (calculatedFee < 20) calculatedFee = 20;
           if (calculatedFee > 45) calculatedFee = 45;
@@ -516,12 +539,12 @@
           currentDeliveryFee = calculatedFee;
 
           statusSmall.style.color = '#16a34a';
-          statusSmall.innerText = `✅ تم تحديد موقعك! المسافة تقريباً (${distanceKm.toFixed(1)} كم) - رسوم التوصيل: ${currentDeliveryFee} جنيه`;
+          statusSmall.innerText = `✅ تم تحديد موقعك وتجهيز خريطة التوصيل! (المسافة تقريباً ${distanceKm.toFixed(1)} كم) - سعر التوصيل: ${currentDeliveryFee} جنيه`;
           
           updateCartUI();
       }, () => {
           statusSmall.style.color = '#ef4444';
-          statusSmall.innerText = '⚠️ تعذر الوصول للموقع. يرجى تفعيل الـ GPS أو كتابة العنوان بالتفصيل.';
+          statusSmall.innerText = '⚠️ تعذر الوصول للموقع. يرجى السماح بالوصول للـ GPS أو كتابة العنوان بالتفصيل.';
       }, { timeout: 10000 });
   }
 
@@ -653,6 +676,9 @@
       message += `👤 *الاسم:* ${name}\n`;
       message += `📞 *الهاتف:* ${phone}\n`;
       message += `📍 *العنوان:* ${address}\n`;
+      if (userLocationUrl) {
+          message += `🗺️ *رابط الموقع على الخريطة (GPS):*\n${userLocationUrl}\n`;
+      }
       message += `💳 *طريقة الدفع:* ${payMethod}\n`;
       if (userMyCode) message += `🔑 *كود العميل:* ${userMyCode}\n`;
       if (referrerCode) message += `🎁 *كود خصم الإحالة المستخدم:* ${referrerCode}\n`;
