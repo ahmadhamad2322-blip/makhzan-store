@@ -98,14 +98,7 @@
             <div class="form-group">
                 <label>القسم:</label>
                 <select id="editPCat" required>
-                    <option value="grocery">🛒 بقالة</option>
-                    <option value="offers">🔥 العروض اليومية</option>
-                    <option value="poultry">🍗 طيور</option>
-                    <option value="frozen">🧊 مجمدات</option>
-                    <option value="cleaning">✨ منظفات</option>
-                    <option value="spices">🧂 عطارة</option>
-                    <option value="beauty">💄 مستحضرات تجميل</option>
-                    <option value="accessories">💍 اكسسوارات بنات</option>
+                    <!-- سيتم تعبئتها ديناميكياً حسب الصلاحيات -->
                 </select>
             </div>
             <div class="form-group">
@@ -144,14 +137,7 @@
             <div class="form-group">
                 <label>تحديد القسم الخاص بالمنتج:</label>
                 <select id="pCat" required>
-                    <option value="grocery">🛒 بقالة</option>
-                    <option value="offers">🔥 العروض اليومية</option>
-                    <option value="poultry">🍗 طيور</option>
-                    <option value="frozen">🧊 مجمدات</option>
-                    <option value="cleaning">✨ منظفات</option>
-                    <option value="spices">🧂 عطارة</option>
-                    <option value="beauty">💄 مستحضرات تجميل</option>
-                    <option value="accessories">💍 اكسسوارات بنات</option>
+                    <!-- سيتم تعبئتها ديناميكياً حسب صلاحيات المستخدم -->
                 </select>
             </div>
             <div class="form-group">
@@ -192,15 +178,15 @@
         <div id="adminProductsList" style="max-height: 450px; overflow-y: auto;">جاري التحميل...</div>
     </div>
 
-    <!-- إدارة طلبات واستئذان الدخول -->
-    <div class="card" style="grid-column: 1 / -1;">
-        <h3>👥 طلبات الدخول المعلقة (المشرفين / المستخدمين)</h3>
+    <!-- إدارة طلبات واستئذان الدخول والصلاحيات -->
+    <div class="card" style="grid-column: 1 / -1;" id="requestsCard" style="display: none;">
+        <h3>👥 طلبات الدخول المعلقة وتحديد الصلاحيات والأقسام</h3>
         <table>
             <thead>
                 <tr>
                     <th>رقم الهاتف</th>
                     <th>حالة الحساب</th>
-                    <th>تاريخ الطلب</th>
+                    <th>تحديد القسم المسموح له (أو الكل)</th>
                     <th>الإجراءات والتحكم</th>
                 </tr>
             </thead>
@@ -215,6 +201,7 @@
   const MAIN_ADMIN_PHONE = "01012517345";
   let currentBase64Image = "";
   let editBase64Image = "";
+  let currentUserAllowedCat = "all"; // الافتراضي للأدمن الرئيسي
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -231,14 +218,14 @@
   const db = firebase.firestore();
 
   const categoryNames = {
-      grocery: "بقالة",
-      offers: "عروض يومية",
-      poultry: "طيور",
-      frozen: "مجمدات",
-      cleaning: "منظفات",
-      spices: "عطارة",
-      beauty: "تجميل",
-      accessories: "اكسسوارات"
+      grocery: "🛒 بقالة",
+      offers: "🔥 العروض اليومية",
+      poultry: "🍗 طيور",
+      frozen: "🧊 مجمدات",
+      cleaning: "✨ منظفات",
+      spices: "🧂 عطارة",
+      beauty: "💄 مستحضرات تجميل",
+      accessories: "💍 اكسسوارات بنات"
   };
 
   window.onload = function() {
@@ -343,6 +330,7 @@
           await db.collection('admin_access_requests').doc(phoneInput).set({
               phone: phoneInput,
               status: 'pending',
+              allowedCat: 'all',
               requestedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           statusMsg.style.color = '#d97706';
@@ -359,6 +347,7 @@
           } else {
               db.collection('admin_access_requests').doc(loggedPhone).get().then((doc) => {
                   if (doc.exists && doc.data().status === 'approved') {
+                      currentUserAllowedCat = doc.data().allowedCat || 'all';
                       document.getElementById('loginOverlay').style.display = 'none';
                       initAdminDashboard();
                   } else {
@@ -374,11 +363,44 @@
       document.getElementById('loginOverlay').style.display = 'flex';
   }
 
-  function initAdminDashboard() {
+  async function initAdminDashboard() {
       const loggedPhone = localStorage.getItem('admin_logged_phone');
       document.getElementById('currentAdminDisplay').innerText = `المستخدم: ${loggedPhone}`;
+      
+      // إذا لم يكن الأدمن الرئيسي، نخفي جدول طلبات الدخول الصلاحيات ونقصر خيارات الأقسام
+      if (loggedPhone !== MAIN_ADMIN_PHONE) {
+          const doc = await db.collection('admin_access_requests').doc(loggedPhone).get();
+          if(doc.exists) {
+              currentUserAllowedCat = doc.data().allowedCat || 'all';
+          }
+          const reqCard = document.getElementById('requestsCard');
+          if(reqCard) reqCard.style.display = 'none';
+      } else {
+          listenAccessRequests();
+      }
+
+      setupCategoryDropdowns();
       loadAdminProducts();
-      listenAccessRequests();
+  }
+
+  // ملء القوائم المنسدلة للأقسام بناءً على الصلاحيات
+  function setupCategoryDropdowns() {
+      const pCatSelect = document.getElementById('pCat');
+      const editCatSelect = document.getElementById('editPCat');
+      
+      let optionsHtml = '';
+      if (currentUserAllowedCat === 'all') {
+          for (const [key, name] of Object.entries(categoryNames)) {
+              optionsHtml += `<option value="${key}">${name}</option>`;
+          }
+      } else {
+          // إذا كان مسموح له بقسم واحد فقط
+          if (categoryNames[currentUserAllowedCat]) {
+              optionsHtml += `<option value="${currentUserAllowedCat}">${categoryNames[currentUserAllowedCat]}</option>`;
+          }
+      }
+      pCatSelect.innerHTML = optionsHtml;
+      editCatSelect.innerHTML = optionsHtml;
   }
 
   // حفظ منتج جديد
@@ -433,8 +455,11 @@
               products.push({ id: doc.id, ...doc.data() });
           });
 
-          // فلترة حسب القسم
-          if (selectedCat !== 'all') {
+          // إذا لم يكن الأدمن الرئيسي وقسمه مخصص، نظهر له منتجات قسمه فقط
+          const loggedPhone = localStorage.getItem('admin_logged_phone');
+          if (loggedPhone !== MAIN_ADMIN_PHONE && currentUserAllowedCat !== 'all') {
+              products = products.filter(p => p.cat === currentUserAllowedCat);
+          } else if (selectedCat !== 'all') {
               products = products.filter(p => p.cat === selectedCat);
           }
 
@@ -446,7 +471,7 @@
           products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
 
           if (products.length === 0) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد نتائج مطابقة للبحث.</p>';
+              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد نتائج مطابقة.</p>';
               return;
           }
 
@@ -544,7 +569,7 @@
       }
   }
 
-  // إدارة طلبات الدخول المعلقة
+  // إدارة طلبات الدخول المعلقة وتحديد صلاحيات الأقسام (للأدمن الرئيسي فقط)
   function listenAccessRequests() {
       db.collection('admin_access_requests').onSnapshot((snapshot) => {
           const tbody = document.getElementById('usersTableBody');
@@ -556,6 +581,8 @@
           let html = '';
           snapshot.forEach((doc) => {
               const data = doc.data();
+              if (data.phone === MAIN_ADMIN_PHONE) return; // لا نظهر رقمك الرئيسي في قائمة الطلبات
+
               let statusClass = 'status-pending';
               let statusText = 'قيد الانتظار ⏳';
               if (data.status === 'approved') {
@@ -566,16 +593,27 @@
                   statusText = 'محظور ❌';
               }
 
-              const reqDate = data.requestedAt ? new Date(data.requestedAt.toDate()).toLocaleString('ar-EG') : 'الآن';
+              let currentAllowed = data.allowedCat || 'all';
 
               html += `
                   <tr>
-                      <td style="font-weight:bold;">${data.phone}</td>
-                      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                      <td>${reqDate}</td>
+                      <td style="font-weight:bold;">${data.phone}<br><span class="status-badge ${statusClass}">${statusText}</span></td>
                       <td>
-                          <button class="btn-approve" onclick="updateUserStatus('${doc.id}', 'approved')">قبول الموافقة</button>
-                          <button class="btn-block" onclick="updateUserStatus('${doc.id}', 'blocked')">رفض / حظر</button>
+                          <select id="catSelect_${doc.id}" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;" onchange="updateUserCategory('${doc.id}')">
+                              <option value="all" ${currentAllowed === 'all' ? 'selected' : ''}>🌟 كل الأقسام (صلاحية كاملة)</option>
+                              <option value="grocery" ${currentAllowed === 'grocery' ? 'selected' : ''}>🛒 بقالة فقط</option>
+                              <option value="offers" ${currentAllowed === 'offers' ? 'selected' : ''}>🔥 العروض اليومية فقط</option>
+                              <option value="poultry" ${currentAllowed === 'poultry' ? 'selected' : ''}>🍗 طيور فقط</option>
+                              <option value="frozen" ${currentAllowed === 'frozen' ? 'selected' : ''}>🧊 مجمدات فقط</option>
+                              <option value="cleaning" ${currentAllowed === 'cleaning' ? 'selected' : ''}>✨ منظفات فقط</option>
+                              <option value="spices" ${currentAllowed === 'spices' ? 'selected' : ''}>🧂 عطارة فقط</option>
+                              <option value="beauty" ${currentAllowed === 'beauty' ? 'selected' : ''}>💄 تجميل فقط</option>
+                              <option value="accessories" ${currentAllowed === 'accessories' ? 'selected' : ''}>💍 اكسسوارات فقط</option>
+                          </select>
+                      </td>
+                      <td>
+                          <button class="btn-approve" onclick="updateUserStatus('${doc.id}', 'approved')">قبول الدخول</button>
+                          <button class="btn-block" onclick="updateUserStatus('${doc.id}', 'blocked')">حظر / رفض</button>
                       </td>
                   </tr>
               `;
@@ -592,6 +630,17 @@
           alert('تم تحديث حالة المستخدم بنجاح.');
       } catch (err) {
           alert('حدث خطأ: ' + err.message);
+      }
+  }
+
+  async function updateUserCategory(docId) {
+      const selectedCat = document.getElementById(`catSelect_${docId}`).value;
+      try {
+          await db.collection('admin_access_requests').doc(docId).update({
+              allowedCat: selectedCat
+          });
+      } catch (err) {
+          alert('حدث خطأ أثناء حفظ الصلاحية: ' + err.message);
       }
   }
 </script>
