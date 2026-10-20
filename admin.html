@@ -26,7 +26,7 @@
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
         
         .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .card h3 { margin-bottom: 15px; color: #0284c7; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .card h3 { margin-bottom: 15px; color: #0284c7; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
@@ -42,7 +42,7 @@
         .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
         .product-info { display: flex; align-items: center; gap: 12px; }
         
-        .product-img-wrapper { width: 60px; height: 60px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img-wrapper { width: 60px; height: 60px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
         .badge-pinned { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
@@ -60,8 +60,12 @@
         .status-approved { background: #dcfce7; color: #15803d; }
         .status-blocked { background: #fee2e2; color: #b91c1c; }
 
-        .btn-approve { background: #16a34a; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: font-size: 12px; }
-        .btn-block { background: #f59e0b; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-approve { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-block { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-right: 5px; }
+
+        /* نافذة التعديل المنبثقة Modal */
+        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -74,6 +78,48 @@
         <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الهاتف">
         <button onclick="attemptLogin()">دخول 🔑</button>
         <p id="loginStatusMsg" style="margin-top:15px; font-size:13px; font-weight:bold;"></p>
+    </div>
+</div>
+
+<!-- نافذة تعديل المنتج -->
+<div id="editModal">
+    <div class="modal-content">
+        <h3 style="color: #0284c7; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">✏️ تعديل بيانات المنتج</h3>
+        <form id="editProductForm" onsubmit="updateProductData(event)">
+            <input type="hidden" id="editProductId">
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="editPName" required>
+            </div>
+            <div class="form-group">
+                <label>السعر (بالجنيه):</label>
+                <input type="number" id="editPPrice" required>
+            </div>
+            <div class="form-group">
+                <label>القسم:</label>
+                <select id="editPCat" required>
+                    <option value="grocery">🛒 بقالة</option>
+                    <option value="offers">🔥 العروض اليومية</option>
+                    <option value="poultry">🍗 طيور</option>
+                    <option value="frozen">🧊 مجمدات</option>
+                    <option value="cleaning">✨ منظفات</option>
+                    <option value="spices">🧂 عطارة</option>
+                    <option value="beauty">💄 مستحضرات تجميل</option>
+                    <option value="accessories">💍 اكسسوارات بنات</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>تغيير صورة المنتج (اختياري) 🖼️:</label>
+                <input type="file" id="editPImgFile" accept="image/*" onchange="previewEditImage(this)">
+                <div class="img-preview" id="editPreviewContainer" style="margin-top: 5px;">
+                    <img id="editImgPreview" alt="معاينة الصورة" style="display: block; max-height: 100px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" class="btn-submit" style="margin-top:0; background:#0284c7;">حفظ التعديلات</button>
+                <button type="button" onclick="closeEditModal()" style="background:#64748b; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%;">إلغاء</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -96,7 +142,7 @@
                 <input type="number" id="pPrice" required placeholder="مثال: 65">
             </div>
             <div class="form-group">
-                <label>تحديد القسم الخاص بالمنتج (ينزل فيه فقط):</label>
+                <label>تحديد القسم الخاص بالمنتج:</label>
                 <select id="pCat" required>
                     <option value="grocery">🛒 بقالة</option>
                     <option value="offers">🔥 العروض اليومية</option>
@@ -124,28 +170,31 @@
         </form>
     </div>
 
-    <!-- قائمة المنتجات المضافة -->
+    <!-- قائمة المنتجات المضافة والبحث -->
     <div class="card">
         <h3>
             <span>📦 المنتجات المتاحة</span>
-            <select id="filterCategoryAdmin" onchange="loadAdminProducts()" style="padding: 4px 8px; font-size: 12px; border-radius: 6px;">
-                <option value="all">عرض جميع الأقسام</option>
-                <option value="grocery">🛒 بقالة</option>
-                <option value="offers">🔥 العروض اليومية</option>
-                <option value="poultry">🍗 طيور</option>
-                <option value="frozen">🧊 مجمدات</option>
-                <option value="cleaning">✨ منظفات</option>
-                <option value="spices">🧂 عطارة</option>
-                <option value="beauty">💄 مستحضرات تجميل</option>
-                <option value="accessories">💍 اكسسوارات بنات</option>
-            </select>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <input type="text" id="searchProductInput" placeholder="🔍 ابحث عن منتج..." oninput="loadAdminProducts()" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 140px;">
+                <select id="filterCategoryAdmin" onchange="loadAdminProducts()" style="padding: 4px 8px; font-size: 12px; border-radius: 6px;">
+                    <option value="all">جميع الأقسام</option>
+                    <option value="grocery">🛒 بقالة</option>
+                    <option value="offers">🔥 العروض اليومية</option>
+                    <option value="poultry">🍗 طيور</option>
+                    <option value="frozen">🧊 مجمدات</option>
+                    <option value="cleaning">✨ منظفات</option>
+                    <option value="spices">🧂 عطارة</option>
+                    <option value="beauty">💄 مستحضرات تجميل</option>
+                    <option value="accessories">💍 اكسسوارات بنات</option>
+                </select>
+            </div>
         </h3>
-        <div id="adminProductsList">جاري التحميل...</div>
+        <div id="adminProductsList" style="max-height: 450px; overflow-y: auto;">جاري التحميل...</div>
     </div>
 
     <!-- إدارة طلبات واستئذان الدخول -->
     <div class="card" style="grid-column: 1 / -1;">
-        <h3>👥 طلبات الدخول وإدارة المشرفين / المستخدمين</h3>
+        <h3>👥 طلبات الدخول المعلقة (المشرفين / المستخدمين)</h3>
         <table>
             <thead>
                 <tr>
@@ -160,29 +209,12 @@
             </tbody>
         </table>
     </div>
-
-    <!-- سجل مكافآت نظام الإحالة -->
-    <div class="card" style="grid-column: 1 / -1;">
-        <h3>🎁 متابعة مكافآت كروت الإحالة (دعوة الأصدقاء)</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>كود العميل</th>
-                    <th>عدد الإحالات الناجحة</th>
-                    <th>آخر رقم هاتف تم دعوته</th>
-                    <th>تاريخ آخر الطلب</th>
-                </tr>
-            </thead>
-            <tbody id="rewardsTableBody">
-                <tr><td colspan="4" style="text-align: center;">جاري تحضير البيانات...</td></tr>
-            </tbody>
-        </table>
-    </div>
 </div>
 
 <script>
   const MAIN_ADMIN_PHONE = "01012517345";
   let currentBase64Image = "";
+  let editBase64Image = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -213,7 +245,7 @@
       checkAdminAuth();
   };
 
-  // معاينة تحويل الصورة المرفوعة إلى Base64
+  // معاينة الصورة للإضافة
   function previewSelectedImage(input) {
       const previewImg = document.getElementById('imgPreview');
       const previewText = document.getElementById('previewText');
@@ -221,7 +253,6 @@
       if (input.files && input.files[0]) {
           const reader = new FileReader();
           reader.onload = function(e) {
-              // ضغط وإعداد الصورة
               compressAndBase64(e.target.result, 600, 0.7, function(compressedBase64) {
                   currentBase64Image = compressedBase64;
                   previewImg.src = compressedBase64;
@@ -237,7 +268,23 @@
       }
   }
 
-  // أداة لضغط حجم الصورة للرفع السريع وحفظ مساحة القواعد
+  // معاينة الصورة للتعديل
+  function previewEditImage(input) {
+      const previewImg = document.getElementById('editImgPreview');
+      if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              compressAndBase64(e.target.result, 600, 0.7, function(compressedBase64) {
+                  editBase64Image = compressedBase64;
+                  previewImg.src = compressedBase64;
+                  previewImg.style.display = 'block';
+              });
+          };
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+
+  // ضغط الصورة
   function compressAndBase64(src, maxWidth, quality, callback) {
       const img = new Image();
       img.src = src;
@@ -245,22 +292,19 @@
           const canvas = document.createElement('canvas');
           let width = img.width;
           let height = img.height;
-
           if (width > maxWidth) {
               height = Math.round((height * maxWidth) / width);
               width = maxWidth;
           }
-
           canvas.width = width;
           canvas.height = height;
-
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           callback(canvas.toDataURL('image/jpeg', quality));
       };
   }
 
-  // نظام تسجيل الدخول والصلاحيات
+  // تسجيل الدخول
   async function attemptLogin() {
       const phoneInput = document.getElementById('adminPhoneInput').value.trim();
       const statusMsg = document.getElementById('loginStatusMsg');
@@ -290,10 +334,10 @@
               initAdminDashboard();
           } else if (userData.status === 'blocked') {
               statusMsg.style.color = '#ef4444';
-              statusMsg.innerText = '❌ تم حظر هذا الرقم من الوصول للوحة التحكم!';
+              statusMsg.innerText = '❌ تم حظر هذا الرقم من الوصول لوحة التحكم!';
           } else {
               statusMsg.style.color = '#d97706';
-              statusMsg.innerText = '⏳ طلبك بانتظار موافقة المسؤول.';
+              statusMsg.innerText = '⏳ طلبك بانتظار موافقة المسؤول الأساسي.';
           }
       } else {
           await db.collection('admin_access_requests').doc(phoneInput).set({
@@ -332,13 +376,12 @@
 
   function initAdminDashboard() {
       const loggedPhone = localStorage.getItem('admin_logged_phone');
-      document.getElementById('currentAdminDisplay').innerText = `المستخدم الحالي: ${loggedPhone}`;
+      document.getElementById('currentAdminDisplay').innerText = `المستخدم: ${loggedPhone}`;
       loadAdminProducts();
       listenAccessRequests();
-      listenRewards();
   }
 
-  // حفظ منتج جديد بالصورة المرفوعة
+  // حفظ منتج جديد
   async function saveProduct(e) {
       e.preventDefault();
       const saveBtn = document.getElementById('saveBtn');
@@ -355,31 +398,33 @@
               name: name,
               price: price,
               cat: cat,
-              img: currentBase64Image, // حفظ كود الصورة المرفوعة
+              img: currentBase64Image,
               isPinned: isPinned,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           
-          alert('تم إضافة المنتج وبث الصورة بنجاح! 🎉');
+          alert('تم إضافة المنتج بنجاح! 🎉');
           document.getElementById('addProductForm').reset();
           currentBase64Image = "";
           document.getElementById('imgPreview').style.display = 'none';
           document.getElementById('previewText').style.display = 'inline';
       } catch (err) {
-          alert('حدث خطأ أثناء حفظ المنتج: ' + err.message);
+          alert('حدث خطأ أثناء الحفظ: ' + err.message);
       } finally {
           saveBtn.innerText = "حفظ المنتج 💾";
           saveBtn.disabled = false;
       }
   }
 
+  // عرض وتحميل المنتجات مع البحث والفلترة
   function loadAdminProducts() {
       const selectedCat = document.getElementById('filterCategoryAdmin').value;
+      const searchQuery = document.getElementById('searchProductInput').value.toLowerCase().trim();
       
       db.collection('products').onSnapshot((snapshot) => {
           const container = document.getElementById('adminProductsList');
           if (snapshot.empty) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات حالياً.</p>';
+              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد منتجات حالياً.</p>';
               return;
           }
 
@@ -388,14 +433,20 @@
               products.push({ id: doc.id, ...doc.data() });
           });
 
+          // فلترة حسب القسم
           if (selectedCat !== 'all') {
               products = products.filter(p => p.cat === selectedCat);
+          }
+
+          // فلترة حسب البحث بالاسم
+          if (searchQuery) {
+              products = products.filter(p => p.name && p.name.toLowerCase().includes(searchQuery));
           }
 
           products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
 
           if (products.length === 0) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد منتجات في هذا القسم.</p>';
+              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد نتائج مطابقة للبحث.</p>';
               return;
           }
 
@@ -408,7 +459,7 @@
                   <div class="product-item">
                       <div class="product-info">
                           <div class="product-img-wrapper">
-                              <img src="${imgSrc}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/100?text=خطأ'">
+                              <img src="${imgSrc}" class="product-img" alt="${p.name}">
                           </div>
                           <div>
                               <strong>${p.name}</strong> 
@@ -419,8 +470,7 @@
                           </div>
                       </div>
                       <div>
-                          <button class="btn-edit" onclick="togglePin('${p.id}', ${!p.isPinned})">${p.isPinned ? 'إلغاء التثبيت' : 'تثبيت 📌'}</button>
-                          <button class="btn-edit" onclick="editPrice('${p.id}', ${p.price})">السعر</button>
+                          <button class="btn-edit" onclick="openEditModal('${p.id}', '${escapeHtml(p.name)}', ${p.price}, '${p.cat}', '${p.img || ''}')">تعديل ✏️</button>
                           <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف</button>
                       </div>
                   </div>
@@ -430,53 +480,102 @@
       });
   }
 
-  async function togglePin(id, pinStatus) {
-      await db.collection('products').doc(id).update({
-          isPinned: pinStatus
-      });
+  function escapeHtml(text) {
+      return text ? text.replace(/'/g, "&apos;").replace(/"/g, "&quot;") : '';
   }
 
-  async function editPrice(id, oldPrice) {
-      const newPrice = prompt('أدخل السعر الجديد:', oldPrice);
-      if (newPrice && !isNaN(newPrice)) {
-          await db.collection('products').doc(id).update({
-              price: parseFloat(newPrice)
-          });
+  // فتح نافذة التعديل
+  function openEditModal(id, name, price, cat, img) {
+      document.getElementById('editProductId').value = id;
+      document.getElementById('editPName').value = name;
+      document.getElementById('editPPrice').value = price;
+      document.getElementById('editPCat').value = cat;
+      editBase64Image = img;
+      
+      const previewImg = document.getElementById('editImgPreview');
+      if (img) {
+          previewImg.src = img;
+          previewImg.style.display = 'block';
+      } else {
+          previewImg.style.display = 'none';
+      }
+      
+      document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+  }
+
+  // حفظ التعديلات
+  async function updateProductData(e) {
+      e.preventDefault();
+      const id = document.getElementById('editProductId').value;
+      const name = document.getElementById('editPName').value.trim();
+      const price = parseFloat(document.getElementById('editPPrice').value);
+      const cat = document.getElementById('editPCat').value;
+
+      try {
+          const updateData = {
+              name: name,
+              price: price,
+              cat: cat
+          };
+          if (editBase64Image) {
+              updateData.img = editBase64Image;
+          }
+
+          await db.collection('products').doc(id).update(updateData);
+          alert('تم تحديث بيانات المنتج بنجاح! ✅');
+          closeEditModal();
+      } catch (err) {
+          alert('خطأ أثناء التحديث: ' + err.message);
       }
   }
 
   async function deleteProduct(id) {
-      if (confirm('هل أنت تأكد من رغبتك في حذف هذا المنتج نهائياً؟')) {
-          await db.collection('products').doc(id).delete();
+      if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+          try {
+              await db.collection('products').doc(id).delete();
+              alert('تم الحذف بنجاح.');
+          } catch (err) {
+              alert('خطأ أثناء الحذف: ' + err.message);
+          }
       }
   }
 
+  // إدارة طلبات الدخول المعلقة
   function listenAccessRequests() {
       db.collection('admin_access_requests').onSnapshot((snapshot) => {
           const tbody = document.getElementById('usersTableBody');
           if (snapshot.empty) {
-              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد طلبات دخول مسجلة.</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color:#64748b;">لا توجد طلبات دخول حالياً.</td></tr>';
               return;
           }
+
           let html = '';
           snapshot.forEach((doc) => {
-              const u = doc.data();
-              const dateStr = u.requestedAt ? new Date(u.requestedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
-              
-              let statusBadge = '';
-              if (u.status === 'approved') statusBadge = '<span class="status-badge status-approved">مقبول ✅</span>';
-              else if (u.status === 'blocked') statusBadge = '<span class="status-badge status-blocked">محظور 🚫</span>';
-              else statusBadge = '<span class="status-badge status-pending">بانتظار الموافقة ⏳</span>';
+              const data = doc.data();
+              let statusClass = 'status-pending';
+              let statusText = 'قيد الانتظار ⏳';
+              if (data.status === 'approved') {
+                  statusClass = 'status-approved';
+                  statusText = 'مقبول ✅';
+              } else if (data.status === 'blocked') {
+                  statusClass = 'status-blocked';
+                  statusText = 'محظور ❌';
+              }
+
+              const reqDate = data.requestedAt ? new Date(data.requestedAt.toDate()).toLocaleString('ar-EG') : 'الآن';
 
               html += `
                   <tr>
-                      <td><strong>${u.phone}</strong></td>
-                      <td>${statusBadge}</td>
-                      <td><small>${dateStr}</small></td>
+                      <td style="font-weight:bold;">${data.phone}</td>
+                      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                      <td>${reqDate}</td>
                       <td>
-                          <button class="btn-approve" onclick="updateUserStatus('${u.phone}', 'approved')">قبول ✅</button>
-                          <button class="btn-block" onclick="updateUserStatus('${u.phone}', 'blocked')">حظر 🚫</button>
-                          <button class="btn-delete" onclick="deleteUserRequest('${u.phone}')">مسح 🗑️</button>
+                          <button class="btn-approve" onclick="updateUserStatus('${doc.id}', 'approved')">قبول الموافقة</button>
+                          <button class="btn-block" onclick="updateUserStatus('${doc.id}', 'blocked')">رفض / حظر</button>
                       </td>
                   </tr>
               `;
@@ -485,41 +584,17 @@
       });
   }
 
-  async function updateUserStatus(phone, newStatus) {
-      await db.collection('admin_access_requests').doc(phone).update({
-          status: newStatus
-      });
-  }
-
-  async function deleteUserRequest(phone) {
-      if (confirm(`هل أنت تأكد من حذف بيانات المستخدم (${phone})؟`)) {
-          await db.collection('admin_access_requests').doc(phone).delete();
+  async function updateUserStatus(docId, newStatus) {
+      try {
+          await db.collection('admin_access_requests').doc(docId).update({
+              status: newStatus
+          });
+          alert('تم تحديث حالة المستخدم بنجاح.');
+      } catch (err) {
+          alert('حدث خطأ: ' + err.message);
       }
   }
-
-  function listenRewards() {
-      db.collection('user_rewards').onSnapshot((snapshot) => {
-          const tbody = document.getElementById('rewardsTableBody');
-          if (snapshot.empty) {
-              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد إحالات مسجلة حتى الآن.</td></tr>';
-              return;
-          }
-          let html = '';
-          snapshot.forEach((doc) => {
-              const data = doc.data();
-              const dateStr = data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleString('ar-EG') : 'غير محدد';
-              html += `
-                  <tr>
-                      <td><strong>${doc.id}</strong></td>
-                      <td><span style="color:#16a34a; font-weight:bold;">${data.pendingRewards || 0} طلبات</span></td>
-                      <td>${data.lastReferredPhone || 'غير متوفر'}</td>
-                      <td><small>${dateStr}</small></td>
-                  </tr>
-              `;
-          });
-          tbody.innerHTML = html;
-      });
-  }
 </script>
+
 </body>
 </html>
