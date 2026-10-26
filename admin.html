@@ -8,6 +8,8 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Tesseract.js للتعرف على النصوص من صور الورق والفواتير -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
@@ -39,6 +41,10 @@
         .btn-submit { background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; margin-top: 10px; }
         .btn-submit:hover { background: #15803d; }
 
+        /* منطقة الرفع السريع للورقة */
+        .ocr-dropzone { border: 2px dashed #0284c7; background: #f0f9ff; padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; margin-bottom: 15px; }
+        .ocr-dropzone:hover { background: #e0f2fe; }
+
         .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; gap: 10px; }
         .product-info { display: flex; align-items: center; gap: 12px; }
         
@@ -54,11 +60,6 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { text-align: right; padding: 10px; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; color: #475569; }
-
-        .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .status-approved { background: #dcfce7; color: #15803d; }
-        .status-blocked { background: #fee2e2; color: #b91c1c; }
 
         .btn-approve { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-block { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; margin-right: 5px; }
@@ -97,9 +98,7 @@
             </div>
             <div class="form-group">
                 <label>القسم:</label>
-                <select id="editPCat" required>
-                    <!-- سيتم تعبئتها ديناميكياً حسب الصلاحيات -->
-                </select>
+                <select id="editPCat" required></select>
             </div>
             <div class="form-group">
                 <label>تغيير صورة المنتج (اختياري) 🖼️:</label>
@@ -122,9 +121,21 @@
 </div>
 
 <div class="admin-grid">
-    <!-- نموذج إضافة منتج -->
+    
+    <!-- زر الرفع السريع للورقة (OCR Automation) -->
+    <div class="card" style="grid-column: 1 / -1; background: #f8fafc; border: 2px dashed #0284c7;">
+        <h3 style="color: #0369a1;">📸 إضافة منتجات جماعية أوتوماتيكياً من صورة الورقة (OCR)</h3>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 10px;">ارفع صورة ورقة الأسعار بخط اليد (الصيغة: اسم المنتج - السعر)، وسيقوم النظام بقراءتها وإضافتها لقاعدة البيانات مباشرة مع صور من الإنترنت!</p>
+        <div class="ocr-dropzone" onclick="document.getElementById('ocrFile').click()">
+            <span style="font-weight: bold; color: #0284c7; font-size: 15px;">📁 اضغط هنا لاختيار صورة الورقة أو الفاتورة</span>
+            <input type="file" id="ocrFile" accept="image/*" style="display:none;" onchange="processOcrSheet(this)">
+        </div>
+        <div id="ocrStatus" style="font-weight: bold; color: #0369a1; text-align: center; font-size: 14px;"></div>
+    </div>
+
+    <!-- نموذج إضافة منتج فردي -->
     <div class="card">
-        <h3>➕ إضافة منتج جديد</h3>
+        <h3>➕ إضافة منتج جديد يدوياً</h3>
         <form id="addProductForm" onsubmit="saveProduct(event)">
             <div class="form-group">
                 <label>اسم المنتج:</label>
@@ -136,9 +147,7 @@
             </div>
             <div class="form-group">
                 <label>تحديد القسم الخاص بالمنتج:</label>
-                <select id="pCat" required>
-                    <!-- سيتم تعبئتها ديناميكياً حسب صلاحيات المستخدم -->
-                </select>
+                <select id="pCat" required></select>
             </div>
             <div class="form-group">
                 <label>اختيار صورة المنتج من جهازك 🖼️:</label>
@@ -156,7 +165,7 @@
         </form>
     </div>
 
-    <!-- قائمة المنتجات المضافة والبحث -->
+    <!-- قائمة المنتجات المتاحة والبحث -->
     <div class="card">
         <h3>
             <span>📦 المنتجات المتاحة</span>
@@ -179,7 +188,7 @@
     </div>
 
     <!-- إدارة طلبات واستئذان الدخول والصلاحيات -->
-    <div class="card" style="grid-column: 1 / -1;" id="requestsCard" style="display: none;">
+    <div class="card" style="grid-column: 1 / -1;" id="requestsCard">
         <h3>👥 طلبات الدخول المعلقة وتحديد الصلاحيات والأقسام</h3>
         <table>
             <thead>
@@ -201,7 +210,7 @@
   const MAIN_ADMIN_PHONE = "01012517345";
   let currentBase64Image = "";
   let editBase64Image = "";
-  let currentUserAllowedCat = "all"; // الافتراضي للأدمن الرئيسي
+  let currentUserAllowedCat = "all";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -232,7 +241,7 @@
       checkAdminAuth();
   };
 
-  // معاينة الصورة للإضافة
+  // معاينة الصورة للإضافة الفردية
   function previewSelectedImage(input) {
       const previewImg = document.getElementById('imgPreview');
       const previewText = document.getElementById('previewText');
@@ -289,6 +298,57 @@
           ctx.drawImage(img, 0, 0, width, height);
           callback(canvas.toDataURL('image/jpeg', quality));
       };
+  }
+
+  // نظام قراءة ورقة الأجندة أو الفاتورة أوتوماتيكياً (OCR)
+  async function processOcrSheet(input) {
+      const file = input.files[0];
+      const statusEl = document.getElementById('ocrStatus');
+      if (!file) return;
+
+      statusEl.innerText = "⏳ جاري قراءة الورقة وتحليل النصوص (OCR)... ثوانٍ معدودة";
+
+      try {
+          // استخدام Tesseract لقراءة العربية والإنجليزية
+          const { data: { text } } = await Tesseract.recognize(file, 'ara+eng');
+          const lines = text.split('\n').filter(l => l.trim().length > 2);
+
+          let addedCount = 0;
+          let targetCategory = currentUserAllowedCat !== 'all' ? currentUserAllowedCat : 'grocery';
+
+          for (let i = 0; i < lines.length; i++) {
+              let line = lines[i].trim();
+              statusEl.innerText = `🔍 جاري تحليل السطر: ${line}`;
+
+              // استخراج الاسم والسعر (الصيغة اسم - سعر أو اسم | سعر)
+              let name = line.split(/[-|]/)[0].replace(/[0-9]/g, '').trim();
+              let priceMatch = line.match(/\d+/);
+              let price = priceMatch ? parseInt(priceMatch[0]) : 0;
+
+              if (!name || name.length < 2) continue;
+
+              // توليد رابط صورة تلقائي للمنتج
+              let autoImg = `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`;
+
+              // رفع المنتج مباشرة لـ Firebase Firestore
+              await db.collection('products').add({
+                  name: name,
+                  price: price,
+                  category: targetCategory,
+                  image: autoImg,
+                  pinned: false,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              addedCount++;
+              await new Promise(r => setTimeout(r, 300));
+          }
+
+          statusEl.innerText = `✅ تمت الإضافة بنجاح! تم قراءة وإضافة ${addedCount} منتج من الورقة لقاعدة البيانات.`;
+          loadAdminProducts();
+      } catch (err) {
+          console.error(err);
+          statusEl.innerText = "❌ حدث خطأ أثناء قراءة الورقة، تأكد من وضوح الصورة.";
+      }
   }
 
   // تسجيل الدخول
@@ -367,7 +427,6 @@
       const loggedPhone = localStorage.getItem('admin_logged_phone');
       document.getElementById('currentAdminDisplay').innerText = `المستخدم: ${loggedPhone}`;
       
-      // إذا لم يكن الأدمن الرئيسي، نخفي جدول طلبات الدخول الصلاحيات ونقصر خيارات الأقسام
       if (loggedPhone !== MAIN_ADMIN_PHONE) {
           const doc = await db.collection('admin_access_requests').doc(loggedPhone).get();
           if(doc.exists) {
@@ -383,7 +442,6 @@
       loadAdminProducts();
   }
 
-  // ملء القوائم المنسدلة للأقسام بناءً على الصلاحيات
   function setupCategoryDropdowns() {
       const pCatSelect = document.getElementById('pCat');
       const editCatSelect = document.getElementById('editPCat');
@@ -394,7 +452,6 @@
               optionsHtml += `<option value="${key}">${name}</option>`;
           }
       } else {
-          // إذا كان مسموح له بقسم واحد فقط
           if (categoryNames[currentUserAllowedCat]) {
               optionsHtml += `<option value="${currentUserAllowedCat}">${categoryNames[currentUserAllowedCat]}</option>`;
           }
@@ -403,7 +460,7 @@
       editCatSelect.innerHTML = optionsHtml;
   }
 
-  // حفظ منتج جديد
+  // حفظ منتج فردي يدوياً
   async function saveProduct(e) {
       e.preventDefault();
       const saveBtn = document.getElementById('saveBtn');
@@ -416,115 +473,125 @@
       saveBtn.disabled = true;
 
       try {
+          let imageUrl = currentBase64Image || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`;
+          
           await db.collection('products').add({
               name: name,
               price: price,
-              cat: cat,
-              img: currentBase64Image,
-              isPinned: isPinned,
+              category: cat,
+              image: imageUrl,
+              pinned: isPinned,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          
-          alert('تم إضافة المنتج بنجاح! 🎉');
+
           document.getElementById('addProductForm').reset();
           currentBase64Image = "";
           document.getElementById('imgPreview').style.display = 'none';
           document.getElementById('previewText').style.display = 'inline';
+          alert('✅ تم حفظ المنتج بنجاح في المتجر!');
+          loadAdminProducts();
       } catch (err) {
-          alert('حدث خطأ أثناء الحفظ: ' + err.message);
+          console.error(err);
+          alert('❌ حدث خطأ أثناء الحفظ.');
       } finally {
           saveBtn.innerText = "حفظ المنتج 💾";
           saveBtn.disabled = false;
       }
   }
 
-  // عرض وتحميل المنتجات مع البحث والفلترة
-  function loadAdminProducts() {
-      const selectedCat = document.getElementById('filterCategoryAdmin').value;
-      const searchQuery = document.getElementById('searchProductInput').value.toLowerCase().trim();
-      
-      db.collection('products').onSnapshot((snapshot) => {
-          const container = document.getElementById('adminProductsList');
-          if (snapshot.empty) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد منتجات حالياً.</p>';
-              return;
-          }
+  // تحميل المنتجات في لوحة التحكم
+  async function loadAdminProducts() {
+      const listContainer = document.getElementById('adminProductsList');
+      const searchTerm = document.getElementById('searchProductInput').value.toLowerCase().trim();
+      const filterCat = document.getElementById('filterCategoryAdmin').value;
 
+      listContainer.innerHTML = "جاري التحميل...";
+
+      try {
+          let query = db.collection('products');
+          const snapshot = await query.get();
+          
+          let html = "";
           let products = [];
-          snapshot.forEach((doc) => {
+          snapshot.forEach(doc => {
               products.push({ id: doc.id, ...doc.data() });
           });
 
-          // إذا لم يكن الأدمن الرئيسي وقسمه مخصص، نظهر له منتجات قسمه فقط
-          const loggedPhone = localStorage.getItem('admin_logged_phone');
-          if (loggedPhone !== MAIN_ADMIN_PHONE && currentUserAllowedCat !== 'all') {
-              products = products.filter(p => p.cat === currentUserAllowedCat);
-          } else if (selectedCat !== 'all') {
-              products = products.filter(p => p.cat === selectedCat);
-          }
+          // الترتيب: المثبت أولاً ثم الأحدث
+          products.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
 
-          // فلترة حسب البحث بالاسم
-          if (searchQuery) {
-              products = products.filter(p => p.name && p.name.toLowerCase().includes(searchQuery));
-          }
+          let filtered = products.filter(p => {
+              let matchCat = (filterCat === 'all' || p.category === filterCat);
+              let matchSearch = !searchTerm || (p.name && p.name.toLowerCase().includes(searchTerm));
+              let matchUserRole = (currentUserAllowedCat === 'all' || p.category === currentUserAllowedCat);
+              return matchCat && matchSearch && matchUserRole;
+          });
 
-          products.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
-
-          if (products.length === 0) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد نتائج مطابقة.</p>';
+          if (filtered.length === 0) {
+              listContainer.innerHTML = `<p style="text-align:center; color:#64748b; padding:20px;">لا توجد منتجات مطابقة.</p>`;
               return;
           }
 
-          let html = '';
-          products.forEach((p) => {
-              const imgSrc = p.img || 'https://via.placeholder.com/100?text=لا+صورة';
-              const catLabel = categoryNames[p.cat] || p.cat;
-              
+          filtered.forEach(p => {
+              let catName = categoryNames[p.category] || p.category;
+              let imgSrc = p.image || 'https://via.placeholder.com/60';
               html += `
-                  <div class="product-item">
-                      <div class="product-info">
-                          <div class="product-img-wrapper">
-                              <img src="${imgSrc}" class="product-img" alt="${p.name}">
-                          </div>
-                          <div>
-                              <strong>${p.name}</strong> 
-                              ${p.isPinned ? '<span class="badge-pinned">📌 مثبت</span>' : ''}
-                              <br>
-                              <span class="badge-cat">${catLabel}</span>
-                              <small style="color:#16a34a; font-weight:bold;">${p.price} جنيه</small>
-                          </div>
-                      </div>
-                      <div>
-                          <button class="btn-edit" onclick="openEditModal('${p.id}', '${escapeHtml(p.name)}', ${p.price}, '${p.cat}', '${p.img || ''}')">تعديل ✏️</button>
-                          <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف</button>
-                      </div>
-                  </div>
+                <div class="product-item">
+                    <div class="product-info">
+                        <div class="product-img-wrapper">
+                            <img src="${imgSrc}" class="product-img" alt="صورة">
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 14px;">${p.name}</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top:2px;">
+                                <span class="badge-cat">${catName}</span>
+                                <span style="font-weight:bold; color:#16a34a;">${p.price} جنيه</span>
+                                ${p.pinned ? '<span class="badge-pinned">مثبت 📌</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn-edit" onclick="openEditModal('${p.id}', '${encodeURIComponent(p.name)}', ${p.price}, '${p.category}', '${p.image || ''}')">تعديل</button>
+                        <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف</button>
+                    </div>
+                </div>
               `;
           });
-          container.innerHTML = html;
-      });
+          listContainer.innerHTML = html;
+      } catch (err) {
+          console.error(err);
+          listContainer.innerHTML = `<p style="color:red; text-align:center;">خطأ في تحميل المنتجات.</p>`;
+      }
   }
 
-  function escapeHtml(text) {
-      return text ? text.replace(/'/g, "&apos;").replace(/"/g, "&quot;") : '';
+  // حذف منتج
+  async function deleteProduct(id) {
+      if (confirm('هل أنت متأكد من حذف هذا المنتج نهائياً؟')) {
+          try {
+              await db.collection('products').doc(id).delete();
+              loadAdminProducts();
+          } catch (err) {
+              alert('❌ حدث خطأ أثناء الحذف.');
+          }
+      }
   }
 
   // فتح نافذة التعديل
-  function openEditModal(id, name, price, cat, img) {
+  function openEditModal(id, name, price, category, image) {
       document.getElementById('editProductId').value = id;
-      document.getElementById('editPName').value = name;
+      document.getElementById('editPName').value = decodeURIComponent(name);
       document.getElementById('editPPrice').value = price;
-      document.getElementById('editPCat').value = cat;
-      editBase64Image = img;
+      document.getElementById('editPCat').value = category;
       
+      editBase64Image = image;
       const previewImg = document.getElementById('editImgPreview');
-      if (img) {
-          previewImg.src = img;
+      if (image) {
+          previewImg.src = image;
           previewImg.style.display = 'block';
       } else {
           previewImg.style.display = 'none';
       }
-      
+
       document.getElementById('editModal').style.display = 'flex';
   }
 
@@ -532,118 +599,93 @@
       document.getElementById('editModal').style.display = 'none';
   }
 
-  // حفظ التعديلات
+  // حفظ التعديل
   async function updateProductData(e) {
       e.preventDefault();
       const id = document.getElementById('editProductId').value;
       const name = document.getElementById('editPName').value.trim();
       const price = parseFloat(document.getElementById('editPPrice').value);
-      const cat = document.getElementById('editPCat').value;
+      const category = document.getElementById('editPCat').value;
 
       try {
-          const updateData = {
+          let updateData = {
               name: name,
               price: price,
-              cat: cat
+              category: category
           };
           if (editBase64Image) {
-              updateData.img = editBase64Image;
+              updateData.image = editBase64Image;
           }
 
           await db.collection('products').doc(id).update(updateData);
-          alert('تم تحديث بيانات المنتج بنجاح! ✅');
           closeEditModal();
+          loadAdminProducts();
+          alert('✅ تم تحديث المنتج بنجاح');
       } catch (err) {
-          alert('خطأ أثناء التحديث: ' + err.message);
+          console.error(err);
+          alert('❌ حدث خطأ أثناء التحديث.');
       }
   }
 
-  async function deleteProduct(id) {
-      if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-          try {
-              await db.collection('products').doc(id).delete();
-              alert('تم الحذف بنجاح.');
-          } catch (err) {
-              alert('خطأ أثناء الحذف: ' + err.message);
-          }
-      }
-  }
-
-  // إدارة طلبات الدخول المعلقة وتحديد صلاحيات الأقسام (للأدمن الرئيسي فقط)
+  // جلب طلبات صلاحيات الأدمن (للأدمن الرئيسي فقط)
   function listenAccessRequests() {
-      db.collection('admin_access_requests').onSnapshot((snapshot) => {
-          const tbody = document.getElementById('usersTableBody');
+      const tbody = document.getElementById('usersTableBody');
+      db.collection('admin_access_requests').onSnapshot(snapshot => {
           if (snapshot.empty) {
-              tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color:#64748b;">لا توجد طلبات دخول حالياً.</td></tr>';
+              tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color:#64748b;">لا توجد طلبات جديدة.</td></tr>`;
               return;
           }
+          let html = "";
+          snapshot.forEach(doc => {
+              let u = doc.data();
+              if (u.phone === MAIN_ADMIN_PHONE) return; // لا نعرض الأدمن الرئيسي
 
-          let html = '';
-          snapshot.forEach((doc) => {
-              const data = doc.data();
-              if (data.phone === MAIN_ADMIN_PHONE) return; // لا نظهر رقمك الرئيسي في قائمة الطلبات
+              let statusBadge = u.status === 'approved' ? '<span style="color:#16a34a; font-weight:bold;">مقبول ✅</span>' : 
+                                u.status === 'blocked' ? '<span style="color:#ef4444; font-weight:bold;">محظور ❌</span>' : 
+                                '<span style="color:#d97706; font-weight:bold;">قيد الانتظار ⏳</span>';
 
-              let statusClass = 'status-pending';
-              let statusText = 'قيد الانتظار ⏳';
-              if (data.status === 'approved') {
-                  statusClass = 'status-approved';
-                  statusText = 'مقبول ✅';
-              } else if (data.status === 'blocked') {
-                  statusClass = 'status-blocked';
-                  statusText = 'محظور ❌';
+              let catOptions = `<option value="all" ${u.allowedCat === 'all' ? 'selected' : ''}>🌟 جميع الأقسام (كل المتجر)</option>`;
+              for (const [key, name] of Object.entries(categoryNames)) {
+                  catOptions += `<option value="${key}" ${u.allowedCat === key ? 'selected' : ''}>${name}</option>`;
               }
 
-              let currentAllowed = data.allowedCat || 'all';
-
               html += `
-                  <tr>
-                      <td style="font-weight:bold;">${data.phone}<br><span class="status-badge ${statusClass}">${statusText}</span></td>
-                      <td>
-                          <select id="catSelect_${doc.id}" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;" onchange="updateUserCategory('${doc.id}')">
-                              <option value="all" ${currentAllowed === 'all' ? 'selected' : ''}>🌟 كل الأقسام (صلاحية كاملة)</option>
-                              <option value="grocery" ${currentAllowed === 'grocery' ? 'selected' : ''}>🛒 بقالة فقط</option>
-                              <option value="offers" ${currentAllowed === 'offers' ? 'selected' : ''}>🔥 العروض اليومية فقط</option>
-                              <option value="poultry" ${currentAllowed === 'poultry' ? 'selected' : ''}>🍗 طيور فقط</option>
-                              <option value="frozen" ${currentAllowed === 'frozen' ? 'selected' : ''}>🧊 مجمدات فقط</option>
-                              <option value="cleaning" ${currentAllowed === 'cleaning' ? 'selected' : ''}>✨ منظفات فقط</option>
-                              <option value="spices" ${currentAllowed === 'spices' ? 'selected' : ''}>🧂 عطارة فقط</option>
-                              <option value="beauty" ${currentAllowed === 'beauty' ? 'selected' : ''}>💄 تجميل فقط</option>
-                              <option value="accessories" ${currentAllowed === 'accessories' ? 'selected' : ''}>💍 اكسسوارات فقط</option>
-                          </select>
-                      </td>
-                      <td>
-                          <button class="btn-approve" onclick="updateUserStatus('${doc.id}', 'approved')">قبول الدخول</button>
-                          <button class="btn-block" onclick="updateUserStatus('${doc.id}', 'blocked')">حظر / رفض</button>
-                      </td>
-                  </tr>
+                <tr>
+                    <td style="font-weight: bold; direction: ltr; text-align: right;">${u.phone}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <select onchange="updateUserCategory('${u.phone}', this.value)" style="padding: 5px; border-radius: 6px; font-size: 13px;">
+                            ${catOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-approve" onclick="setUserStatus('${u.phone}', 'approved')">موافقة</button>
+                        <button class="btn-block" onclick="setUserStatus('${u.phone}', 'blocked')" style="background:#ef4444;">حظر</button>
+                    </td>
+                </tr>
               `;
           });
           tbody.innerHTML = html;
       });
   }
 
-  async function updateUserStatus(docId, newStatus) {
+  async function setUserStatus(phone, status) {
       try {
-          await db.collection('admin_access_requests').doc(docId).update({
-              status: newStatus
-          });
-          alert('تم تحديث حالة المستخدم بنجاح.');
-      } catch (err) {
-          alert('حدث خطأ: ' + err.message);
+          await db.collection('admin_access_requests').doc(phone).update({ status: status });
+      } catch(err) {
+          alert('حدث خطأ');
       }
   }
 
-  async function updateUserCategory(docId) {
-      const selectedCat = document.getElementById(`catSelect_${docId}`).value;
+  async function updateUserCategory(phone, cat) {
       try {
-          await db.collection('admin_access_requests').doc(docId).update({
-              allowedCat: selectedCat
-          });
-      } catch (err) {
-          alert('حدث خطأ أثناء حفظ الصلاحية: ' + err.message);
+          await db.collection('admin_access_nested_or_cat' || 'admin_access_requests').doc(phone).update({ allowedCat: cat });
+          // أو مباشرة:
+          await db.collection('admin_access_requests').doc(phone).update({ allowedCat: cat });
+      } catch(err) {
+          console.error(err);
       }
   }
 </script>
-
 </body>
 </html>
