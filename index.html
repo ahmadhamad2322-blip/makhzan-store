@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ماركت نت - Market Net</title>
+    <title>ماركت نت</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -38,7 +38,7 @@
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         
-        /* خانة البحث الفوري */
+        /* خانة البحث عن المنتجات */
         .search-container { margin-bottom: 20px; display: flex; justify-content: center; }
         .search-input { width: 100%; max-width: 600px; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 25px; font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: #fff; }
         .search-input:focus { border-color: #0284c7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.2); }
@@ -145,7 +145,7 @@
 </div>
 
 <div class="container">
-    <!-- خانة البحث الفوري -->
+    <!-- خانة البحث عن المنتجات -->
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أي منتج هنا..." oninput="handleSearch()">
     </div>
@@ -165,7 +165,7 @@
 
     <h3 style="margin-bottom: 15px;" id="sectionTitle">المنتجات المتاحة</h3>
     <div class="products-grid" id="productsContainer">
-        <p style="grid-column: 1/-1; text-align: center; color: #64748b;">جاري تحميل المنتجات...</p>
+        <p style="grid-column: 1/-1; text-align: center;">جاري تحميل المنتجات...</p>
     </div>
 </div>
 
@@ -213,7 +213,7 @@
             <span id="discountTotal">-0 جنيه</span>
         </div>
         <div class="summary-row" style="color: #0284c7;">
-            <span>خدمة التوصيل:</span>
+            <span>خدمة التوصيل (حسب الموقع):</span>
             <span id="deliveryTotal">حدد موقعك</span>
         </div>
         <div class="summary-row" id="tipRow" style="color: #16a34a; display: none;">
@@ -254,6 +254,7 @@
                     <option value="فودافون كاش">📱 فودافون كاش</option>
                     <option value="إنستاباي InstaPay">💳 إنستاباي (InstaPay)</option>
                 </select>
+
                 <div id="paymentNotice" class="payment-info"></div>
             </div>
             <button type="submit" class="send-btn">إرسال الطلب عبر الواتساب 💬</button>
@@ -265,7 +266,7 @@
   const ADMIN_WHATSAPP_NUMBER = "201127491224";
   const STORE_LAT = 30.0131; 
   const STORE_LNG = 31.2089;
-  let userLocationUrl = "";
+  let userLocationUrl = ""; 
 
   const categoryImages = {
       'offers': { title: '🔥 العروض اليومية', img: 'https://images.unsplash.com/photo-1607349913338-fca6f7fc04d0?w=1000' },
@@ -309,7 +310,7 @@
       loadInitialProductsFast();
   };
 
-  // تسريع التحميل الأولي عبر التخزين المؤقت المحلي (Cache)
+  // تسريع التحميل الأولي (Cache)
   function loadInitialProductsFast() {
       const cached = localStorage.getItem('cached_marketnet_products');
       if (cached) {
@@ -393,7 +394,6 @@
       renderProducts(filterProductsByCategoryAndSearch(allProducts));
   }
 
-  // فلترة المنتجات حسب القسم والبحث
   function filterProductsByCategoryAndSearch(productsList) {
       const query = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : "";
       
@@ -414,6 +414,7 @@
       });
   }
 
+  // البحث الفوري
   function handleSearch() {
       renderProducts(filterProductsByCategoryAndSearch(allProducts));
   }
@@ -446,7 +447,6 @@
       filterCategory('offers');
   }
 
-  // أداء حركة إضافة المنتج للسلة وتحديث العداد
   function addToCart(productId, event) {
       const product = allProducts.find(p => p.id === productId);
       if (!product) return;
@@ -640,6 +640,7 @@
       }
   }
 
+  // إرسال الطلب عبر الواتساب بالطريقة الصحيحة والآمنة 100%
   function sendOrderToWhatsApp(e) {
       e.preventDefault();
       const name = document.getElementById('custName').value.trim();
