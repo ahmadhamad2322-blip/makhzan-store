@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ماركت نت | تسوق أونلاين لأفضل العروض والمنتجات الغذائية والمنزلية</title>
-    <meta name="description" content="ماركت نت - متجرك الأول لتلبية احتياجات البيت من بقالة، طيور، مجمدات، منظفات، وعطارة بأقوي العروض وتوصيل سريع.">
     
-    <!-- Structured Data (GroceryStore) -->
+    <!-- وسوم محركات البحث وSEO -->
+    <meta name="description" content="ماركت نت - متجرك الأول لتلبية احتياجات البيت من بقالة، طيور، مجمدات، منظفات، وعطارة بأقوي العروض وتوصيل سريع في الهرم والجيزة.">
+    <meta name="keywords" content="ماركت نت, سوبر ماركت, بقالة أونلاين, توصيل طلبات, الجيزة, الهرم, خضار, طيور, مجمدات">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph لمواقع التواصل الاجتماعي (Facebook, WhatsApp) -->
+    <meta property="og:title" content="ماركت نت | عروض يومية وتوصيل للمنزل">
+    <meta property="og:description" content="كل مستلزمات البيت بأقوى العروض والتوصيل السريع.">
+    <meta property="og:type" content="website">
+
+    <!-- Structured Data (GroceryStore Schema) لظهور محركات البحث بشكل احترافي -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -27,8 +36,10 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
+    <!-- مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background-color: #f8fafc; color: #1e293b; padding-bottom: 80px; }
@@ -185,7 +196,7 @@
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض والتوصيل السريع</p>
     </div>
 
-    <!-- نبذة عن ماركت نت -->
+    <!-- نبذة عن ماركت نت (لأرشفة جوجل) -->
     <div class="about-section">
         <strong>عن ماركت نت:</strong> وجهتك الأولى للتسوق المنزلي في منطقة الهرم والجيزة والمناطق المجاورة. نوفر منتجات طازجة، بقالة، ومستلزمات منزلية بأسعار منافسة مع خدمة توصيل سريعة حتى باب البيت.
     </div>
@@ -344,7 +355,7 @@
   
   const db = firebase.firestore();
   
-  // تفعيل الكاش المحلي لـ Firestore لتقليل القراءات وتسريع التحميل
+  // تفعيل الكاش المحلي لـ Firestore
   db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
       if (err.code == 'failed-precondition') {
           console.warn('Persistence failed: Multiple tabs open');
@@ -881,7 +892,6 @@
           status: 'pending'
       };
 
-      // حفظ الطلب في Firestore لكي يظهر في لوحة الإدارة
       db.collection('orders').add(orderData).then(() => {
           finalizeWhatsAppOrder(orderMessage);
       }).catch((err) => {
