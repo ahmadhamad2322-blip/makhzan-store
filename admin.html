@@ -73,8 +73,9 @@
     <div class="login-box">
         <h2>🔒 تسجيل دخول الأدمن</h2>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">أدخل رقم الهاتف وكلمة المرور</p>
-        <input type="tel" id="adminPhoneInput" placeholder="رقم الهاتف (01012517345)">
-        <input type="password" id="adminPassInput" placeholder="كلمة المرور (1224)">
+        <!-- تم إخفاء الأرقام وجعلها في الـ placeholder -->
+        <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الهاتف">
+        <input type="password" id="adminPassInput" placeholder="أدخل كلمة المرور">
         <button onclick="attemptLogin()">دخول 🔑</button>
         <p id="loginStatusMsg" style="margin-top:15px; font-size:13px; font-weight:bold;"></p>
     </div>
@@ -362,7 +363,6 @@
           return;
       }
 
-      // حسابك أنت الشخصي (المالك)
       if (phoneInput === MAIN_ADMIN_PHONE) {
           if (passInput === MAIN_ADMIN_PASS) {
               localStorage.setItem('admin_logged_phone', phoneInput);
@@ -375,7 +375,6 @@
           return;
       }
 
-      // أي شخص آخر يحاول الدخول
       statusMsg.style.color = '#0284c7';
       statusMsg.innerText = 'جاري التحقق من حالة الحساب...';
 
