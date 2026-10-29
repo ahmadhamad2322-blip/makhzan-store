@@ -43,7 +43,7 @@
         /* بانر الترحيب */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
         
-        /* --- قسم فيديوهات التيك توك للعروض اليومية (رأسي وبحجم كامل مع خاصية الإيقاف عند التمرير) --- */
+        /* --- قسم فيديوهات التيك توك للعروض اليومية --- */
         .tiktok-section { display: none; margin-bottom: 30px; }
         .tiktok-container {
             display: flex;
@@ -187,25 +187,21 @@
 </div>
 
 <div class="container">
-    <!-- خانة البحث عن المنتجات -->
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أي منتج هنا..." oninput="handleSearch()">
     </div>
 
-    <!-- بانر الترحيب -->
     <div class="banner" id="mainBanner">
         <h2>أهلاً بك في ماركت نت! 🎁</h2>
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
-    <!-- بانر القسم -->
     <div class="category-hero-banner" id="categoryHero">
         <div class="category-hero-overlay">
             <div class="category-hero-title" id="categoryHeroTitle">اسم القسم</div>
         </div>
     </div>
 
-    <!-- قسم فيديوهات العروض اليومية (بنظام تيك توك - يظهر في العروض اليومية فقط) -->
     <div class="tiktok-section" id="tiktokSection">
         <h3 style="margin-bottom: 15px;">🎥 فيديوهات العروض اليومية</h3>
         <div class="tiktok-container" id="tiktokContainer" onscroll="handleVideoAutostop()">
@@ -222,7 +218,6 @@
 
 <a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
 
-<!-- نافذة السلة وإكمال الطلب -->
 <div class="modal" id="cartModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -233,7 +228,6 @@
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
         
-        <!-- كود الخصم -->
         <div class="form-group">
             <label>كود الخصم أو الإحالة:</label>
             <div class="promo-box">
@@ -357,6 +351,7 @@
           showUserBadge();
       }
       checkUrlReferral();
+      loadAllDataOptimized();
   };
 
   function showUserBadge() {
@@ -377,229 +372,239 @@
           userMyCode = generateUserCode();
           localStorage.setItem('marketnet_user_code', userMyCode);
           showUserBadge();
-          
           document.getElementById('alertCode').innerText = userMyCode;
           document.getElementById('rewardAlert').style.display = 'block';
           
-          isDiscountApplied = true;
-          updateCartUI();
+          if (!isDiscountApplied && !referrerCode) {
+              isDiscountApplied = true;
+              document.getElementById('promoCodeInput').value = userMyCode;
+              document.getElementById('promoCodeInput').disabled = true;
+              document.getElementById('discountRow').style.display = 'flex';
+              updateCartUI();
+          }
       }
   }
 
-  function checkUrlReferral() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const refCode = urlParams.get('ref');
-      if (refCode) {
-          document.getElementById('promoCodeInput').value = refCode.toUpperCase();
-          setTimeout(() => { applyPromoCode(); }, 800);
+  // تحميل محسّن وسريع للغاية للبيانات لضمان عدم تعليق المتصفح
+  async function loadAllDataOptimized() {
+      try {
+          const snapshot = await db.collection("products").get();
+          allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          
+          // ترتيب المنتجات أبجدياً حسب الاسم لتظهر المنتجات المتشابهة ورا بعضها
+          allProducts.sort((a, b) => {
+              let nameA = (a.title || "").trim();
+              let nameB = (b.title || "").trim();
+              return nameA.localeCompare(nameB, 'ar');
+          });
+
+          filterCategory('offers');
+          loadTiktokVideos();
+      } catch (error) {
+          console.error("خطأ في جلب المنتجات:", error);
+          document.getElementById('productsContainer').innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">حدث خطأ أثناء تحميل المنتجات. تأكد من اتصال الإنترنت.</p>`;
       }
   }
 
-  // الاستماع للمنتجات من فايربيست
-  db.collection('products').onSnapshot((snapshot) => {
-      allProducts = [];
-      snapshot.forEach((doc) => {
-          allProducts.push({ id: doc.id, ...doc.data() });
-      });
-      filterCategory(currentCategory);
-  });
+  function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-${cat}`);
+      if (activeBtn) activeBtn.classList.add('active');
 
-  function renderProducts(products) {
+      const hero = document.getElementById('categoryHero');
+      const banner = document.getElementById('mainBanner');
+      const tiktokSec = document.getElementById('tiktokSection');
+
+      if (cat === 'offers') {
+          if (banner) banner.style.display = 'block';
+          if (hero) hero.style.display = 'none';
+          if (tiktokSec) tiktokSec.style.display = 'block';
+          document.getElementById('sectionTitle').innerText = '🔥 العروض اليومية الحصرية';
+      } else {
+          if (banner) banner.style.display = 'none';
+          if (tiktokSec) tiktokSec.style.display = 'none';
+          if (categoryImages[cat]) {
+              if (hero) {
+                  hero.style.display = 'block';
+                  hero.style.backgroundImage = `url('${categoryImages[cat].img}')`;
+                  document.getElementById('categoryHeroTitle').innerText = categoryImages[cat].title;
+              }
+              document.getElementById('sectionTitle').innerText = categoryImages[cat].title;
+          }
+      }
+      
+      document.getElementById('searchInput').value = '';
+      renderProducts(allProducts);
+  }
+
+  function renderProducts(productsList) {
       const container = document.getElementById('productsContainer');
       
-      if (products.length === 0) {
-          container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">لا توجد منتجات مطابقة.</p>';
+      // تصفية المنتجات حسب القسم المحدد
+      let filtered = productsList;
+      if (currentCategory === 'offers') {
+          filtered = productsList.filter(p => p.isOffer === true || p.category === 'offers');
+      } else if (currentCategory !== 'all') {
+          filtered = productsList.filter(p => p.category === currentCategory);
+      }
+
+      if (filtered.length === 0) {
+          container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 30px;">عريضة المنتجات فارغة حالياً في هذا القسم.</p>`;
           return;
       }
 
-      // الترتيب الأبجدي التلقائي (وتجميع الأصناف المتشابهة مثل الجبن والعسل وراء بعضها)
-      products.sort((a, b) => {
-          let nameA = a.name || '';
-          let nameB = b.name || '';
-          return nameA.localeCompare(nameB, 'ar');
-      });
-
       let html = '';
-      products.forEach((p) => {
-          const imgSrc = p.img || 'https://via.placeholder.com/150?text=لا+توجد+صورة';
+      filtered.forEach(p => {
+          let title = p.title || "بدون اسم";
+          let price = p.price || 0;
+          let img = p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
+          
           html += `
-              <div class="product-card" id="card-${p.id}">
-                  <img src="${imgSrc}" class="product-img" id="img-${p.id}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=خطأ+بالصورة'">
+              <div class="product-card">
                   <div>
-                      <div class="product-title">${p.name}</div>
-                      <div class="product-price">${p.price} جنيه</div>
+                      <img src="${img}" class="product-img" alt="${title}" loading="lazy">
+                      <div class="product-title">${title}</div>
                   </div>
-                  <button class="add-btn" onclick="addToCart('${p.id}', event)">إضافة للسلة 🛒</button>
+                  <div>
+                      <div class="product-price">${price} جنيه</div>
+                      <button class="add-btn" onclick="addToCart('${p.id}', '${title.replace(/'/g, "\\'")}', ${price}, '${img}', event)">أضف للسلة 🛒</button>
+                  </div>
               </div>
           `;
       });
       container.innerHTML = html;
   }
 
-  // البحث الفوري في المنتجات
   function handleSearch() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (query === "") {
-          filterCategory(currentCategory);
+      if (!query) {
+          renderProducts(allProducts);
           return;
       }
-      const filtered = allProducts.filter(p => p.name && p.name.toLowerCase().includes(query));
-      renderProducts(filtered);
-  }
-
-  function goHome() {
-      document.getElementById('searchInput').value = "";
-      filterCategory('offers');
-  }
-
-  function filterCategory(cat) {
-      currentCategory = cat;
-      document.getElementById('searchInput').value = "";
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      const activeBtn = document.getElementById(`btn-${cat}`);
-      if (activeBtn) activeBtn.classList.add('active');
-
-      const heroBanner = document.getElementById('categoryHero');
-      const mainBanner = document.getElementById('mainBanner');
-      const heroTitle = document.getElementById('categoryHeroTitle');
-      const tiktokSec = document.getElementById('tiktokSection');
-
-      // التحكم في ظهور قسم فيديوهات التيك توك (يظهر في "العروض اليومية" فقط)
-      if (cat === 'offers') {
-          tiktokSec.style.display = 'block';
-          loadTiktokVideosFromDB(); // جلب الفيديوهات المرفوعة من لوحة التحكم
-      } else {
-          tiktokSec.style.display = 'none';
-          stopAllVideos(); // إيقاف الفيديوهات عند الانتقال لقسم آخر
+      
+      const searched = allProducts.filter(p => (p.title || "").toLowerCase().includes(query));
+      const container = document.getElementById('productsContainer');
+      
+      if (searched.length === 0) {
+          container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 30px;">لا توجد نتائج مطابقة لبحثك.</p>`;
+          return;
       }
 
-      if (cat === 'all' || !categoryImages[cat]) {
-          heroBanner.style.display = 'none';
-          mainBanner.style.display = 'block';
-          document.getElementById('sectionTitle').innerText = 'جميع المنتجات المتاحة';
-          renderProducts(allProducts);
-      } else {
-          mainBanner.style.display = 'none';
-          heroBanner.style.backgroundImage = `url('${categoryImages[cat].img}')`;
-          heroTitle.innerText = categoryImages[cat].title;
-          heroBanner.style.display = 'block';
-          document.getElementById('sectionTitle').innerText = categoryImages[cat].title;
+      let html = '';
+      searched.forEach(p => {
+          let title = p.title || "بدون اسم";
+          let price = p.price || 0;
+          let img = p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
           
-          if (cat === 'offers') {
-              renderProducts(allProducts); 
-          } else {
-              const filtered = allProducts.filter(p => p.cat === cat);
-              renderProducts(filtered);
-          }
-      }
+          html += `
+              <div class="product-card">
+                  <div>
+                      <img src="${img}" class="product-img" alt="${title}" loading="lazy">
+                      <div class="product-title">${title}</div>
+                  </div>
+                  <div>
+                      <div class="product-price">${price} جنيه</div>
+                      <button class="add-btn" onclick="addToCart('${p.id}', '${title.replace(/'/g, "\\'")}', ${price}, '${img}', event)">أضف للسلة 🛒</button>
+                  </div>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
   }
 
-  // جلب وعرض فيديوهات العروض المرفوعة من لوحة التحكم عبر Firebase
-  async function loadTiktokVideosFromDB() {
-      const tContainer = document.getElementById('tiktokContainer');
+  async function loadTiktokVideos() {
+      const container = document.getElementById('tiktokContainer');
       try {
-          const snapshot = await db.collection('daily_videos').get();
+          const snapshot = await db.collection("tiktok_videos").get();
           if (snapshot.empty) {
-              tContainer.innerHTML = `<div class="no-videos-msg">🎥 لا توجد فيديوهات عروض مرفوعة حالياً من لوحة التحكم.</div>`;
+              container.innerHTML = `<div class="no-videos-msg">لا توجد فيديوهات عروض مضافة حالياً.</div>`;
               return;
           }
           let html = '';
-          snapshot.forEach(doc => {
+          snapshot.docs.forEach(doc => {
               const v = doc.data();
               html += `
                   <div class="tiktok-card">
-                      <video class="tiktok-video" src="${v.videoUrl}" controls loop muted playsinline></video>
+                      <video src="${v.videoUrl}" class="tiktok-video" loop muted playsinline></video>
                       <div class="tiktok-overlay">
-                          <div class="tiktok-title">${v.title}</div>
-                          <div class="tiktok-desc">${v.desc}</div>
+                          <div class="tiktok-title">${v.title || "عرض مميز"}</div>
+                          <div class="tiktok-desc">${v.description || ""}</div>
                       </div>
                   </div>
               `;
           });
-          tContainer.innerHTML = html;
-      } catch (err) {
-          console.error(err);
-          tContainer.innerHTML = `<div class="no-videos-msg">❌ حدث خطأ في تحميل الفيديوهات.</div>`;
+          container.innerHTML = html;
+          handleVideoAutostop();
+      } catch (e) {
+          console.error("خطأ في تحميل الفيديوهات:", e);
+          container.innerHTML = `<div class="no-videos-msg">فشل تحميل الفيديوهات.</div>`;
       }
   }
 
-  // خاصية إيقاف الفيديو (Stop) تلقائياً عندما يتحرك العميل ويبعد عنه
   function handleVideoAutostop() {
       const container = document.getElementById('tiktokContainer');
-      const videos = container.querySelectorAll('video');
+      if (!container) return;
+      const cards = container.querySelectorAll('.tiktok-card');
       const containerRect = container.getBoundingClientRect();
-
-      videos.forEach(video => {
-          const rect = video.getBoundingClientRect();
-          if (rect.left < containerRect.left - 100 || rect.right > containerRect.right + 100) {
-              if (!video.paused) {
-                  video.pause();
-              }
+      
+      cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const video = card.querySelector('.tiktok-video');
+          if (!video) return;
+          
+          const isVisible = (rect.left >= containerRect.left - 50) && (rect.right <= containerRect.right + 50);
+          if (isVisible) {
+              if (video.paused) video.play().catch(err => console.log(err));
+          } else {
+              if (!video.paused) video.pause();
           }
       });
   }
 
-  function stopAllVideos() {
-      const videos = document.querySelectorAll('.tiktok-video');
-      videos.forEach(v => v.pause());
-  }
-
-  function addToCart(id, event) {
-      const prod = allProducts.find(p => p.id === id);
-      const exist = cart.find(item => item.id === id);
+  function addToCart(id, title, price, img, event) {
+      // تأثير بصري سريع لإضافة المنتج للسلة
+      const btn = event.target;
+      const card = btn.closest('.product-card');
+      const imgElem = card.querySelector('.product-img');
       
-      if (exist) {
-          exist.qty += 1;
+      if (imgElem) {
+          const flyingImg = imgElem.cloneNode(true);
+          const rect = imgElem.getBoundingClientRect();
+          const cartBtnRect = document.getElementById('cartIconButton').getBoundingClientRect();
+          
+          flyingImg.className = 'flying-img';
+          flyingImg.style.top = `${rect.top}px`;
+          flyingImg.style.left = `${rect.left}px`;
+          flyingImg.style.width = `${rect.width}px`;
+          flyingImg.style.height = `${rect.height}px`;
+          document.body.appendChild(flyingImg);
+          
+          setTimeout(() => {
+              flyingImg.style.top = `${cartBtnRect.top}px`;
+              flyingImg.style.left = `${cartBtnRect.left}px`;
+              flyingImg.style.width = '30px';
+              flyingImg.style.height = '30px';
+              flyingImg.style.opacity = '0.5';
+          }, 10);
+          
+          setTimeout(() => {
+              flyingImg.remove();
+          }, 750);
+      }
+
+      const existing = cart.find(item => item.id === id);
+      if (existing) {
+          existing.qty += 1;
       } else {
-          cart.push({ ...prod, qty: 1 });
+          cart.push({ id, title, price, img, qty: 1 });
       }
-      
-      updateCartUI();
-      triggerFlyToCartAnimation(event.target);
+      updateCartCount();
   }
 
-  function triggerFlyToCartAnimation(buttonElement) {
-      const card = buttonElement.closest('.product-card');
-      const img = card.querySelector('.product-img');
-      const cartIcon = document.getElementById('cartIconButton');
-      const imgRect = img.getBoundingClientRect();
-      const cartRect = cartIcon.getBoundingClientRect();
-      const flyingImg = document.createElement('img');
-      flyingImg.src = img.src;
-      flyingImg.className = 'flying-img';
-      
-      flyingImg.style.left = `${imgRect.left}px`;
-      flyingImg.style.top = `${imgRect.top}px`;
-      flyingImg.style.width = `${imgRect.width}px`;
-      flyingImg.style.height = `${imgRect.height}px`;
-      document.body.appendChild(flyingImg);
-      
-      const targetX = cartRect.left + (cartRect.width / 2) - (imgRect.width / 2);
-      const targetY = cartRect.top + (cartRect.height / 2) - (imgRect.height / 2);
-      
-      requestAnimationFrame(() => {
-          flyingImg.style.left = `${targetX}px`;
-          flyingImg.style.top = `${targetY}px`;
-          flyingImg.style.transform = 'scale(0.1) rotate(15deg)';
-          flyingImg.style.opacity = '0.2';
-      });
-      
-      setTimeout(() => {
-          cartIcon.style.transform = 'scale(1.2)';
-          setTimeout(() => { cartIcon.style.transform = 'scale(1)'; }, 200);
-          flyingImg.remove();
-      }, 750);
-  }
-
-  function changeQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      if (item) {
-          item.qty += delta;
-          if (item.qty <= 0) {
-              cart = cart.filter(i => i.id !== id);
-          }
-          updateCartUI();
-      }
+  function updateCartCount() {
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCount').innerText = totalQty;
   }
 
   function openCart() {
@@ -611,200 +616,229 @@
       document.getElementById('cartModal').style.display = 'none';
   }
 
+  function updateCartUI() {
+      const listContainer = document.getElementById('cartItemsList');
+      if (cart.length === 0) {
+          listContainer.innerHTML = `<p style="text-align: center; color: #64748b; padding: 20px;">السلة فارغة حالياً.</p>`;
+          document.getElementById('subTotal').innerText = '0 جنيه';
+          document.getElementById('deliveryTotal').innerText = 'حدد موقعك';
+          document.getElementById('cartTotal').innerText = '0 جنيه';
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('tipRow').style.display = 'none';
+          return;
+      }
+
+      let html = '';
+      let subTotal = 0;
+      cart.forEach((item, index) => {
+          subTotal += item.price * item.qty;
+          html += `
+              <div class="cart-item">
+                  <div>
+                      <div style="font-weight: 700; font-size: 14px;">${item.title}</div>
+                      <div style="color: #16a34a; font-size: 13px;">${item.price} جنيه × ${item.qty}</div>
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                      <button type="button" onclick="changeQty(${index}, 1)" style="padding: 2px 8px; background: #e2e8f0; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">+</button>
+                      <span>${item.qty}</span>
+                      <button type="button" onclick="changeQty(${index}, -1)" style="padding: 2px 8px; background: #e2e8f0; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">-</button>
+                  </div>
+              </div>
+          `;
+      });
+      listContainer.innerHTML = html;
+
+      let discountAmount = 0;
+      if (isDiscountApplied) {
+          discountAmount = subTotal * 0.05;
+          document.getElementById('discountTotal').innerText = `-${discountAmount.toFixed(1)} جنيه`;
+          document.getElementById('discountRow').style.display = 'flex';
+      } else {
+          document.getElementById('discountRow').style.display = 'none';
+      }
+
+      const tip = parseInt(document.getElementById('tipAmount').value) || 0;
+      if (tip > 0) {
+          document.getElementById('tipTotal').innerText = `${tip} جنيه`;
+          document.getElementById('tipRow').style.display = 'flex';
+      } else {
+          document.getElementById('tipRow').style.display = 'none';
+      }
+
+      document.getElementById('subTotal').innerText = `${subTotal} جنيه`;
+      
+      const finalTotal = subTotal - discountAmount + currentDeliveryFee + tip;
+      document.getElementById('cartTotal').innerText = `${finalTotal.toFixed(1)} جنيه`;
+  }
+
+  function changeQty(index, amount) {
+      cart[index].qty += amount;
+      if (cart[index].qty <= 0) {
+          cart.splice(index, 1);
+      }
+      updateCartCount();
+      updateCartUI();
+  }
+
+  function applyPromoCode() {
+      const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const msg = document.getElementById('promoMsg');
+      
+      if (!code) return;
+      
+      if (code === userMyCode && userMyCode) {
+          msg.style.display = 'block';
+          msg.style.color = '#ef4444';
+          msg.innerText = '⚠️ لا يمكنك استخدام كود الخصم الخاص بك بنفسك.';
+          return;
+      }
+
+      isDiscountApplied = true;
+      referrerCode = code;
+      msg.style.display = 'block';
+      msg.style.color = '#16a34a';
+      msg.innerText = '✅ تم تطبيق كود الخصم بنجاح (خصم 5%)!';
+      updateCartUI();
+  }
+
+  function getStoreLocationByGPS() {
+      const status = document.getElementById('gpsStatus');
+      if (!navigator.geolocation) {
+          status.innerText = 'متصفحك لا يدعم تحديد الموقع الجغرافي.';
+          return;
+      }
+
+      status.innerText = 'جاري تحديد موقعك بدقة عبر GPS... 📍';
+      navigator.geolocation.getCurrentPosition(position => {
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          userLocationUrl = `https://maps.google.com/?q=${userLat},${userLng}`;
+          
+          const distance = calculateDistance(STORE_LAT, STORE_LNG, userLat, userLng);
+          
+          if (distance <= 3) {
+              currentDeliveryFee = 15;
+          } else if (distance <= 6) {
+              currentDeliveryFee = 25;
+          } else {
+              currentDeliveryFee = 35;
+          }
+
+          document.getElementById('deliveryTotal').innerText = `${currentDeliveryFee} جنيه (المسافة: ${distance.toFixed(1)} كم)`;
+          status.innerText = `✅ تم تحديد موقعك بنجاح! تكلفة التوصيل: ${currentDeliveryFee} جنيه`;
+          updateCartUI();
+      }, error => {
+          status.innerText = 'تعسّر تحديد موقعك. يرجى تفعيل الـ GPS ومحاولة مجدداً.';
+      }, { enableHighAccuracy: true });
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; 
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+  }
+
+  function togglePaymentInfo() {
+      const method = document.getElementById('payMethod').value;
+      const notice = document.getElementById('paymentNotice');
+      
+      if (method === 'فودافون كاش') {
+          notice.style.display = 'block';
+          notice.innerHTML = '📱 يجدر التحويل على رقم فودافون كاش التالي: <strong>01127491224</strong> وإرسال صورة الإيصال في الواتساب.';
+      } else if (method === 'إنستاباي InstaPay') {
+          notice.style.display = 'block';
+          notice.innerHTML = '💳 حساب إنستاباي (InstaPay): <strong>marketnet@instapay</strong> يرجى إرسال إيصال التحويل.';
+      } else {
+          notice.style.display = 'none';
+      }
+  }
+
+  function sendOrderToWhatsApp(event) {
+      event.preventDefault();
+      if (cart.length === 0) {
+          alert('السلة فارغة!');
+          return;
+      }
+
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+      const payMethod = document.getElementById('payMethod').value;
+      
+      let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      let discountAmount = isDiscountApplied ? subTotal * 0.05 : 0;
+      let tip = parseInt(document.getElementById('tipAmount').value) || 0;
+      let finalTotal = subTotal - discountAmount + currentDeliveryFee + tip;
+
+      let orderText = `🛒 *طلب جديد عبر ماركت نت* 🛒\n\n`;
+      orderText += `👤 *الاسم:* ${name}\n`;
+      orderText += `📞 *الهاتف:* ${phone}\n`;
+      orderText += `📍 *العنوان:* ${address}\n`;
+      if (userLocationUrl) orderText += `🗺️ *رابط الموقع (GPS):* ${userLocationUrl}\n`;
+      if (userMyCode) orderText += `🔑 *كود العميل:* ${userMyCode}\n`;
+      if (referrerCode) orderText += `🏷️ *كود الخصم المستخدم:* ${referrerCode}\n`;
+      orderText += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
+      
+      orderText += `🛍️ *المنتجات المطلوبة:*\n`;
+      cart.forEach((item, index) => {
+          orderText += `${index + 1}. ${item.title} (${item.price} ج) × ${item.qty} = ${item.price * item.qty} ج\n`;
+      });
+
+      orderText += `\n------------------\n`;
+      orderText += `🔹 إجمالي المنتجات: ${subTotal} جنيه\n`;
+      if (isDiscountApplied) orderText += `🔹 خصم الإحالة (5%): -${discountAmount.toFixed(1)} جنيه\n`;
+      orderText += `🚴 خدمة التوصيل: ${currentDeliveryFee} جنيه\n`;
+      if (tip > 0) orderText += `💙 إكرامية الديلفري: ${tip} جنيه\n`;
+      orderText += `💰 *الإجمالي النهائي: ${finalTotal.toFixed(1)} جنيه*\n`;
+
+      const encodedUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText)}`;
+      window.open(encodedUrl, '_blank');
+  }
+
   function shareStore() {
       if (!userMyCode) {
           userMyCode = generateUserCode();
           localStorage.setItem('marketnet_user_code', userMyCode);
           showUserBadge();
       }
-      
-      let baseUrl = window.location.origin + window.location.pathname;
-      const storeUrl = `${baseUrl}?ref=${userMyCode}`;
-      const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واستخدم كود الخصم الخاص بي (${userMyCode}) للحصول على خصم 5% على طلبك!\n\n${storeUrl}`;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?ref=${userMyCode}`;
       
       if (navigator.share) {
-          navigator.share({ title: 'ماركت نت', text: shareText, url: storeUrl }).catch(() => {});
+          navigator.share({
+              title: 'ماركت نت - أقوى العروض',
+              text: `تسوق من ماركت نت واستمتع بخصم 5% باستخدام كود الخصم الخاص بي: ${userMyCode}`,
+              url: shareUrl
+          }).catch(() => {});
       } else {
-          navigator.clipboard.writeText(shareText);
-          alert(`تم نسخ رابط الدعوة وكود الخصم (${userMyCode}) بنجاح!`);
+          navigator.clipboard.writeText(shareUrl);
+          alert(`تم نسخ رابط المشاركة الخاص بك!\nشارك الرابط مع أصدقائك للحصول على الخصم: ${shareUrl}`);
       }
   }
 
-  function getStoreLocationByGPS() {
-      const statusSmall = document.getElementById('gpsStatus');
-      if (!navigator.geolocation) {
-          statusSmall.innerText = '⚠️ المتصفح لا يدعم تحديد الموقع الجغرافي.';
-          return;
-      }
-      statusSmall.innerText = '🛰️ جاري تحديد موقعك عبر الـ GPS...';
-      
-      navigator.geolocation.getCurrentPosition((position) => {
-          const userLat = position.coords.latitude;
-          const userLng = position.coords.longitude;
-          
-          userLocationUrl = `https://maps.google.com/?q=${userLat},${userLng}`;
-          const distanceKm = calculateDistance(STORE_LAT, STORE_LNG, userLat, userLng);
-          
-          let calculatedFee = Math.round(20 + (distanceKm * 6));
-          if (calculatedFee < 20) calculatedFee = 20;
-          if (calculatedFee > 45) calculatedFee = 45;
-          currentDeliveryFee = calculatedFee;
-          
-          statusSmall.style.color = '#16a34a';
-          statusSmall.innerText = `✅ تم تحديد موقعك! (المسافة تقريباً ${distanceKm.toFixed(1)} كم) - التوصيل: ${currentDeliveryFee} جنيه`;
-          
-          updateCartUI();
-      }, () => {
-          statusSmall.style.color = '#ef4444';
-          statusSmall.innerText = '⚠️ تعذر الوصول للموقع. يرجى السماح بالوصول للـ GPS.';
-      }, { timeout: 10000 });
-  }
-
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; 
-      const dLat = deg2rad(lat2 - lat1);
-      const dLon = deg2rad(lon2 - lon1);
-      const a = 
-          Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-          Math.sin(dLon/2) * Math.sin(dLon/2); 
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-      return R * c; 
-  }
-
-  function deg2rad(deg) { return deg * (Math.PI/180); }
-
-  async function applyPromoCode() {
-      const codeInput = document.getElementById('promoCodeInput').value.trim().toUpperCase();
-      const msg = document.getElementById('promoMsg');
-      const codeRegex = /^[0-9]{4}[A-Z]{1}$/;
-      if (!codeRegex.test(codeInput)) {
-          isDiscountApplied = false;
-          referrerCode = "";
-          msg.style.display = 'block';
-          msg.style.color = '#ef4444';
-          msg.innerText = '⚠️ الكود غير صحيح! (مثال: 1234A)';
-          updateCartUI();
-          return;
-      }
-      isDiscountApplied = true;
-      referrerCode = codeInput;
-      msg.style.display = 'block';
-      msg.style.color = '#16a34a';
-      msg.innerText = `🎉 تم تطبيق كود الخصم بنجاح (خصم 5%)!`;
-      updateCartUI();
-  }
-
-  function togglePaymentInfo() {
-      const method = document.getElementById('payMethod').value;
-      const notice = document.getElementById('paymentNotice');
-      if (method === 'فودافون كاش') {
-          notice.innerText = '📱 يرجى التحويل على رقم فودافون كاش: 01127491224 وإرفاق لقطة التحويل مع الطلب.';
-          notice.style.display = 'block';
-      } else if (method === 'إنستاباي InstaPay') {
-          notice.innerText = '💳 يرجى التحويل على حساب / رقم إنستاباي: 01127491224 وإرفاق لقطة التحويل مع الطلب.';
-          notice.style.display = 'block';
-      } else {
-          notice.style.display = 'none';
+  function checkUrlReferral() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ref = urlParams.get('ref');
+      if (ref && ref !== userMyCode) {
+          referrerCode = ref.toUpperCase();
+          isDiscountApplied = true;
+          setTimeout(() => {
+              openCart();
+              document.getElementById('promoCodeInput').value = referrerCode;
+              document.getElementById('promoMsg').style.display = 'block';
+              document.getElementById('promoMsg').style.color = '#16a34a';
+              document.getElementById('promoMsg').innerText = `✅ تم تفعيل كود الإحالة (${referrerCode}) وتطبيق خصم 5% تلقائياً!`;
+              updateCartUI();
+          }, 1000);
       }
   }
 
-  function updateCartUI() {
-      const count = cart.reduce((sum, item) => sum + item.qty, 0);
-      document.getElementById('cartCount').innerText = count;
-      const itemsList = document.getElementById('cartItemsList');
-      let subtotal = 0;
-      
-      if (cart.length === 0) {
-          itemsList.innerHTML = '<p style="text-align:center;">السلة فارغة</p>';
-          document.getElementById('subTotal').innerText = '0 جنيه';
-          document.getElementById('cartTotal').innerText = '0 جنيه';
-          document.getElementById('discountRow').style.display = 'none';
-          document.getElementById('tipRow').style.display = 'none';
-          document.getElementById('deliveryTotal').innerText = 'حدد موقعك عبر الـ GPS';
-      } else {
-          let html = '';
-          cart.forEach((item) => {
-              const itemTotal = item.price * item.qty;
-              subtotal += itemTotal;
-              html += `
-                  <div class="cart-item">
-                      <div>
-                          <strong>${item.name}</strong><br>
-                          <small>${item.price} × ${item.qty} = ${itemTotal} جنيه</small>
-                      </div>
-                      <div>
-                          <button onclick="changeQty('${item.id}', -1)" style="padding: 2px 8px;">-</button>
-                          <span style="margin: 0 5px;">${item.qty}</span>
-                          <button onclick="changeQty('${item.id}', 1)" style="padding: 2px 8px;">+</button>
-                      </div>
-                  </div>
-              `;
-          });
-          itemsList.innerHTML = html;
-          document.getElementById('deliveryTotal').innerText = `${currentDeliveryFee} جنيه`;
-          const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
-          let discountAmount = 0;
-          if (isDiscountApplied) {
-              discountAmount = Math.round(subtotal * 0.05);
-              document.getElementById('discountRow').style.display = 'flex';
-              document.getElementById('discountTotal').innerText = `-${discountAmount} جنيه`;
-          } else {
-              document.getElementById('discountRow').style.display = 'none';
-          }
-          if (tipFee > 0) {
-              document.getElementById('tipRow').style.display = 'flex';
-              document.getElementById('tipTotal').innerText = `${tipFee} جنيه`;
-          } else {
-              document.getElementById('tipRow').style.display = 'none';
-          }
-          const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
-          document.getElementById('subTotal').innerText = `${subtotal} جنيه`;
-          document.getElementById('cartTotal').innerText = `${finalTotal} جنيه`;
-      }
-  }
-
-  function sendOrderToWhatsApp(e) {
-      e.preventDefault();
-      if (cart.length === 0) {
-          alert('السلة فارغة!');
-          return;
-      }
-      const name = document.getElementById('custName').value.trim();
-      const phone = document.getElementById('custPhone').value.trim();
-      const address = document.getElementById('custAddress').value.trim();
-      const payMethod = document.getElementById('payMethod').value;
-      
-      let message = `🛒 *طلب جديد من متجر ماركت نت*\n\n`;
-      message += `👤 *الاسم:* ${name}\n`;
-      message += `📞 *الهاتف:* ${phone}\n`;
-      message += `📍 *العنوان:* ${address}\n`;
-      if (userLocationUrl) {
-          message += `🗺️ *رابط الموقع على الخريطة (GPS):*\n${userLocationUrl}\n`;
-      }
-      message += `💳 *طريقة الدفع:* ${payMethod}\n`;
-      if (userMyCode) message += `🔑 *كود العميل:* ${userMyCode}\n`;
-      if (referrerCode) message += `🎁 *كود خصم الإحالة المستخدم:* ${referrerCode}\n`;
-      
-      message += `\n📦 *المنتجات المطلوبة:*\n`;
-      let subtotal = 0;
-      cart.forEach((item, index) => {
-          const itemTotal = item.price * item.qty;
-          subtotal += itemTotal;
-          message += `${index + 1}. ${item.name} (${item.qty} × ${item.price} ج) = ${itemTotal} ج\n`;
-      });
-      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
-      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
-      const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
-      message += `\n------------------\n`;
-      message += `إجمالي المنتجات: ${subtotal} ج\n`;
-      if (discountAmount > 0) message += `الخصم (5%): -${discountAmount} ج\n`;
-      message += `التوصيل (حسب الموقع): ${currentDeliveryFee} ج\n`;
-      if (tipFee > 0) message += `إكرامية الديلفري: ${tipFee} ج\n`;
-      message += `*الإجمالي النهائي:* ${finalTotal} ج\n`;
-      
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+  function goHome() {
+      filterCategory('offers');
   }
 </script>
 </body>
