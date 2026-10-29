@@ -32,7 +32,7 @@
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
         
         .img-preview { width: 100%; height: 120px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 8px; overflow: hidden; background: #f8fafc; }
         .img-preview img { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
@@ -73,7 +73,6 @@
     <div class="login-box">
         <h2>🔒 تسجيل دخول الأدمن</h2>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">أدخل رقم الهاتف وكلمة المرور</p>
-        <!-- تم إخفاء الأرقام وجعلها في الـ placeholder -->
         <input type="tel" id="adminPhoneInput" placeholder="أدخل رقم الهاتف">
         <input type="password" id="adminPassInput" placeholder="أدخل كلمة المرور">
         <button onclick="attemptLogin()">دخول 🔑</button>
@@ -132,6 +131,27 @@
         <div id="ocrStatus" style="font-weight: bold; color: #0369a1; text-align: center; font-size: 14px;"></div>
     </div>
 
+    <!-- قسم رفع وإدارة فيديوهات العروض اليومية (نظام التيك توك) -->
+    <div class="card">
+        <h3>🎥 إضافة فيديو عرض جديد (TikTok Style)</h3>
+        <form id="addVideoForm" onsubmit="saveVideoOffer(event)">
+            <div class="form-group">
+                <label>عنوان العرض بالفيديو:</label>
+                <input type="text" id="vTitle" required placeholder="مثال: عرض جبنة رومي حصرية">
+            </div>
+            <div class="form-group">
+                <label>وصف العرض:</label>
+                <input type="text" id="vDesc" required placeholder="مثال: اشتري كيلو واحصل على نصف كيلو مجاناً">
+            </div>
+            <div class="form-group">
+                <label>اختر ملف الفيديو (MP4):</label>
+                <input type="file" id="vFile" accept="video/mp4,video/*" required onchange="previewVideoFile(this)">
+                <small style="color: #64748b; display: block; margin-top: 4px;">ملاحظة: سيتم رفع الفيديو وعرضه رأسيًا في صفحة العروض اليومية.</small>
+            </div>
+            <button type="submit" class="btn-submit" id="saveVideoBtn" style="background: #0284c7;">نشر الفيديو 🚀</button>
+        </form>
+    </div>
+
     <!-- نموذج إضافة منتج فردي -->
     <div class="card">
         <h3>➕ إضافة منتج جديد يدوياً</h3>
@@ -165,9 +185,9 @@
     </div>
 
     <!-- قائمة المنتجات المتاحة والبحث -->
-    <div class="card">
+    <div class="card" style="grid-column: 1 / -1;">
         <h3>
-            <span>📦 المنتجات المتاحة</span>
+            <span>📦 المنتجات المتاحة (مرتبة أبجديًا)</span>
             <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                 <input type="text" id="searchProductInput" placeholder="🔍 ابحث عن منتج..." oninput="loadAdminProducts()" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 140px;">
                 <select id="filterCategoryAdmin" onchange="loadAdminProducts()" style="padding: 4px 8px; font-size: 12px; border-radius: 6px;">
@@ -186,22 +206,14 @@
         <div id="adminProductsList" style="max-height: 450px; overflow-y: auto;">جاري التحميل...</div>
     </div>
 
-    <!-- إدارة طلبات واستئذان الدخول والصلاحيات -->
-    <div class="card" style="grid-column: 1 / -1;" id="requestsCard">
-        <h3>👥 طلبات الدخول المعلقة للمتجر</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>رقم الهاتف</th>
-                    <th>حالة الحساب</th>
-                    <th>الإجراءات والتحكم</th>
-                </tr>
-            </thead>
-            <tbody id="usersTableBody">
-                <tr><td colspan="3" style="text-align: center;">جاري التحميل...</td></tr>
-            </tbody>
-        </table>
+    <!-- إدارة الفيديوهات المرفوعة -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <h3>🎥 فيديوهات العروض المرفوعة حالياً</h3>
+        <div id="adminVideosList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+            جاري تحميل الفيديوهات...
+        </div>
     </div>
+
 </div>
 
 <script>
@@ -210,6 +222,7 @@
 
   let currentBase64Image = "";
   let editBase64Image = "";
+  let currentVideoBase64 = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -289,6 +302,17 @@
       }
   }
 
+  function previewVideoFile(input) {
+      if (input.files && input.files[0]) {
+          const file = input.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              currentVideoBase64 = e.target.result; // تخزين الفيديو كـ Base64 أو رابط مؤقت
+          };
+          reader.readAsDataURL(file);
+      }
+  }
+
   function compressAndBase64(src, maxWidth, quality, callback) {
       const img = new Image();
       img.src = src;
@@ -308,114 +332,26 @@
       };
   }
 
-  async function processOcrSheet(input) {
-      const file = input.files[0];
-      const statusEl = document.getElementById('ocrStatus');
-      if (!file) return;
-
-      statusEl.innerText = "⏳ جاري قراءة الورقة وتحليل النصوص (OCR)... ثوانٍ معدودة";
-
-      try {
-          const { data: { text } } = await Tesseract.recognize(file, 'ara+eng');
-          const lines = text.split('\n').filter(l => l.trim().length > 2);
-
-          let addedCount = 0;
-          for (let i = 0; i < lines.length; i++) {
-              let line = lines[i].trim();
-              statusEl.innerText = `🔍 جاري تحليل السطر: ${line}`;
-
-              let name = line.split(/[-|]/)[0].replace(/[0-9]/g, '').trim();
-              let priceMatch = line.match(/\d+/);
-              let price = priceMatch ? parseInt(priceMatch[0]) : 0;
-
-              if (!name || name.length < 2) continue;
-
-              let autoImg = `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`;
-
-              await db.collection('products').add({
-                  name: name,
-                  price: price,
-                  category: 'grocery',
-                  image: autoImg,
-                  pinned: false,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-              addedCount++;
-              await new Promise(r => setTimeout(r, 300));
-          }
-
-          statusEl.innerText = `✅ تمت الإضافة بنجاح! تم إضافة ${addedCount} منتج من الورقة.`;
-          loadAdminProducts();
-      } catch (err) {
-          console.error(err);
-          statusEl.innerText = "❌ حدث خطأ أثناء قراءة الورقة، تأكد من وضوح الصورة.";
-      }
-  }
-
   async function attemptLogin() {
       const phoneInput = document.getElementById('adminPhoneInput').value.trim();
       const passInput = document.getElementById('adminPassInput').value.trim();
       const statusMsg = document.getElementById('loginStatusMsg');
 
-      if (!phoneInput) {
-          statusMsg.style.color = '#ef4444';
-          statusMsg.innerText = 'الرجاء إدخال رقم الهاتف!';
-          return;
-      }
-
-      if (phoneInput === MAIN_ADMIN_PHONE) {
-          if (passInput === MAIN_ADMIN_PASS) {
-              localStorage.setItem('admin_logged_phone', phoneInput);
-              document.getElementById('loginOverlay').style.display = 'none';
-              initAdminDashboard();
-          } else {
-              statusMsg.style.color = '#ef4444';
-              statusMsg.innerText = '❌ كلمة المرور غير صحيحة للمالك!';
-          }
-          return;
-      }
-
-      statusMsg.style.color = '#0284c7';
-      statusMsg.innerText = 'جاري التحقق من حالة الحساب...';
-
-      const userDoc = await db.collection('admin_access_requests').doc(phoneInput).get();
-      if (userDoc.exists) {
-          const userData = userDoc.data();
-          if (userData.status === 'approved') {
-              localStorage.setItem('admin_logged_phone', phoneInput);
-              document.getElementById('loginOverlay').style.display = 'none';
-              initAdminDashboard();
-          } else {
-              statusMsg.style.color = '#d97706';
-              statusMsg.innerText = '⏳ طلبك بانتظار موافقة المسؤول الأساسي.';
-          }
+      if (phoneInput === MAIN_ADMIN_PHONE && passInput === MAIN_ADMIN_PASS) {
+          localStorage.setItem('admin_logged_phone', phoneInput);
+          document.getElementById('loginOverlay').style.display = 'none';
+          initAdminDashboard();
       } else {
-          await db.collection('admin_access_requests').doc(phoneInput).set({
-              phone: phoneInput,
-              status: 'pending',
-              requestedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          statusMsg.style.color = '#d97706';
-          statusMsg.innerText = '📩 تم إرسال طلب دخولك للمسؤول. انتظر الموافقة.';
+          statusMsg.style.color = '#ef4444';
+          statusMsg.innerText = '❌ بيانات الدخول غير صحيحة!';
       }
   }
 
-  async function checkAdminAuth() {
+  function checkAdminAuth() {
       const loggedPhone = localStorage.getItem('admin_logged_phone');
-      if (!loggedPhone) return;
-
       if (loggedPhone === MAIN_ADMIN_PHONE) {
           document.getElementById('loginOverlay').style.display = 'none';
           initAdminDashboard();
-          return;
-      }
-
-      const userDoc = await db.collection('admin_access_requests').doc(loggedPhone).get();
-      if (userDoc.exists && userDoc.data().status === 'approved') {
-          document.getElementById('loginOverlay').style.display = 'none';
-          initAdminDashboard();
-      } else {
-          localStorage.removeItem('admin_logged_phone');
       }
   }
 
@@ -425,159 +361,189 @@
   }
 
   function initAdminDashboard() {
-      const loggedPhone = localStorage.getItem('admin_logged_phone');
-      document.getElementById('currentAdminDisplay').innerText = `أهلاً بك (${loggedPhone})`;
-
-      if (loggedPhone !== MAIN_ADMIN_PHONE) {
-          document.getElementById('requestsCard').style.display = 'none';
-      } else {
-          loadAccessRequests();
-      }
-
       loadAdminProducts();
+      loadAdminVideos();
   }
 
-  function loadAccessRequests() {
-      db.collection('admin_access_requests').onSnapshot((snapshot) => {
-          const tbody = document.getElementById('usersTableBody');
-          if (snapshot.empty) {
-              tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b;">لا توجد طلبات دخول معلقة.</td></tr>`;
-              return;
-          }
-
-          let html = "";
-          snapshot.forEach(doc => {
-              const data = doc.data();
-              if (data.phone === MAIN_ADMIN_PHONE) return;
-
-              let statusBadge = data.status === 'approved' ? '<span style="color:green; font-weight:bold;">مقبول ✅</span>' : '<span style="color:orange; font-weight:bold;">قيد الانتظار ⏳</span>';
-
-              html += `<tr>
-                  <td>${data.phone}</td>
-                  <td>${statusBadge}</td>
-                  <td>
-                      ${data.status !== 'approved' ? `<button class="btn-approve" onclick="approveUser('${doc.id}')">قبول الطلب</button>` : ''}
-                      <button class="btn-block" onclick="deleteUserRequest('${doc.id}')">حذف / رفض</button>
-                  </td>
-              </tr>`;
-          });
-          tbody.innerHTML = html;
-      });
-  }
-
-  function approveUser(id) {
-      db.collection('admin_access_requests').doc(id).update({ status: 'approved' }).then(() => {
-          alert('✅ تم قبول المستخدم بنجاح!');
-      });
-  }
-
-  function deleteUserRequest(id) {
-      if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-          db.collection('admin_access_requests').doc(id).delete();
-      }
-  }
-
-  async function saveProduct(event) {
-      event.preventDefault();
-      const saveBtn = document.getElementById('saveBtn');
-      saveBtn.disabled = true;
-      saveBtn.innerText = 'جاري الحفظ...';
-
+  // --- حفظ وعرض المنتجات مع الترتيب الأبجدي وتجميع المتشابهات ---
+  async function saveProduct(e) {
+      e.preventDefault();
       const name = document.getElementById('pName').value.trim();
-      const price = Number(document.getElementById('pPrice').value.trim());
-      const category = document.getElementById('pCat').value;
+      const price = parseFloat(document.getElementById('pPrice').value);
+      const cat = document.getElementById('pCat').value;
       const pinned = document.getElementById('pPinned').checked;
-      const image = currentBase64Image || 'https://via.placeholder.com/150';
+      const img = currentBase64Image || 'https://via.placeholder.com/150?text=ماركت+نت';
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.innerText = "⏳ جاري الحفظ...";
+      saveBtn.disabled = true;
 
       try {
           await db.collection('products').add({
-              name, price, category, image, pinned,
+              name,
+              price,
+              cat,
+              pinned,
+              img,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-
-          alert('✅ تم حفظ المنتج بنجاح!');
           document.getElementById('addProductForm').reset();
+          currentBase64Image = "";
           document.getElementById('imgPreview').style.display = 'none';
           document.getElementById('previewText').style.display = 'inline';
-          currentBase64Image = "";
+          alert('✅ تم إضافة المنتج بنجاح!');
           loadAdminProducts();
       } catch (err) {
-          alert('حدث خطأ أثناء الحفظ: ' + err.message);
+          console.error(err);
+          alert('❌ حدث خطأ أثناء الحفظ.');
       } finally {
+          saveBtn.innerText = "حفظ المنتج 💾";
           saveBtn.disabled = false;
-          saveBtn.innerText = 'حفظ المنتج 💾';
       }
   }
 
-  function loadAdminProducts() {
-      const searchVal = document.getElementById('searchProductInput').value.trim().toLowerCase();
+  async function loadAdminProducts() {
+      const listEl = document.getElementById('adminProductsList');
+      const searchQuery = document.getElementById('searchProductInput').value.trim().toLowerCase();
       const filterCat = document.getElementById('filterCategoryAdmin').value;
-      const container = document.getElementById('adminProductsList');
 
-      db.collection('products').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-          if (snapshot.empty) {
-              container.innerHTML = '<p style="text-align: center; color: #64748b; padding: 20px;">لا توجد منتجات مسجلة حالياً.</p>';
+      try {
+          const snapshot = await db.collection('products').get();
+          let products = [];
+          snapshot.forEach(doc => {
+              products.push({ id: doc.id, ...doc.data() });
+          });
+
+          // الترتيب الأبجدي التلقائي (وتجميع المنتجات المتشابهة في الاسم وراء بعضها)
+          products.sort((a, b) => {
+              let nameA = a.name || '';
+              let nameB = b.name || '';
+              return nameA.localeCompare(nameB, 'ar');
+          });
+
+          // فلترة حسب البحث والقسم
+          if (filterCat !== 'all') {
+              products = products.filter(p => p.cat === filterCat);
+          }
+          if (searchQuery) {
+              products = products.filter(p => p.name && p.name.toLowerCase().includes(searchQuery));
+          }
+
+          if (products.length === 0) {
+              listEl.innerHTML = '<p style="text-align:center; padding:20px; color:#64748b;">لا توجد منتجات متاحة.</p>';
               return;
           }
 
-          let html = "";
-          snapshot.forEach(doc => {
-              const data = doc.data();
-
-              if (filterCat !== 'all' && data.category !== filterCat) return;
-              if (searchVal && !data.name.toLowerCase().includes(searchVal)) return;
-
-              let catLabel = categoryNames[data.category] || data.category;
-
+          let html = '';
+          products.forEach(p => {
               html += `
                   <div class="product-item">
                       <div class="product-info">
                           <div class="product-img-wrapper">
-                              <img src="${data.image || 'https://via.placeholder.com/150'}" class="product-img" alt="${data.name}">
+                              <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img">
                           </div>
                           <div>
-                              <strong style="font-size: 14px; color: #0f172a;">${data.name}</strong><br>
-                              <span style="color: #16a34a; font-weight: bold; font-size: 13px;">${data.price} جنيه</span>
-                              <div style="margin-top: 3px;">
-                                  <span class="badge-cat">${catLabel}</span>
-                                  ${data.pinned ? '<span class="badge-pinned">📌 مثبت</span>' : ''}
-                              </div>
+                              <strong>${p.name}</strong><br>
+                              <span class="badge-cat">${categoryNames[p.cat] || p.cat}</span>
+                              <span style="color: #16a34a; font-weight: bold;">${p.price} جنيه</span>
+                              ${p.pinned ? '<span class="badge-pinned">📌 مثبت</span>' : ''}
                           </div>
                       </div>
                       <div>
-                          <button class="btn-edit" onclick="openEditModal('${doc.id}', '${encodeURIComponent(data.name)}', ${data.price}, '${data.category}', '${data.image || ''}')">تعديل</button>
-                          <button class="btn-delete" onclick="deleteProduct('${doc.id}')">حذف</button>
+                          <button class="btn-edit" onclick="openEditModal('${p.id}', '${p.name}', ${p.price}, '${p.cat}', '${p.img}')">تعديل</button>
+                          <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف</button>
                       </div>
                   </div>
               `;
           });
-
-          container.innerHTML = html || '<p style="text-align: center; color: #64748b; padding: 20px;">لا توجد منتجات مطابقة للبحث.</p>';
-      });
-  }
-
-  function deleteProduct(id) {
-      if (confirm('هل أنت متأكد من حذف هذا المنتج نهائياً؟')) {
-          db.collection('products').doc(id).delete();
+          listEl.innerHTML = html;
+      } catch (err) {
+          console.error(err);
       }
   }
 
-  function openEditModal(id, name, price, category, image) {
+  async function deleteProduct(id) {
+      if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+          await db.collection('products').doc(id).delete();
+          loadAdminProducts();
+      }
+  }
+
+  // --- إدارة فيديوهات العروض اليومية (رفع وعرض) ---
+  async function saveVideoOffer(e) {
+      e.preventDefault();
+      const title = document.getElementById('vTitle').value.trim();
+      const desc = document.getElementById('vDesc').value.trim();
+      const videoUrl = currentVideoBase64;
+
+      if (!videoUrl) {
+          alert('الرجاء اختيار ملف فيديو أولاً!');
+          return;
+      }
+
+      const btn = document.getElementById('saveVideoBtn');
+      btn.innerText = "⏳ جاري رفع الفيديو...";
+      btn.disabled = true;
+
+      try {
+          await db.collection('daily_videos').add({
+              title,
+              desc,
+              videoUrl,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          document.getElementById('addVideoForm').reset();
+          currentVideoBase64 = "";
+          alert('✅ تم نشر فيديو العرض بنجاح وسيظهر فوراً في المتجر!');
+          loadAdminVideos();
+      } catch (err) {
+          console.error(err);
+          alert('❌ حدث خطأ أثناء رفع الفيديو.');
+      } finally {
+          btn.innerText = "نشر الفيديو 🚀";
+          btn.disabled = false;
+      }
+  }
+
+  async function loadAdminVideos() {
+      const vListEl = document.getElementById('adminVideosList');
+      try {
+          const snapshot = await db.collection('daily_videos').get();
+          if (snapshot.empty) {
+              vListEl.innerHTML = '<p style="color:#64748b; grid-column:1/-1;">لا توجد فيديوهات عروض مرفوعة حالياً.</p>';
+              return;
+          }
+          let html = '';
+          snapshot.forEach(doc => {
+              const v = doc.data();
+              html += `
+                  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px; text-align:center;">
+                      <video src="${v.videoUrl}" style="width:100%; height:180px; object-fit:cover; border-radius:8px;" controls muted></video>
+                      <h4 style="font-size:14px; margin-top:8px; color:#0f172a;">${v.title}</h4>
+                      <p style="font-size:12px; color:#64748b; margin-bottom:8px;">${v.desc}</p>
+                      <button class="btn-delete" onclick="deleteVideo('${doc.id}')" style="width:100%;">حذف الفيديو</button>
+                  </div>
+              `;
+          });
+          vListEl.innerHTML = html;
+      } catch (err) {
+          console.error(err);
+      }
+  }
+
+  async function deleteVideo(id) {
+      if (confirm('هل تريد حذف فيديو العرض هذا؟')) {
+          await db.collection('daily_videos').doc(id).delete();
+          loadAdminVideos();
+      }
+  }
+
+  function openEditModal(id, name, price, cat, img) {
       document.getElementById('editProductId').value = id;
-      document.getElementById('editPName').value = decodeURIComponent(name);
+      document.getElementById('editPName').value = name;
       document.getElementById('editPPrice').value = price;
-      document.getElementById('editPCat').value = category;
-      
-      const imgPreview = document.getElementById('editImgPreview');
-      if (image) {
-          imgPreview.src = image;
-          imgPreview.style.display = 'block';
-          editBase64Image = image;
-      } else {
-          imgPreview.style.display = 'none';
-          editBase64Image = "";
-      }
-
+      document.getElementById('editPCat').value = cat;
+      document.getElementById('editImgPreview').src = img;
       document.getElementById('editModal').style.display = 'flex';
   }
 
@@ -585,24 +551,22 @@
       document.getElementById('editModal').style.display = 'none';
   }
 
-  async function updateProductData(event) {
-      event.preventDefault();
+  async function updateProductData(e) {
+      e.preventDefault();
       const id = document.getElementById('editProductId').value;
       const name = document.getElementById('editPName').value.trim();
-      const price = Number(document.getElementById('editPPrice').value.trim());
-      const category = document.getElementById('editPCat').value;
-
-      const updateData = { name, price, category };
-      if (editBase64Image) {
-          updateData.image = editBase64Image;
-      }
+      const price = parseFloat(document.getElementById('editPPrice').value);
+      const cat = document.getElementById('editPCat').value;
+      const img = editBase64Image || document.getElementById('editImgPreview').src;
 
       try {
-          await db.collection('products').doc(id).update(updateData);
-          alert('✅ تم تحديث المنتج بنجاح!');
+          await db.collection('products').doc(id).update({ name, price, cat, img });
           closeEditModal();
+          alert('✅ تم التعديل بنجاح!');
+          loadAdminProducts();
       } catch (err) {
-          alert('حدث خطأ أثناء التحديث: ' + err.message);
+          console.error(err);
+          alert('❌ حدث خطأ أثناء التعديل.');
       }
   }
 </script>
