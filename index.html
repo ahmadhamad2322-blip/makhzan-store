@@ -43,7 +43,7 @@
         /* بانر الترحيب */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
         
-        /* --- قسم فيديوهات التيك توك للعروض اليومية --- */
+        /* --- قسم فيديوهات التيك توك للعروض اليومية (رأسي وبحجم كامل مع خاصية الإيقاف عند التمرير) --- */
         .tiktok-section { display: none; margin-bottom: 30px; }
         .tiktok-container {
             display: flex;
@@ -187,21 +187,25 @@
 </div>
 
 <div class="container">
+    <!-- خانة البحث عن المنتجات -->
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 ابحث عن أي منتج هنا..." oninput="handleSearch()">
     </div>
 
+    <!-- بانر الترحيب -->
     <div class="banner" id="mainBanner">
         <h2>أهلاً بك في ماركت نت! 🎁</h2>
         <p>كل اللي تحتاجه ست البيت موجود بأقوي العروض</p>
     </div>
 
+    <!-- بانر القسم -->
     <div class="category-hero-banner" id="categoryHero">
         <div class="category-hero-overlay">
             <div class="category-hero-title" id="categoryHeroTitle">اسم القسم</div>
         </div>
     </div>
 
+    <!-- قسم فيديوهات العروض اليومية (بنظام تيك توك - يظهر في العروض اليومية فقط) -->
     <div class="tiktok-section" id="tiktokSection">
         <h3 style="margin-bottom: 15px;">🎥 فيديوهات العروض اليومية</h3>
         <div class="tiktok-container" id="tiktokContainer" onscroll="handleVideoAutostop()">
@@ -218,6 +222,7 @@
 
 <a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
 
+<!-- نافذة السلة وإكمال الطلب -->
 <div class="modal" id="cartModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -228,6 +233,7 @@
         <div id="cartItemsList"></div>
         <hr style="margin: 15px 0;">
         
+        <!-- كود الخصم -->
         <div class="form-group">
             <label>كود الخصم أو الإحالة:</label>
             <div class="promo-box">
@@ -351,7 +357,7 @@
           showUserBadge();
       }
       checkUrlReferral();
-      loadAllDataOptimized();
+      loadAllProductsFromFirebase();
   };
 
   function showUserBadge() {
@@ -385,13 +391,13 @@
       }
   }
 
-  // تحميل محسّن وسريع للغاية للبيانات لضمان عدم تعليق المتصفح
-  async function loadAllDataOptimized() {
+  // تحميل المنتجات مع ترتيبها أبجدياً وتجميع المنتجات المتشابهة ورا بعضها
+  async function loadAllProductsFromFirebase() {
       try {
           const snapshot = await db.collection("products").get();
           allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          
-          // ترتيب المنتجات أبجدياً حسب الاسم لتظهر المنتجات المتشابهة ورا بعضها
+
+          // ترتيب أبجدي ذكي حسب الاسم بحيث المنتجات المتشابهة تظهر ورا بعضها
           allProducts.sort((a, b) => {
               let nameA = (a.title || "").trim();
               let nameB = (b.title || "").trim();
@@ -441,7 +447,6 @@
   function renderProducts(productsList) {
       const container = document.getElementById('productsContainer');
       
-      // تصفية المنتجات حسب القسم المحدد
       let filtered = productsList;
       if (currentCategory === 'offers') {
           filtered = productsList.filter(p => p.isOffer === true || p.category === 'offers');
@@ -450,7 +455,7 @@
       }
 
       if (filtered.length === 0) {
-          container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 30px;">عريضة المنتجات فارغة حالياً في هذا القسم.</p>`;
+          container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 30px;">لا توجد منتجات متاحة حالياً في هذا القسم.</p>`;
           return;
       }
 
@@ -563,7 +568,6 @@
   }
 
   function addToCart(id, title, price, img, event) {
-      // تأثير بصري سريع لإضافة المنتج للسلة
       const btn = event.target;
       const card = btn.closest('.product-card');
       const imgElem = card.querySelector('.product-img');
