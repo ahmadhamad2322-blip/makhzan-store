@@ -43,7 +43,7 @@
         /* بانر الترحيب */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
         
-        /* --- قسم فيديوهات التيك توك للعروض اليومية (رأسي وبحجم كامل) --- */
+        /* --- قسم فيديوهات التيك توك للعروض اليومية (رأسي وبحجم كامل مع خاصية الإيقاف عند التمرير) --- */
         .tiktok-section { display: none; margin-bottom: 30px; }
         .tiktok-container {
             display: flex;
@@ -75,6 +75,7 @@
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             padding: 20px 15px;
             color: white;
+            pointer-events: none;
         }
         .tiktok-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
         .tiktok-desc { font-size: 13px; color: #cbd5e1; margin-bottom: 10px; }
@@ -207,9 +208,8 @@
     <!-- قسم فيديوهات العروض اليومية (بنظام تيك توك - يظهر في العروض اليومية فقط) -->
     <div class="tiktok-section" id="tiktokSection">
         <h3 style="margin-bottom: 15px;">🎥 فيديوهات العروض اليومية</h3>
-        <div class="tiktok-container" id="tiktokContainer">
-            <!-- سيتم جلب وعرض الفيديوهات من قاعدة البيانات تلقائياً، أو ترك مكان جاهز لرفعها من لوحة التحكم -->
-            <div class="no-videos-msg">لم يتم رفع فيديوهات عروض اليوم بعد. (يمكنك إضافتها ورفعها من لوحة التحكم الخاصة بك)</div>
+        <div class="tiktok-container" id="tiktokContainer" onscroll="handleVideoAutostop()">
+            <div class="no-videos-msg">جاري تحميل فيديوهات العروض...</div>
         </div>
     </div>
 
@@ -412,7 +412,7 @@
           return;
       }
 
-      // ترتيب المنتجات أبجديًا باللغة العربية بحيث تتجمع الأصناف المتشابهة وراء بعضها تماماً (مثل الجبن، العسل، إلخ)
+      // الترتيب الأبجدي التلقائي (وتجميع الأصناف المتشابهة مثل الجبن والعسل وراء بعضها)
       products.sort((a, b) => {
           let nameA = a.name || '';
           let nameB = b.name || '';
@@ -467,9 +467,10 @@
       // التحكم في ظهور قسم فيديوهات التيك توك (يظهر في "العروض اليومية" فقط)
       if (cat === 'offers') {
           tiktokSec.style.display = 'block';
-          loadTiktokVideosFromDB(); // جلب الفيديوهات إن وجدت من لوحة التحكم
+          loadTiktokVideosFromDB(); // جلب الفيديوهات المرفوعة من لوحة التحكم
       } else {
           tiktokSec.style.display = 'none';
+          stopAllVideos(); // إيقاف الفيديوهات عند الانتقال لقسم آخر
       }
 
       if (cat === 'all' || !categoryImages[cat]) {
@@ -485,7 +486,7 @@
           document.getElementById('sectionTitle').innerText = categoryImages[cat].title;
           
           if (cat === 'offers') {
-              renderProducts(allProducts); // العروض اليومية تعرض كل المنتجات أو المنتجات المميزة
+              renderProducts(allProducts); 
           } else {
               const filtered = allProducts.filter(p => p.cat === cat);
               renderProducts(filtered);
@@ -493,16 +494,19 @@
       }
   }
 
-  // دالة لجلب وعرض فيديوهات التيك توك من قاعدة البيانات (جاهزة للربط مع لوحة التحكم)
-  function loadTiktokVideosFromDB() {
+  // جلب وعرض فيديوهات العروض المرفوعة من لوحة التحكم عبر Firebase
+  async function loadTiktokVideosFromDB() {
       const tContainer = document.getElementById('tiktokContainer');
-      // يمكنك جلب مجموعة الفيديوهات من فايربيست هنا لاحقاً وعرضها بهذا الشكل:
-      let uploadedVideos = []; 
-
-      if (uploadedVideos.length > 0) {
-          tContainer.innerHTML = '';
-          uploadedVideos.forEach(v => {
-              tContainer.innerHTML += `
+      try {
+          const snapshot = await db.collection('daily_videos').get();
+          if (snapshot.empty) {
+              tContainer.innerHTML = `<div class="no-videos-msg">🎥 لا توجد فيديوهات عروض مرفوعة حالياً من لوحة التحكم.</div>`;
+              return;
+          }
+          let html = '';
+          snapshot.forEach(doc => {
+              const v = doc.data();
+              html += `
                   <div class="tiktok-card">
                       <video class="tiktok-video" src="${v.videoUrl}" controls loop muted playsinline></video>
                       <div class="tiktok-overlay">
@@ -512,9 +516,32 @@
                   </div>
               `;
           });
-      } else {
-          tContainer.innerHTML = `<div class="no-videos-msg">🎥 قسم فيديوهات العروض جاهز. يمكنك رفع وتحديث فيديوهات التيك توك من لوحة التحكم الخاصة بك لتظهر هنا تلقائياً.</div>`;
+          tContainer.innerHTML = html;
+      } catch (err) {
+          console.error(err);
+          tContainer.innerHTML = `<div class="no-videos-msg">❌ حدث خطأ في تحميل الفيديوهات.</div>`;
       }
+  }
+
+  // خاصية إيقاف الفيديو (Stop) تلقائياً عندما يتحرك العميل ويبعد عنه
+  function handleVideoAutostop() {
+      const container = document.getElementById('tiktokContainer');
+      const videos = container.querySelectorAll('video');
+      const containerRect = container.getBoundingClientRect();
+
+      videos.forEach(video => {
+          const rect = video.getBoundingClientRect();
+          if (rect.left < containerRect.left - 100 || rect.right > containerRect.right + 100) {
+              if (!video.paused) {
+                  video.pause();
+              }
+          }
+      });
+  }
+
+  function stopAllVideos() {
+      const videos = document.querySelectorAll('.tiktok-video');
+      videos.forEach(v => v.pause());
   }
 
   function addToCart(id, event) {
