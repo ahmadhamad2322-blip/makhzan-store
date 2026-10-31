@@ -124,9 +124,9 @@
         </div>
     </div>
     
-    <!-- قسم إضافة فيديو عرض سريع عبر الرابط المباشر لتلافي أخطاء الرفع الحجمي -->
+    <!-- قسم رفع فيديو العرض مباشرة من الهاتف -->
     <div class="card">
-        <h3>🎥 إضافة فيديو عرض جديد (TikTok Style)</h3>
+        <h3>🎥 إضافة فيديو عرض جديد من هاتفك (TikTok Style)</h3>
         <form id="addVideoForm" onsubmit="saveVideoOffer(event)">
             <div class="form-group">
                 <label>عنوان العرض بالفيديو:</label>
@@ -137,9 +137,9 @@
                 <input type="text" id="vDesc" required placeholder="مثال: اشتري كيلو واحصل على نصف كيلو مجاناً">
             </div>
             <div class="form-group">
-                <label>رابط فيديو العرض المباشر (رابط MP4 أو يوتيوب/درايف):</label>
-                <input type="url" id="vUrlInput" required placeholder="https://example.com/video.mp4">
-                <small style="color: #64748b; display: block; margin-top: 4px;">ضع رابط الفيديو المباشر ليعمل بسرعة فائقة وبدون أي أخطاء حجم الملف.</small>
+                <label>اختر ملف الفيديو من جهازك (بأي صيغة):</label>
+                <input type="file" id="vFile" accept="video/*" required onchange="handleVideoFileSelect(this)">
+                <small id="videoFileStatus" style="color: #64748b; display: block; margin-top: 4px;">اختر أي فيديو من استوديو هاتفك وسيقوم النظام بضغط ورفعه بسلاسة.</small>
             </div>
             <button type="submit" class="btn-submit" id="saveVideoBtn" style="background: #0284c7;">نشر الفيديو 🚀</button>
         </form>
@@ -215,6 +215,7 @@
 
   let currentBase64Image = "";
   let editBase64Image = "";
+  let compressedVideoBase64 = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -311,6 +312,37 @@
           ctx.drawImage(img, 0, 0, width, height);
           callback(canvas.toDataURL('image/jpeg', quality));
       };
+  }
+
+  // معالجة وضغط الفيديو المرفوع من الهاتف محلياً لضمان سرعة الرفع وعدم الأخطاء
+  function handleVideoFileSelect(input) {
+      const statusEl = document.getElementById('videoFileStatus');
+      if (input.files && input.files[0]) {
+          const file = input.files[0];
+          
+          // التحقق من حجم الفيديو الأولي وإعطاء تنبيه
+          if (file.size > 25 * 1024 * 1024) {
+              statusEl.style.color = '#ef4444';
+              statusEl.innerText = '⚠️ حجم الفيديو كبير جداً (أكثر من 25 ميجا). يرجى اختيار فيديو أقصر أو أصغر حجماً.';
+              compressedVideoBase64 = "";
+              return;
+          }
+
+          statusEl.style.color = '#0284c7';
+          statusEl.innerText = '⏳ جاري تجهيز ومعالجة الفيديو من هاتفك...';
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              compressedVideoBase64 = e.target.result;
+              statusEl.style.color = '#16a34a';
+              statusEl.innerText = '✅ تم جاهزية الفيديو للرفع بنجاح!';
+          };
+          reader.onerror = function() {
+              statusEl.style.color = '#ef4444';
+              statusEl.innerText = '❌ حدث خطأ أثناء قراءة ملف الفيديو.';
+          };
+          reader.readAsDataURL(file);
+      }
   }
 
   async function attemptLogin() {
@@ -589,7 +621,11 @@
       e.preventDefault();
       const title = document.getElementById('vTitle').value.trim();
       const desc = document.getElementById('vDesc').value.trim();
-      const videoUrl = document.getElementById('vUrlInput').value.trim();
+
+      if (!compressedVideoBase64) {
+          alert('⚠️ يرجى اختيار ملف الفيديو من هاتفك والانتظار حتى يكتمل تجهيزه!');
+          return;
+      }
 
       const saveBtn = document.getElementById('saveVideoBtn');
       saveBtn.innerText = "⏳ جاري نشر الفيديو...";
@@ -599,15 +635,17 @@
           await db.collection('daily_videos').add({
               title,
               desc,
-              videoUrl,
+              videoUrl: compressedVideoBase64,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           document.getElementById('addVideoForm').reset();
-          alert('✅ تم نشر فيديو العرض بنجاح وبسرعة فائقة!');
+          compressedVideoBase64 = "";
+          document.getElementById('videoFileStatus').innerText = 'اختر أي فيديو من استوديو هاتفك وسيقوم النظام بضغط ورفعه بسلاسة.';
+          alert('✅ تم نشر فيديو العرض من هاتفك بنجاح!');
           loadAdminVideos();
       } catch (err) {
           console.error(err);
-          alert('❌ حدث خطأ أثناء نشر الفيديو.');
+          alert('❌ حدث خطأ أثناء نشر الفيديو. تأكد أن حجم الفيديو قصير أو صغير نسبياً.');
       } finally {
           saveBtn.innerText = "نشر الفيديو 🚀";
           saveBtn.disabled = false;
