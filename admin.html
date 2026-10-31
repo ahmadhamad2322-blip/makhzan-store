@@ -13,7 +13,6 @@
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background-color: #f1f5f9; color: #1e293b; padding: 20px; }
         
-        /* شاشة تسجيل الدخول أو طلب الانضمام */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .login-box h2 { color: #0284c7; margin-bottom: 15px; }
@@ -63,7 +62,6 @@
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول أو تقديم طلب انضمام -->
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 تسجيل دخول الأدمن</h2>
@@ -75,7 +73,6 @@
     </div>
 </div>
 
-<!-- نافذة تعديل المنتج -->
 <div id="editModal">
     <div class="modal-content">
         <h3 style="color: #0284c7; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">✏️ تعديل بيانات المنتج</h3>
@@ -119,7 +116,6 @@
 
 <div class="admin-grid">
 
-    <!-- قسم إدارة الصلاحيات وطلبات الدخول (خاص بالمالك الأساسي) -->
     <div class="card" id="adminManagementCard" style="grid-column: 1 / -1; display: none; background: #f0fdf4; border: 2px solid #16a34a;">
         <h3 style="color: #166534;">👥 إدارة طلبات الدخول والصلاحيات للمشرفين</h3>
         <p style="font-size: 13px; color: #15803d; margin-bottom: 10px;">طلبات الأشخاص الذين حاولوا تسجيل الدخول برقم هاتفهم للتحكم في المتجر:</p>
@@ -128,7 +124,7 @@
         </div>
     </div>
     
-    <!-- قسم رفع وإدارة فيديوهات العروض اليومية (يدعم أي صيغة وبدون أخطاء) -->
+    <!-- قسم إضافة فيديو عرض سريع عبر الرابط المباشر لتلافي أخطاء الرفع الحجمي -->
     <div class="card">
         <h3>🎥 إضافة فيديو عرض جديد (TikTok Style)</h3>
         <form id="addVideoForm" onsubmit="saveVideoOffer(event)">
@@ -141,15 +137,14 @@
                 <input type="text" id="vDesc" required placeholder="مثال: اشتري كيلو واحصل على نصف كيلو مجاناً">
             </div>
             <div class="form-group">
-                <label>اختر ملف الفيديو (بأي صيغة):</label>
-                <input type="file" id="vFile" accept="video/*" required onchange="previewVideoFile(this)">
-                <small style="color: #64748b; display: block; margin-top: 4px;">ملاحظة: يدعم جميع صيغ الفيديوهات وبسلاسة تامة.</small>
+                <label>رابط فيديو العرض المباشر (رابط MP4 أو يوتيوب/درايف):</label>
+                <input type="url" id="vUrlInput" required placeholder="https://example.com/video.mp4">
+                <small style="color: #64748b; display: block; margin-top: 4px;">ضع رابط الفيديو المباشر ليعمل بسرعة فائقة وبدون أي أخطاء حجم الملف.</small>
             </div>
             <button type="submit" class="btn-submit" id="saveVideoBtn" style="background: #0284c7;">نشر الفيديو 🚀</button>
         </form>
     </div>
 
-    <!-- نموذج إضافة منتج فردي -->
     <div class="card">
         <h3>➕ إضافة منتج جديد يدوياً</h3>
         <form id="addProductForm" onsubmit="saveProduct(event)">
@@ -185,7 +180,6 @@
         </form>
     </div>
 
-    <!-- قائمة المنتجات المتاحة والبحث -->
     <div class="card" style="grid-column: 1 / -1;">
         <h3>
             <span>📦 المنتجات المتاحة (مرتبة أبجديًا)</span>
@@ -207,7 +201,6 @@
         <div id="adminProductsList" style="max-height: 450px; overflow-y: auto;">جاري التحميل...</div>
     </div>
 
-    <!-- إدارة الفيديوهات المرفوعة -->
     <div class="card" style="grid-column: 1 / -1;">
         <h3>🎥 فيديوهات العروض المرفوعة حالياً</h3>
         <div id="adminVideosList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
@@ -218,11 +211,10 @@
 </div>
 
 <script>
-  const MAIN_ADMIN_PHONE = "01012517345"; // رقمك الأساسي (المالك)
+  const MAIN_ADMIN_PHONE = "01012517345";
 
   let currentBase64Image = "";
   let editBase64Image = "";
-  let currentVideoBase64 = "";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjWBs5Qw-1bHq3fVd8bac0b1470523c4", 
@@ -302,17 +294,6 @@
       }
   }
 
-  function previewVideoFile(input) {
-      if (input.files && input.files[0]) {
-          const file = input.files[0];
-          const reader = new FileReader();
-          reader.onload = function(e) {
-              currentVideoBase64 = e.target.result; 
-          };
-          reader.readAsDataURL(file);
-      }
-  }
-
   function compressAndBase64(src, maxWidth, quality, callback) {
       const img = new Image();
       img.src = src;
@@ -332,7 +313,6 @@
       };
   }
 
-  // --- نظام المصادقة وطلبات الدخول الجديدة ---
   async function attemptLogin() {
       const phoneInput = document.getElementById('adminPhoneInput').value.trim();
       const statusMsg = document.getElementById('loginStatusMsg');
@@ -350,7 +330,6 @@
           return;
       }
 
-      // فحص إذا كان الرقم مقبول مسبقاً من الأدمن
       try {
           const docRef = db.collection('admin_permissions').doc(phoneInput);
           const doc = await docRef.get();
@@ -360,14 +339,13 @@
               document.getElementById('loginOverlay').style.display = 'none';
               initAdminDashboard();
           } else {
-              // تسجيل الطلب في قاعدة البيانات لكي يوافق عليه المالك
               await docRef.set({
                   phone: phoneInput,
                   status: 'pending',
                   requestedAt: firebase.firestore.FieldValue.serverTimestamp()
               });
               statusMsg.style.color = '#f59e0b';
-              statusMsg.innerText = '⏳ تم إرسال طلب الدخول للمالك. يجتاز انتظار الموافقة!';
+              statusMsg.innerText = '⏳ تم إرسال طلب الدخول للمالك. بانتظار الموافقة!';
           }
       } catch (err) {
           console.error(err);
@@ -417,7 +395,6 @@
       loadAdminVideos();
   }
 
-  // إدارة طلبات الدخول (قبول أو حظر)
   async function loadAccessRequests() {
       const container = document.getElementById('accessRequestsList');
       try {
@@ -429,7 +406,7 @@
           let html = `<table><tr><th>رقم الهاتف</th><th>الحالة</th><th>الإجراء</th></tr>`;
           snapshot.forEach(doc => {
               const data = doc.data();
-              if (data.phone === MAIN_ADMIN_PHONE) return; // تخطي المالك الأساسي
+              if (data.phone === MAIN_ADMIN_PHONE) return;
               let statusText = data.status === 'approved' ? '<span style="color:#16a34a; font-weight:bold;">مقبول ✅</span>' : '<span style="color:#f59e0b; font-weight:bold;">قيد الانتظار ⏳</span>';
               
               html += `
@@ -464,7 +441,6 @@
       }
   }
 
-  // --- حفظ وعرض المنتجات مع الترتيب الأبجدي وتجميع المتشابهات ---
   async function saveProduct(e) {
       e.preventDefault();
       const name = document.getElementById('pName').value.trim();
@@ -515,10 +491,8 @@
               products.push({ id: doc.id, ...doc.data() });
           });
 
-          // الترتيب الأبجدي التلقائي (وتجميع الأصناف المتشابهة وراء بعضها)
           products.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
 
-          // الفلترة بالبحث والقسم
           if (filterCat !== 'all') {
               products = products.filter(p => p.cat === filterCat);
           }
@@ -611,16 +585,11 @@
       }
   }
 
-  // --- حفظ وعرض فيديوهات العروض اليومية (تدعم أي صيغة وبدون مشاكل) ---
   async function saveVideoOffer(e) {
       e.preventDefault();
       const title = document.getElementById('vTitle').value.trim();
       const desc = document.getElementById('vDesc').value.trim();
-      
-      if (!currentVideoBase64) {
-          alert('⚠️ يرجى اختيار ملف الفيديو أولاً!');
-          return;
-      }
+      const videoUrl = document.getElementById('vUrlInput').value.trim();
 
       const saveBtn = document.getElementById('saveVideoBtn');
       saveBtn.innerText = "⏳ جاري نشر الفيديو...";
@@ -630,16 +599,15 @@
           await db.collection('daily_videos').add({
               title,
               desc,
-              videoUrl: currentVideoBase64,
+              videoUrl,
               createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           document.getElementById('addVideoForm').reset();
-          currentVideoBase64 = "";
-          alert('✅ تم نشر فيديو العرض بنجاح!');
+          alert('✅ تم نشر فيديو العرض بنجاح وبسرعة فائقة!');
           loadAdminVideos();
       } catch (err) {
           console.error(err);
-          alert('❌ حدث خطأ أثناء رفع الفيديو. تأكد من حجم الملف.');
+          alert('❌ حدث خطأ أثناء نشر الفيديو.');
       } finally {
           saveBtn.innerText = "نشر الفيديو 🚀";
           saveBtn.disabled = false;
