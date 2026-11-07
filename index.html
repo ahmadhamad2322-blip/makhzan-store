@@ -116,15 +116,19 @@
         }
         .category-hero-title { font-size: 22px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
         
-        /* المنتجات بمقاسات الصور الطبيعية بالكامل */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        /* المنتجات بمقاسات صغيرة لتظهر منتجين بجانب بعضهما في الشاشات الصغيرة */
+        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        @media (min-width: 768px) {
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        }
+        
+        .product-card { background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 10px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
-        .product-img-container { width: 100%; height: 140px; background: #fff; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img-container { width: 100%; height: 110px; background: #fff; border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .product-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s; }
-        .product-title { font-weight: 700; font-size: 14px; margin-bottom: 5px; color: #0f172a; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-price { color: #16a34a; font-weight: 900; font-size: 15px; margin-bottom: 10px; }
-        .add-btn { background: #0284c7; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.2s; z-index: 2; }
+        .product-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #0f172a; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-price { color: #16a34a; font-weight: 900; font-size: 14px; margin-bottom: 8px; }
+        .add-btn { background: #0284c7; color: white; border: none; padding: 6px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; width: 100%; transition: background 0.2s; z-index: 2; }
         .add-btn:hover { background: #0369a1; }
         
         .flying-img {
@@ -137,18 +141,19 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         
-        /* نافذة عامة / تفاصيل المنتج مثل المتاجر الكبرى */
+        /* نافذة عامة / تفاصيل المنتج */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; }
         .modal-content { background: white; width: 100%; max-width: 480px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: #64748b; }
         
         /* تفاصيل المنتج الكبرى */
-        .details-img-box { width: 100%; height: 260px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; border: 1px solid #f1f5f9; }
+        .details-img-box { width: 100%; height: 220px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; border: 1px solid #f1f5f9; }
         .details-img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .details-title { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
         .details-price { font-size: 20px; font-weight: 900; color: #16a34a; margin-bottom: 12px; }
-        .details-desc-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; color: #475569; line-height: 1.6; }
+        .details-desc-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; color: #475569; line-height: 1.6; }
+        .details-qty-note { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #15803d; font-weight: bold; text-align: center; }
 
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
@@ -161,7 +166,7 @@
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
         .payment-info { background: #f0fdf4; border: 1px dashed #16a34a; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: #166534; display: none; }
         
-        /* زر الواتساب العائم مع النص المطلوب بجانبه */
+        /* زر الواتساب العائم مع النص المحدث */
         .whatsapp-float-container { position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px; }
         .whatsapp-label { background: #ffffff; color: #0f172a; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #cbd5e1; white-space: nowrap; animation: pulseLabel 2s infinite; }
         .whatsapp-float { background-color: #25d366; color: white; width: 55px; height: 55px; border-radius: 50%; text-align: center; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); display: flex; justify-content: center; align-items: center; text-decoration: none; transition: transform 0.2s, background 0.2s; flex-shrink: 0; }
@@ -237,13 +242,13 @@
     </div>
 </div>
 
-<!-- زر الواتساب العائم مع الجملة المطلوبة -->
+<!-- زر الواتساب العائم مع النص المحدث -->
 <div class="whatsapp-float-container">
-    <div class="whatsapp-label">أي حاجه مش موجوده في المتجر احنا نوفرهالك اتواصل معانا 💬</div>
+    <div class="whatsapp-label">اطلبي الكمية اللي انتي محتاجاها من الوتس 💬</div>
     <a href="https://wa.me/201127491224" class="whatsapp-float" target="_blank" title="تواصل معنا عبر الواتساب">💬</a>
 </div>
 
-<!-- نافذة تفاصيل المنتج (مثل المتاجر الكبرى) -->
+<!-- نافذة تفاصيل المنتج (مثل المتاجر الكبرى مع ملحوظة الكميات) -->
 <div class="modal" id="productDetailsModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -258,6 +263,9 @@
         <div class="form-group">
             <label>وصف المنتج:</label>
             <div class="details-desc-box" id="detailsModalDesc">لا يوجد وصف متاح لهذا المنتج حالياً.</div>
+        </div>
+        <div class="details-qty-note">
+            💡 مش شرط كيلو، تقدر تطلب أي كمية محتاجها وتحددها من خلالنا أو تطلبها عبر الواتساب مباشرةً!
         </div>
         <button class="add-btn" id="detailsModalAddBtn" style="padding: 12px; font-size: 15px;">إضافة للسلة 🛒</button>
     </div>
@@ -436,7 +444,6 @@
       }
   }
 
-  // الاستماع السريع لمنتجات فايربيست
   db.collection('products').onSnapshot((snapshot) => {
       allProducts = [];
       snapshot.forEach((doc) => {
@@ -478,7 +485,6 @@
       container.innerHTML = html;
   }
 
-  // فتح صفحة وصف المنتج مثل المتاجر الكبرى
   function openProductDetails(id) {
       const p = allProducts.find(item => item.id === id);
       if (!p) return;
@@ -530,7 +536,6 @@
       const heroTitle = document.getElementById('categoryHeroTitle');
       const tiktokSec = document.getElementById('tiktokSection');
 
-      // التحكم في ظهور فيديوهات التيك توك والعروض اليومية فقط
       if (cat === 'offers') {
           tiktokSec.style.display = 'block';
           loadTiktokVideosFromDB();
@@ -543,7 +548,6 @@
           heroBanner.style.display = 'none';
           mainBanner.style.display = 'block';
           document.getElementById('sectionTitle').innerText = 'جميع المنتجات المتاحة';
-          // عرض كافة المنتجات في قسم الكل دون العروض اليومية الخاصة بالفيديوهات إن أردت فصلها أو عرضها جميعاً
           renderProducts(allProducts);
       } else {
           mainBanner.style.display = 'none';
@@ -553,7 +557,6 @@
           document.getElementById('sectionTitle').innerText = categoryImages[cat].title;
           
           if (cat === 'offers') {
-              // المنتجات المخصصة للعروض اليومية (أو التي تحوي علامة عرض)
               const offersProducts = allProducts.filter(p => p.cat === 'offers' || p.isOffer === true || p.isOffer === "true");
               renderProducts(offersProducts.length > 0 ? offersProducts : allProducts); 
           } else {
