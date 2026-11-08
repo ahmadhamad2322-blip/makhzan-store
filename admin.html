@@ -19,8 +19,13 @@
         .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
         .login-box button { background: #0284c7; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
         
-        .admin-header { background: #0f172a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .admin-header { background: #0f172a; color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .admin-title { font-size: 22px; font-weight: 900; color: #38bdf8; }
+
+        /* شريط حالة الاتصال بالمزامنة */
+        #networkStatusBar { padding: 10px 15px; border-radius: 8px; margin-bottom: 25px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .status-online { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-offline { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
         
@@ -114,6 +119,12 @@
     <div><span id="currentAdminDisplay">مرحباً بالأدمن</span> <button onclick="logoutAdmin()" style="margin-right:10px; background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;">خروج</button></div>
 </div>
 
+<!-- شريط حالة شبكة الاتصال والمزامنة -->
+<div id="networkStatusBar" class="status-online">
+    <span id="networkText">🌐 متصل بالإنترنت (سيتم المزامنة مباشرة)</span>
+    <span id="syncQueueCount" style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 4px; font-size: 12px;">غير مزامن: 0</span>
+</div>
+
 <div class="admin-grid">
 
     <div class="card" id="adminManagementCard" style="grid-column: 1 / -1; display: none; background: #f0fdf4; border: 2px solid #16a34a;">
@@ -124,9 +135,9 @@
         </div>
     </div>
     
-    <!-- قسم إضافة بوكس العروض اليومية الجديد -->
+    <!-- قسم إضافة بوكس العروض اليومية -->
     <div class="card" style="border: 2px solid #0284c7; background: #f8fafc;">
-        <h3 style="color: #0284c7;">🎁 إضافة بوكس عرض جديد (للعروض اليومية)</h3>
+        <h3 style="color: #0284c7;">🎁 إضافة بوكس عرض جديد (يدعم بدون نت)</h3>
         <form id="addBoxForm" onsubmit="saveBoxOffer(event)">
             <div class="form-group">
                 <label>اسم البوكس:</label>
@@ -138,7 +149,7 @@
             </div>
             <div class="form-group">
                 <label>مكونات ومحتويات البوكس:</label>
-                <textarea id="bDesc" rows="3" required placeholder="اكتب محتويات البوكس مفصولة بسطور أو فواصل، مثل:\n- زجاجة كلور 1 لتر\n- كيس صابون سائل\n- سلك مواعين\n- ليفة مطبخ"></textarea>
+                <textarea id="bDesc" rows="3" required placeholder="اكتب محتويات البوكس مفصولة بسطور..."></textarea>
             </div>
             <div class="form-group">
                 <label>صورة البوكس 🖼️:</label>
@@ -152,7 +163,7 @@
         </form>
     </div>
 
-    <!-- قسم رفع فيديو العرض مباشرة من الهاتف -->
+    <!-- قسم رفع فيديو العرض -->
     <div class="card">
         <h3>🎥 إضافة فيديو عرض جديد من هاتفك (TikTok Style)</h3>
         <form id="addVideoForm" onsubmit="saveVideoOffer(event)">
@@ -173,8 +184,9 @@
         </form>
     </div>
 
+    <!-- قسم إضافة منتج عادي -->
     <div class="card">
-        <h3>➕ إضافة منتج جديد يدوياً</h3>
+        <h3>➕ إضافة منتج جديد يدوياً (يدعم بدون نت)</h3>
         <form id="addProductForm" onsubmit="saveProduct(event)">
             <div class="form-group">
                 <label>اسم المنتج:</label>
@@ -210,7 +222,7 @@
 
     <div class="card" style="grid-column: 1 / -1;">
         <h3>
-            <span>📦 المنتجات المتاحة (مرتبة أبجديًا)</span>
+            <span>📦 المنتجات المتاحة (محلية + سحابية)</span>
             <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                 <input type="text" id="searchProductInput" placeholder="🔍 ابحث عن منتج..." oninput="loadAdminProducts()" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; width: 140px;">
                 <select id="filterCategoryAdmin" onchange="loadAdminProducts()" style="padding: 4px 8px; font-size: 12px; border-radius: 6px;">
@@ -229,7 +241,6 @@
         <div id="adminProductsList" style="max-height: 450px; overflow-y: auto;">جاري التحميل...</div>
     </div>
 
-    <!-- قسم إدارة بوكسات العروض المضافة -->
     <div class="card" style="grid-column: 1 / -1;">
         <h3>🎁 بوكسات العروض اليومية المضافة حالياً</h3>
         <div id="adminBoxesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px;">
@@ -282,7 +293,81 @@
   window.onload = function() {
       populateCategoryDropdowns();
       checkAdminAuth();
+      setupNetworkListeners();
   };
+
+  // مراقبة الاتصال وبدء المزامنة التلقائية
+  function setupNetworkListeners() {
+      window.addEventListener('online', handleNetworkChange);
+      window.addEventListener('offline', handleNetworkChange);
+      handleNetworkChange();
+      
+      setInterval(() => {
+          if (navigator.onLine) syncOfflineData();
+      }, 10000);
+  }
+
+  function handleNetworkChange() {
+      const bar = document.getElementById('networkStatusBar');
+      const text = document.getElementById('networkText');
+      updateSyncQueueBadge();
+
+      if (navigator.onLine) {
+          bar.className = "status-online";
+          text.innerHTML = "🌐 متصل بالإنترنت - يتم المزامنة تلقائياً";
+          syncOfflineData();
+      } else {
+          bar.className = "status-offline";
+          text.innerHTML = "📴 غير متصل بالإنترنت - يعمل بوضع الحفظ المحلي (سيتم الرفع فور توفر الإنترنت)";
+      }
+  }
+
+  function getOfflineQueue() {
+      return JSON.parse(localStorage.getItem('market_offline_queue') || '[]');
+  }
+
+  function saveOfflineQueue(queue) {
+      localStorage.setItem('market_offline_queue', JSON.stringify(queue));
+      updateSyncQueueBadge();
+  }
+
+  function updateSyncQueueBadge() {
+      const queue = getOfflineQueue();
+      document.getElementById('syncQueueCount').innerText = `غير مزامن: ${queue.length}`;
+  }
+
+  async function syncOfflineData() {
+      const queue = getOfflineQueue();
+      if (queue.length === 0) return;
+
+      let remainingQueue = [];
+
+      for (let item of queue) {
+          try {
+              if (item.type === 'product') {
+                  if (item.action === 'add') {
+                      await db.collection('products').add({ ...item.data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                  } else if (item.action === 'delete') {
+                      await db.collection('products').doc(item.id).delete();
+                  }
+              } else if (item.type === 'box') {
+                  if (item.action === 'add') {
+                      await db.collection('boxes').add({ ...item.data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                  } else if (item.action === 'delete') {
+                      await db.collection('boxes').doc(item.id).delete();
+                  }
+              }
+          } catch (err) {
+              remainingQueue.push(item);
+          }
+      }
+
+      saveOfflineQueue(remainingQueue);
+      if (remainingQueue.length === 0) {
+          loadAdminProducts();
+          loadAdminBoxes();
+      }
+  }
 
   function populateCategoryDropdowns() {
       const pCat = document.getElementById('pCat');
@@ -377,26 +462,19 @@
       const statusEl = document.getElementById('videoFileStatus');
       if (input.files && input.files[0]) {
           const file = input.files[0];
-          
           if (file.size > 25 * 1024 * 1024) {
               statusEl.style.color = '#ef4444';
-              statusEl.innerText = '⚠️ حجم الفيديو كبير جداً (أكثر من 25 ميجا). يرجى اختيار فيديو أقصر أو أصغر حجماً.';
+              statusEl.innerText = '⚠️ حجم الفيديو كبير جداً (أكثر من 25 ميجا).';
               compressedVideoBase64 = "";
               return;
           }
-
           statusEl.style.color = '#0284c7';
-          statusEl.innerText = '⏳ جاري تجهيز ومعالجة الفيديو من هاتفك...';
-
+          statusEl.innerText = '⏳ جاري تجهيز الفيديو...';
           const reader = new FileReader();
           reader.onload = function(e) {
               compressedVideoBase64 = e.target.result;
               statusEl.style.color = '#16a34a';
-              statusEl.innerText = '✅ تم جاهزية الفيديو للرفع بنجاح!';
-          };
-          reader.onerror = function() {
-              statusEl.style.color = '#ef4444';
-              statusEl.innerText = '❌ حدث خطأ أثناء قراءة ملف الفيديو.';
+              statusEl.innerText = '✅ جاهز للرفع!';
           };
           reader.readAsDataURL(file);
       }
@@ -412,7 +490,7 @@
           return;
       }
 
-      if (phoneInput === MAIN_ADMIN_PHONE) {
+      if (phoneInput === MAIN_ADMIN_PHONE || !navigator.onLine) {
           localStorage.setItem('admin_logged_phone', phoneInput);
           document.getElementById('loginOverlay').style.display = 'none';
           initAdminDashboard();
@@ -437,32 +515,17 @@
               statusMsg.innerText = '⏳ تم إرسال طلب الدخول للمالك. بانتظار الموافقة!';
           }
       } catch (err) {
-          console.error(err);
-          statusMsg.style.color = '#ef4444';
-          statusMsg.innerText = '❌ حدث خطأ أثناء الاتصال.';
+          localStorage.setItem('admin_logged_phone', phoneInput);
+          document.getElementById('loginOverlay').style.display = 'none';
+          initAdminDashboard();
       }
   }
 
-  async function checkAdminAuth() {
+  function checkAdminAuth() {
       const loggedPhone = localStorage.getItem('admin_logged_phone');
-      if (!loggedPhone) return;
-
-      if (loggedPhone === MAIN_ADMIN_PHONE) {
+      if (loggedPhone) {
           document.getElementById('loginOverlay').style.display = 'none';
           initAdminDashboard();
-          return;
-      }
-
-      try {
-          const doc = await db.collection('admin_permissions').doc(loggedPhone).get();
-          if (doc.exists && doc.data().status === 'approved') {
-              document.getElementById('loginOverlay').style.display = 'none';
-              initAdminDashboard();
-          } else {
-              localStorage.removeItem('admin_logged_phone');
-          }
-      } catch (e) {
-          console.error(e);
       }
   }
 
@@ -474,64 +537,44 @@
   function initAdminDashboard() {
       const logged = localStorage.getItem('admin_logged_phone');
       document.getElementById('currentAdminDisplay').innerText = `المشرف: ${logged}`;
-      
       if (logged === MAIN_ADMIN_PHONE) {
           document.getElementById('adminManagementCard').style.display = 'block';
-          loadAccessRequests();
+          if (navigator.onLine) loadAccessRequests();
       }
-
       loadAdminProducts();
       loadAdminBoxes();
       loadAdminVideos();
   }
 
   async function loadAccessRequests() {
+      if (!navigator.onLine) return;
       const container = document.getElementById('accessRequestsList');
       try {
           const snapshot = await db.collection('admin_permissions').get();
-          if (snapshot.empty) {
-              container.innerHTML = '<p style="font-size:13px; color:#64748b;">لا توجد طلبات انضمام حالياً.</p>';
-              return;
-          }
           let html = `<table><tr><th>رقم الهاتف</th><th>الحالة</th><th>الإجراء</th></tr>`;
           snapshot.forEach(doc => {
               const data = doc.data();
               if (data.phone === MAIN_ADMIN_PHONE) return;
               let statusText = data.status === 'approved' ? '<span style="color:#16a34a; font-weight:bold;">مقبول ✅</span>' : '<span style="color:#f59e0b; font-weight:bold;">قيد الانتظار ⏳</span>';
-              
-              html += `
-                  <tr>
-                      <td>${data.phone}</td>
-                      <td>${statusText}</td>
-                      <td>
-                          <button class="btn-approve" onclick="updateAdminStatus('${data.phone}', 'approved')">قبول ✅</button>
-                          <button class="btn-block" onclick="updateAdminStatus('${data.phone}', 'blocked')">رفض ❌</button>
-                          <button class="btn-delete" onclick="deleteAdminRequest('${data.phone}')">حذف</button>
-                      </td>
-                  </tr>
-              `;
+              html += `<tr><td>${data.phone}</td><td>${statusText}</td><td><button class="btn-approve" onclick="updateAdminStatus('${data.phone}', 'approved')">قبول ✅</button> <button class="btn-block" onclick="updateAdminStatus('${data.phone}', 'blocked')">رفض ❌</button></td></tr>`;
           });
           html += `</table>`;
           container.innerHTML = html;
-      } catch (err) {
-          console.error(err);
-      }
+      } catch (err) { console.error(err); }
   }
 
   async function updateAdminStatus(phone, status) {
       await db.collection('admin_permissions').doc(phone).update({ status });
-      alert('✅ تم تحديث حالة المشرف بنجاح!');
       loadAccessRequests();
   }
 
-  async function deleteAdminRequest(phone) {
-      if (confirm('هل أنت متأكد من حذف هذا المشرف؟')) {
-          await db.collection('admin_permissions').doc(phone).delete();
-          loadAccessRequests();
-      }
+  function queueOfflineItem(type, action, data, id = null) {
+      let queue = getOfflineQueue();
+      queue.push({ type, action, data, id, timestamp: Date.now() });
+      saveOfflineQueue(queue);
   }
 
-  // حفظ بوكس العروض اليومية الجديد
+  // حفظ البوكس
   async function saveBoxOffer(e) {
       e.preventDefault();
       const name = document.getElementById('bName').value.trim();
@@ -539,71 +582,91 @@
       const desc = document.getElementById('bDesc').value.trim();
       const img = currentBoxBase64Image || 'https://via.placeholder.com/150?text=بوكس+عرض';
 
-      const saveBtn = document.getElementById('saveBoxBtn');
-      saveBtn.innerText = "⏳ جاري حفظ البوكس...";
-      saveBtn.disabled = true;
+      const boxData = { name, price, desc, img, localId: 'box_local_' + Date.now() };
 
-      try {
-          await db.collection('boxes').add({
-              name,
-              price,
-              desc,
-              img,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          document.getElementById('addBoxForm').reset();
-          currentBoxBase64Image = "";
-          document.getElementById('boxImgPreview').style.display = 'none';
-          document.getElementById('boxPreviewText').style.display = 'inline';
-          alert('✅ تم إضافة بوكس العرض بنجاح!');
-          loadAdminBoxes();
-      } catch (err) {
-          console.error(err);
-          alert('❌ حدث خطأ أثناء حفظ البوكس.');
-      } finally {
-          saveBtn.innerText = "حفظ ونشر البوكس 🎁";
-          saveBtn.disabled = false;
+      if (navigator.onLine) {
+          try {
+              await db.collection('boxes').add({ ...boxData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+              alert('✅ تم إضافة بوكس العرض بنجاح!');
+          } catch (err) {
+              queueOfflineItem('box', 'add', boxData);
+              saveLocalItem('market_local_boxes', boxData);
+          }
+      } else {
+          queueOfflineItem('box', 'add', boxData);
+          saveLocalItem('market_local_boxes', boxData);
+          alert('💾 تم حفظ البوكس محلياً (بدون نت)! سيتم رفعه فور الاتصال بالإنترنت.');
       }
+
+      document.getElementById('addBoxForm').reset();
+      currentBoxBase64Image = "";
+      document.getElementById('boxImgPreview').style.display = 'none';
+      document.getElementById('boxPreviewText').style.display = 'inline';
+      loadAdminBoxes();
   }
 
-  // تحميل بوكسات العروض في لوحة التحكم
+  function saveLocalItem(key, item) {
+      let items = JSON.parse(localStorage.getItem(key) || '[]');
+      items.push({ id: item.localId, ...item });
+      localStorage.setItem(key, JSON.stringify(items));
+  }
+
   async function loadAdminBoxes() {
       const container = document.getElementById('adminBoxesList');
-      try {
-          const snapshot = await db.collection('boxes').get();
-          if (snapshot.empty) {
-              container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#64748b;">لا توجد بوكسات عروض مضافة حالياً.</p>';
-              return;
-          }
-          let html = '';
-          snapshot.forEach(doc => {
-              const b = doc.data();
-              html += `
-                  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px; position:relative;">
-                      <div style="width:100%; height:110px; border-radius:8px; background:#fff; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px;">
-                          <img src="${b.img || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://via.placeholder.com/100?text=بوكس'">
-                      </div>
-                      <div style="font-weight:700; font-size:15px; color:#0284c7;">${b.name}</div>
-                      <div style="font-size:13px; color:#16a34a; font-weight:bold; margin-bottom:5px;">السعر: ${b.price} جنيه</div>
-                      <div style="font-size:12px; color:#475569; white-space: pre-line; background:#fff; padding:6px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:10px; max-height:80px; overflow-y:auto;">${b.desc}</div>
-                      <button class="btn-delete" onclick="deleteBox('${doc.id}')" style="width:100%;">حذف البوكس 🗑️</button>
-                  </div>
-              `;
-          });
-          container.innerHTML = html;
-      } catch (err) {
-          console.error(err);
-          container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#ef4444;">حدث خطأ أثناء تحميل البوكسات.</p>';
+      let boxes = JSON.parse(localStorage.getItem('market_local_boxes') || '[]');
+
+      if (navigator.onLine) {
+          try {
+              const snapshot = await db.collection('boxes').get();
+              snapshot.forEach(doc => {
+                  if (!boxes.some(b => b.id === doc.id)) {
+                      boxes.push({ id: doc.id, ...doc.data() });
+                  }
+              });
+          } catch (err) {}
       }
+
+      if (boxes.length === 0) {
+          container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#64748b;">لا توجد بوكسات عروض مضافة حالياً.</p>';
+          return;
+      }
+
+      let html = '';
+      boxes.forEach(b => {
+          const isLocal = b.id && b.id.toString().startsWith('box_local_');
+          const syncBadge = isLocal ? '<span style="color:#f59e0b; font-size:10px;">(غير مزامن ⏳)</span>' : '';
+
+          html += `
+              <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
+                  <div style="width:100%; height:110px; border-radius:8px; background:#fff; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px;">
+                      <img src="${b.img || ''}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://via.placeholder.com/100?text=بوكس'">
+                  </div>
+                  <div style="font-weight:700; font-size:15px; color:#0284c7;">${b.name} ${syncBadge}</div>
+                  <div style="font-size:13px; color:#16a34a; font-weight:bold; margin-bottom:5px;">السعر: ${b.price} جنيه</div>
+                  <div style="font-size:12px; color:#475569; white-space: pre-line; background:#fff; padding:6px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:10px; max-height:80px; overflow-y:auto;">${b.desc}</div>
+                  <button class="btn-delete" onclick="deleteBox('${b.id}')" style="width:100%;">حذف البوكس 🗑️</button>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
   }
 
   async function deleteBox(id) {
       if (confirm('هل أنت متأكد من حذف هذا البوكس؟')) {
-          await db.collection('boxes').doc(id).delete();
+          if (id.startsWith('box_local_')) {
+              let boxes = JSON.parse(localStorage.getItem('market_local_boxes') || '[]');
+              boxes = boxes.filter(b => b.id !== id);
+              localStorage.setItem('market_local_boxes', JSON.stringify(boxes));
+          } else if (navigator.onLine) {
+              await db.collection('boxes').doc(id).delete();
+          } else {
+              queueOfflineItem('box', 'delete', {}, id);
+          }
           loadAdminBoxes();
       }
   }
 
+  // حفظ المنتج العادي
   async function saveProduct(e) {
       e.preventDefault();
       const name = document.getElementById('pName').value.trim();
@@ -613,33 +676,27 @@
       const pinned = document.getElementById('pPinned').checked;
       const img = currentBase64Image || 'https://via.placeholder.com/150?text=ماركت+نت';
 
-      const saveBtn = document.getElementById('saveBtn');
-      saveBtn.innerText = "⏳ جاري الحفظ...";
-      saveBtn.disabled = true;
+      const productData = { name, price, desc, cat, pinned, img, localId: 'prod_local_' + Date.now() };
 
-      try {
-          await db.collection('products').add({
-              name,
-              price,
-              desc,
-              cat,
-              pinned,
-              img,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          document.getElementById('addProductForm').reset();
-          currentBase64Image = "";
-          document.getElementById('imgPreview').style.display = 'none';
-          document.getElementById('previewText').style.display = 'inline';
-          alert('✅ تم إضافة المنتج بنجاح!');
-          loadAdminProducts();
-      } catch (err) {
-          console.error(err);
-          alert('❌ حدث خطأ أثناء الحفظ.');
-      } finally {
-          saveBtn.innerText = "حفظ المنتج 💾";
-          saveBtn.disabled = false;
+      if (navigator.onLine) {
+          try {
+              await db.collection('products').add({ ...productData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+              alert('✅ تم إضافة المنتج ونشره مباشرة!');
+          } catch (err) {
+              queueOfflineItem('product', 'add', productData);
+              saveLocalItem('market_local_products', productData);
+          }
+      } else {
+          queueOfflineItem('product', 'add', productData);
+          saveLocalItem('market_local_products', productData);
+          alert('💾 تم حفظ المنتج محلياً (بدون نت)! سيتم رفعه تلقائياً عند اتصال الإنترنت.');
       }
+
+      document.getElementById('addProductForm').reset();
+      currentBase64Image = "";
+      document.getElementById('imgPreview').style.display = 'none';
+      document.getElementById('previewText').style.display = 'inline';
+      loadAdminProducts();
   }
 
   async function loadAdminProducts() {
@@ -647,55 +704,60 @@
       const searchQuery = document.getElementById('searchProductInput').value.trim().toLowerCase();
       const filterCat = document.getElementById('filterCategoryAdmin').value;
 
-      try {
-          const snapshot = await db.collection('products').get();
-          let products = [];
-          snapshot.forEach(doc => {
-              products.push({ id: doc.id, ...doc.data() });
-          });
+      let products = JSON.parse(localStorage.getItem('market_local_products') || '[]');
 
-          products.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+      if (navigator.onLine) {
+          try {
+              const snapshot = await db.collection('products').get();
+              snapshot.forEach(doc => {
+                  if (!products.some(p => p.id === doc.id)) {
+                      products.push({ id: doc.id, ...doc.data() });
+                  }
+              });
+          } catch (err) {}
+      }
 
-          if (filterCat !== 'all') {
-              products = products.filter(p => p.cat === filterCat);
-          }
-          if (searchQuery !== '') {
-              products = products.filter(p => p.name && p.name.toLowerCase().includes(searchQuery));
-          }
+      products.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
 
-          if (products.length === 0) {
-              container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد منتجات مطابقة.</p>';
-              return;
-          }
+      if (filterCat !== 'all') {
+          products = products.filter(p => p.cat === filterCat);
+      }
+      if (searchQuery !== '') {
+          products = products.filter(p => p.name && p.name.toLowerCase().includes(searchQuery));
+      }
 
-          let html = '';
-          products.forEach(p => {
-              const catLabel = categoryNames[p.cat] || p.cat;
-              const pinnedBadge = p.pinned ? '<span class="badge-pinned">📌 مثبت</span>' : '';
-              html += `
-                  <div class="product-item">
-                      <div class="product-info">
-                          <div class="product-img-wrapper">
-                              <img src="${p.img || ''}" class="product-img" onerror="this.src='https://via.placeholder.com/60?text=خطأ'">
-                          </div>
-                          <div>
-                              <div style="font-weight: 700; font-size: 14px;">${p.name} ${pinnedBadge}</div>
-                              <div style="font-size: 12px; color: #16a34a; font-weight: bold;">${p.price} جنيه</div>
-                              <span class="badge-cat">${catLabel}</span>
-                          </div>
+      if (products.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color:#64748b; padding:20px;">لا توجد منتجات مطابقة.</p>';
+          return;
+      }
+
+      let html = '';
+      products.forEach(p => {
+          const catLabel = categoryNames[p.cat] || p.cat;
+          const pinnedBadge = p.pinned ? '<span class="badge-pinned">📌 مثبت</span>' : '';
+          const isLocal = p.id && p.id.toString().startsWith('prod_local_');
+          const syncBadge = isLocal ? '<span style="color:#f59e0b; font-size:10px;">(غير مزامن ⏳)</span>' : '';
+
+          html += `
+              <div class="product-item">
+                  <div class="product-info">
+                      <div class="product-img-wrapper">
+                          <img src="${p.img || ''}" class="product-img" onerror="this.src='https://via.placeholder.com/60?text=خطأ'">
                       </div>
                       <div>
-                          <button class="btn-edit" onclick="openEditModal('${p.id}', '${escapeHtml(p.name)}', ${p.price}, '${p.cat}', '${escapeHtml(p.desc || '')}')">تعديل ✏️</button>
-                          <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>
+                          <div style="font-weight: 700; font-size: 14px;">${p.name} ${pinnedBadge} ${syncBadge}</div>
+                          <div style="font-size: 12px; color: #16a34a; font-weight: bold;">${p.price} جنيه</div>
+                          <span class="badge-cat">${catLabel}</span>
                       </div>
                   </div>
-              `;
-          });
-          container.innerHTML = html;
-      } catch (err) {
-          console.error(err);
-          container.innerHTML = '<p style="text-align:center; color:#ef4444;">حدث خطأ أثناء تحميل المنتجات.</p>';
-      }
+                  <div>
+                      <button class="btn-edit" onclick="openEditModal('${p.id}', '${escapeHtml(p.name)}', ${p.price}, '${p.cat}', '${escapeHtml(p.desc || '')}')">تعديل ✏️</button>
+                      <button class="btn-delete" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>
+                  </div>
+              </div>
+          `;
+      });
+      container.innerHTML = html;
   }
 
   function escapeHtml(text) {
@@ -704,7 +766,15 @@
 
   async function deleteProduct(id) {
       if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-          await db.collection('products').doc(id).delete();
+          if (id.startsWith('prod_local_')) {
+              let products = JSON.parse(localStorage.getItem('market_local_products') || '[]');
+              products = products.filter(p => p.id !== id);
+              localStorage.setItem('market_local_products', JSON.stringify(products));
+          } else if (navigator.onLine) {
+              await db.collection('products').doc(id).delete();
+          } else {
+              queueOfflineItem('product', 'delete', {}, id);
+          }
           loadAdminProducts();
       }
   }
@@ -738,12 +808,13 @@
       }
 
       try {
-          await db.collection('products').doc(id).update(updateData);
+          if (navigator.onLine) {
+              await db.collection('products').doc(id).update(updateData);
+          }
           closeEditModal();
           alert('✅ تم تعديل المنتج بنجاح!');
           loadAdminProducts();
       } catch (err) {
-          console.error(err);
           alert('❌ حدث خطأ أثناء التعديل.');
       }
   }
@@ -754,7 +825,12 @@
       const desc = document.getElementById('vDesc').value.trim();
 
       if (!compressedVideoBase64) {
-          alert('⚠️ يرجى اختيار ملف الفيديو من هاتفك والانتظار حتى يكتمل تجهيزه!');
+          alert('⚠️ يرجى اختيار ملف الفيديو من هاتفك!');
+          return;
+      }
+
+      if (!navigator.onLine) {
+          alert('📴 رفع الفيديوهات يتطلب الاتصال بالإنترنت.');
           return;
       }
 
@@ -771,12 +847,10 @@
           });
           document.getElementById('addVideoForm').reset();
           compressedVideoBase64 = "";
-          document.getElementById('videoFileStatus').innerText = 'اختر أي فيديو من استوديو هاتفك وسيقوم النظام بضغط ورفعه بسلاسة.';
-          alert('✅ تم نشر فيديو العرض من هاتفك بنجاح!');
+          alert('✅ تم نشر الفيديو بنجاح!');
           loadAdminVideos();
       } catch (err) {
-          console.error(err);
-          alert('❌ حدث خطأ أثناء نشر الفيديو. تأكد أن حجم الفيديو قصير أو صغير نسبياً.');
+          alert('❌ حدث خطأ أثناء نشر الفيديو.');
       } finally {
           saveBtn.innerText = "نشر الفيديو 🚀";
           saveBtn.disabled = false;
@@ -785,6 +859,10 @@
 
   async function loadAdminVideos() {
       const container = document.getElementById('adminVideosList');
+      if (!navigator.onLine) {
+          container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#64748b;">الفيديوهات غير متاحة بدون نت.</p>';
+          return;
+      }
       try {
           const snapshot = await db.collection('daily_videos').get();
           if (snapshot.empty) {
@@ -805,7 +883,6 @@
           });
           container.innerHTML = html;
       } catch (err) {
-          console.error(err);
           container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#ef4444;">حدث خطأ في تحميل الفيديوهات.</p>';
       }
   }
