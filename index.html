@@ -27,6 +27,10 @@
         .cart-icon-btn:hover { background: #0369a1; }
         .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
         
+        /* زر تقرير اليومية الإداري */
+        .admin-report-btn { background: #7c3aed; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; transition: 0.2s; }
+        .admin-report-btn:hover { background: #6d28d9; }
+
         /* الأقسام */
         .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; }
         .categories::-webkit-scrollbar { display: none; }
@@ -36,87 +40,25 @@
         
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         
-        /* خانة البحث عن المنتجات */
         .search-container { margin-bottom: 20px; display: flex; justify-content: center; }
         .search-input { width: 100%; max-width: 600px; padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 25px; font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: #fff; }
         .search-input:focus { border-color: #0284c7; box-shadow: 0 0 8px rgba(2, 132, 199, 0.2); }
         
-        /* بانر الترحيب */
         .banner { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(2,132,199,0.2); }
         
-        /* --- قسم فيديوهات التيك توك للعروض اليومية --- */
         .tiktok-section { display: none; margin-bottom: 30px; }
-        .tiktok-container {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding: 10px 5px;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: thin;
-        }
-        .tiktok-card {
-            flex: 0 0 260px;
-            height: 440px;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            scroll-snap-align: center;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-            border: 2px solid #38bdf8;
-        }
-        .tiktok-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
-        }
-        .tiktok-overlay {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-            padding: 15px 12px;
-            color: white;
-            pointer-events: none;
-        }
+        .tiktok-container { display: flex; overflow-x: auto; gap: 15px; padding: 10px 5px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+        .tiktok-card { flex: 0 0 260px; height: 440px; background: #000; border-radius: 16px; overflow: hidden; position: relative; scroll-snap-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.15); border: 2px solid #38bdf8; }
+        .tiktok-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .tiktok-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 15px 12px; color: white; pointer-events: none; }
         .tiktok-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
         .tiktok-desc { font-size: 12px; color: #cbd5e1; }
-        .no-videos-msg {
-            width: 100%;
-            text-align: center;
-            padding: 25px;
-            background: #fff;
-            border-radius: 16px;
-            border: 1px dashed #cbd5e1;
-            color: #64748b;
-            font-size: 14px;
-        }
+        .no-videos-msg { width: 100%; text-align: center; padding: 25px; background: #fff; border-radius: 16px; border: 1px dashed #cbd5e1; color: #64748b; font-size: 14px; }
 
-        /* غلاف القسم */
-        .category-hero-banner { 
-            width: 100%; 
-            height: 180px; 
-            border-radius: 16px; 
-            background-size: cover; 
-            background-position: center; 
-            margin-bottom: 25px; 
-            display: none; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        }
-        .category-hero-overlay { 
-            position: absolute; 
-            top: 0; left: 0; right: 0; bottom: 0; 
-            background: linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.3)); 
-            display: flex; 
-            align-items: flex-end; 
-            padding: 20px; 
-            color: white; 
-        }
+        .category-hero-banner { width: 100%; height: 180px; border-radius: 16px; background-size: cover; background-position: center; margin-bottom: 25px; display: none; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .category-hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.3)); display: flex; align-items: flex-end; padding: 20px; color: white; }
         .category-hero-title { font-size: 22px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
         
-        /* المنتجات والبوكسات بمقاسات صغيرة لتظهر منتجين بجانب بعضهما في الشاشات الصغيرة */
         .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 768px) {
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
@@ -131,20 +73,10 @@
         .add-btn { background: #0284c7; color: white; border: none; padding: 6px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; width: 100%; transition: background 0.2s; z-index: 2; }
         .add-btn:hover { background: #0369a1; }
         
-        /* شارة تميز البوكس */
         .badge-box { position: absolute; top: 8px; right: 8px; background: #f59e0b; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; z-index: 3; }
 
-        .flying-img {
-            position: fixed;
-            z-index: 9999;
-            object-fit: contain;
-            border-radius: 12px;
-            pointer-events: none;
-            transition: all 0.75s cubic-bezier(0.19, 1, 0.22, 1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
+        .flying-img { position: fixed; z-index: 9999; object-fit: contain; border-radius: 12px; pointer-events: none; transition: all 0.75s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
         
-        /* نافذة عامة / تفاصيل المنتج أو البوكس */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; }
         .modal-content { background: white; width: 100%; max-width: 480px; padding: 20px; border-radius: 16px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -189,6 +121,7 @@
         </div>
     </div>
     <div class="header-actions">
+        <button class="admin-report-btn" onclick="sendDailyReportToWhatsApp()" title="إرسال تقرير المبيعات اليومي للواتساب">📊 تقرير اليوم</button>
         <button class="share-btn" onclick="shareStore()">مشاركة 🔗</button>
         <button class="cart-icon-btn" id="cartIconButton" onclick="openCart()">
             السلة 🛍️
@@ -402,6 +335,7 @@
       }
       checkUrlReferral();
       fetchBoxes();
+      initMidnightReportChecker();
   };
 
   function showUserBadge() {
@@ -440,7 +374,6 @@
       }
   }
 
-  // جلب المنتجات من فايربيس
   db.collection('products').onSnapshot((snapshot) => {
       allProducts = [];
       snapshot.forEach((doc) => {
@@ -449,7 +382,6 @@
       filterCategory(currentCategory);
   });
 
-  // جلب البوكسات من فايربيس
   function fetchBoxes() {
       db.collection('boxes').onSnapshot((snapshot) => {
           allBoxes = [];
@@ -580,7 +512,6 @@
           document.getElementById('sectionTitle').innerText = '🔥 عروض اليوم والبوكسات الشاملة';
           
           const offersProducts = allProducts.filter(p => p.cat === 'offers' || p.isOffer === true || p.isOffer === "true");
-          // دمج البوكسات مع منتجات العروض اليومية في نفس القسم
           renderItems([...allBoxes, ...offersProducts]);
       } else {
           mainBanner.style.display = 'none';
@@ -872,7 +803,8 @@
       }
   }
 
-  function sendOrderToWhatsApp(e) {
+  // إرسال الطلب وحفظه في قاعدة البيانات (Firestore) لكي يتم حسابه في تقرير المبيعات اليومي
+  async function sendOrderToWhatsApp(e) {
       e.preventDefault();
       if (cart.length === 0) {
           alert('السلة فارغة!');
@@ -883,6 +815,46 @@
       const address = document.getElementById('custAddress').value.trim();
       const payMethod = document.getElementById('payMethod').value;
       
+      let subtotal = 0;
+      let orderItemsDetails = [];
+      cart.forEach((item) => {
+          const itemTotal = item.price * item.qty;
+          subtotal += itemTotal;
+          orderItemsDetails.push({
+              name: item.name,
+              type: item.type,
+              price: item.price,
+              qty: item.qty,
+              total: itemTotal
+          });
+      });
+
+      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
+      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
+      const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
+
+      // حفظ الطلب في فايربيس مع الوقت والتاريخ
+      const orderData = {
+          customerName: name,
+          customerPhone: phone,
+          address: address,
+          payMethod: payMethod,
+          items: orderItemsDetails,
+          subtotal: subtotal,
+          discount: discountAmount,
+          deliveryFee: currentDeliveryFee,
+          tip: tipFee,
+          finalTotal: finalTotal,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          dateString: new Date().toISOString().split('T')[0] // لتسهيل فلترة طلبات اليوم
+      };
+
+      try {
+          await db.collection('orders').add(orderData);
+      } catch (err) {
+          console.error("خطأ في حفظ الطلب:", err);
+      }
+
       let message = `🛒 *طلب جديد من متجر ماركت نت*\n\n`;
       message += `👤 *الاسم:* ${name}\n`;
       message += `📞 *الهاتف:* ${phone}\n`;
@@ -895,16 +867,11 @@
       if (referrerCode) message += `🎁 *كود خصم الإحالة المستخدم:* ${referrerCode}\n`;
       
       message += `\n📦 *المنتجات والبوكسات المطلوبة:*\n`;
-      let subtotal = 0;
       cart.forEach((item, index) => {
           const itemTotal = item.price * item.qty;
-          subtotal += itemTotal;
           const boxLabel = item.type === 'box' ? ' (🎁 بوكس)' : '';
           message += `${index + 1}. ${item.name}${boxLabel} (${item.qty} × ${item.price} ج) = ${itemTotal} ج\n`;
       });
-      let discountAmount = isDiscountApplied ? Math.round(subtotal * 0.05) : 0;
-      const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
-      const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
       message += `\n------------------\n`;
       message += `إجمالي المنتجات: ${subtotal} ج\n`;
       if (discountAmount > 0) message += `الخصم (5%): -${discountAmount} ج\n`;
@@ -914,6 +881,103 @@
       
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+  }
+
+  // دالة جلب وإرسال تقرير المبيعات اليومي للواتساب
+  async function sendDailyReportToWhatsApp(isAutomatic = false) {
+      // جلب تاريخ اليوم الحالي بصيغة YYYY-MM-DD
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      try {
+          const snapshot = await db.collection('orders').where('dateString', '==', todayStr).get();
+          
+          let totalCustomers = snapshot.size;
+          let totalSalesProductsAmount = 0;
+          let totalDeliveryAmount = 0;
+          let totalTipsAmount = 0;
+          let grandTotalRevenue = 0;
+          let totalItemsCount = 0;
+          let productQuantitiesMap = {};
+
+          snapshot.forEach(doc => {
+              const order = doc.data();
+              totalSalesProductsAmount += (order.subtotal || 0);
+              totalDeliveryAmount += (order.deliveryFee || 0);
+              totalTipsAmount += (order.tip || 0);
+              grandTotalRevenue += (order.finalTotal || 0);
+
+              if (order.items && Array.isArray(order.items)) {
+                  order.items.forEach(item => {
+                      totalItemsCount += item.qty;
+                      if (!productQuantitiesMap[item.name]) {
+                          productQuantitiesMap[item.name] = 0;
+                      }
+                      productQuantitiesMap[item.name] += item.qty;
+                  });
+              }
+          });
+
+          // بناء رسالة التقرير المطلوبة
+          let reportMsg = `📊 *التقرير اليومي للمبيعات - ماركت نت*\n`;
+          reportMsg += `📅 *التاريخ:* ${todayStr}\n`;
+          reportMsg += `----------------------------------\n`;
+          reportMsg += `👥 *عدد العملاء (الطلبات):* ${totalCustomers}\n`;
+          reportMsg += `📦 *إجمالي عدد القطع المباعة:* ${totalItemsCount} قطعة\n`;
+          reportMsg += `💰 *إجمالي قيمة المنتجات:* ${totalSalesProductsAmount} جنيه\n`;
+          reportMsg += `🚴 *إجمالي مصاريف التوصيل:* ${totalDeliveryAmount} جنيه\n`;
+          if (totalTipsAmount > 0) {
+              reportMsg += `💙 *إجمالي الإكراميات:* ${totalTipsAmount} جنيه\n`;
+          }
+          reportMsg += `⭐ *إجمالي الإيرادات الكلية:* ${grandTotalRevenue} جنيه\n`;
+          reportMsg += `----------------------------------\n`;
+          reportMsg += `📋 *القطع المباعة من كل منتج على حدة:*\n`;
+
+          if (Object.keys(productQuantitiesMap).length === 0) {
+              reportMsg += `_لا توجد مبيعات مسجلة اليوم حتى الآن._\n`;
+          } else {
+              let i = 1;
+              for (let prodName in productQuantitiesMap) {
+                  reportMsg += `${i}. ${prodName}: *${productQuantitiesMap[prodName]} قطعة*\n`;
+                  i++;
+              }
+          }
+
+          reportMsg += `\n✨ تم إنشاء هذا التقرير تلقائياً بواسطة نظام ماركت نت.`;
+
+          const encodedReport = encodeURIComponent(reportMsg);
+          const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedReport}`;
+
+          if (isAutomatic) {
+              // فتح نافذة التقرير تلقائياً بعد منتصف الليل
+              window.open(whatsappUrl, '_blank');
+          } else {
+              window.open(whatsappUrl, '_blank');
+          }
+
+      } catch (err) {
+          console.error("خطأ في جلب تقرير المبيعات:", err);
+          if (!isAutomatic) alert('حدث خطأ أثناء جلب تقرير المبيعات.');
+      }
+  }
+
+  // فحص تلقائي بعد الساعة 12 منتصف الليل (يتحقق كل ساعة أو دقيقة عندما يكون المتجر مفتوحاً)
+  function initMidnightReportChecker() {
+      setInterval(() => {
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          
+          // إذا كانت الساعة 12 صباحاً (00:00 أو 00:01) ولم يتم إرسال تقرير اليوم بعد
+          if (hours === 0 && minutes <= 2) {
+              const lastReportDate = localStorage.getItem('last_midnight_report_date');
+              const todayStr = now.toISOString().split('T')[0];
+              
+              if (lastReportDate !== todayStr) {
+                  localStorage.setItem('last_midnight_report_date', todayStr);
+                  sendDailyReportToWhatsApp(true);
+              }
+          }
+      }, 60000); // يفحص كل دقيقة
   }
 </script>
 </body>
