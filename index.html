@@ -26,10 +26,6 @@
         .cart-icon-btn { background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; position: relative; transition: transform 0.2s, background 0.2s; }
         .cart-icon-btn:hover { background: #0369a1; }
         .cart-count { background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; }
-        
-        /* زر تقرير اليومية الإداري */
-        .admin-report-btn { background: #7c3aed; color: white; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; transition: 0.2s; }
-        .admin-report-btn:hover { background: #6d28d9; }
 
         /* الأقسام */
         .categories { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; background: #fff; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; }
@@ -116,13 +112,12 @@
 <header>
     <div class="logo-container">
         <div class="logo" onclick="goHome()" title="الرجوع للصفحة الرئيسية">🛒 ماركت نت</div>
-        <div class="user-code-header-badge" id="userBadge" onclick="shareStore()" title="اضغط لمشاركة رابط الخصم">
+        <div class="user-code-header-badge" id="userBadge" onclick="shareAppUrl()" title="مشاركة رابط البرنامج">
             🔑 كودك: <strong id="headerUserCodeDisplay">...</strong> 📋
         </div>
     </div>
     <div class="header-actions">
-        <button class="admin-report-btn" onclick="sendDailyReportToWhatsApp()" title="إرسال تقرير المبيعات اليومي للواتساب">📊 تقرير اليوم</button>
-        <button class="share-btn" onclick="shareStore()">مشاركة 🔗</button>
+        <button class="share-btn" onclick="shareAppUrl()">مشاركة 🔗</button>
         <button class="cart-icon-btn" id="cartIconButton" onclick="openCart()">
             السلة 🛍️
             <span class="cart-count" id="cartCount">0</span>
@@ -335,7 +330,7 @@
       }
       checkUrlReferral();
       fetchBoxes();
-      initMidnightReportChecker();
+      initMidnightReportAutoSender();
   };
 
   function showUserBadge() {
@@ -649,22 +644,20 @@
       document.getElementById('cartModal').style.display = 'none';
   }
 
-  function shareStore() {
-      if (!userMyCode) {
-          userMyCode = generateUserCode();
-          localStorage.setItem('marketnet_user_code', userMyCode);
-          showUserBadge();
-      }
-      
-      let baseUrl = window.location.origin + window.location.pathname;
-      const storeUrl = `${baseUrl}?ref=${userMyCode}`;
-      const shareText = `🛒 تسوق الآن من متجر "ماركت نت" واستخدم كود الخصم الخاص بي (${userMyCode}) للحصول على خصم 5% على طلبك!\n\n${storeUrl}`;
+  // مشاركة رابط المتجر/البرنامج بدون فرض مشاركة كود الخصم فقط
+  function shareAppUrl() {
+      const appUrl = window.location.origin + window.location.pathname;
+      const shareText = `🛒 جربي التسوق الآن من متجر "ماركت نت" واحصل على أفضل العروض والخصومات:\n\n${appUrl}`;
       
       if (navigator.share) {
-          navigator.share({ title: 'ماركت نت', text: shareText, url: storeUrl }).catch(() => {});
+          navigator.share({ 
+              title: 'ماركت نت', 
+              text: shareText, 
+              url: appUrl 
+          }).catch(() => {});
       } else {
-          navigator.clipboard.writeText(shareText);
-          alert(`تم نسخ رابط الدعوة وكود الخصم (${userMyCode}) بنجاح!`);
+          navigator.clipboard.writeText(appUrl);
+          alert(`تم نسخ رابط برنامج "ماركت نت" بنجاح!\n\n${appUrl}`);
       }
   }
 
@@ -803,7 +796,7 @@
       }
   }
 
-  // إرسال الطلب وحفظه في قاعدة البيانات (Firestore) لكي يتم حسابه في تقرير المبيعات اليومي
+  // إرسال الطلب وحفظه في قواعد البيانات
   async function sendOrderToWhatsApp(e) {
       e.preventDefault();
       if (cart.length === 0) {
@@ -833,7 +826,6 @@
       const tipFee = parseFloat(document.getElementById('tipAmount').value) || 0;
       const finalTotal = (subtotal - discountAmount) + currentDeliveryFee + tipFee;
 
-      // حفظ الطلب في فايربيس مع الوقت والتاريخ
       const orderData = {
           customerName: name,
           customerPhone: phone,
@@ -846,7 +838,7 @@
           tip: tipFee,
           finalTotal: finalTotal,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          dateString: new Date().toISOString().split('T')[0] // لتسهيل فلترة طلبات اليوم
+          dateString: new Date().toISOString().split('T')[0]
       };
 
       try {
@@ -883,13 +875,35 @@
       window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
   }
 
-  // دالة جلب وإرسال تقرير المبيعات اليومي للواتساب
-  async function sendDailyReportToWhatsApp(isAutomatic = false) {
-      // جلب تاريخ اليوم الحالي بصيغة YYYY-MM-DD
-      const todayStr = new Date().toISOString().split('T')[0];
-      
+  // إرسال التقرير اليومي أوتوماتيكياً للواتساب بعد 12 منتصف الليل
+  function initMidnightReportAutoSender() {
+      setInterval(async () => {
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          
+          // التأكد من حلول منتصف الليل (00:00 إلى 00:05)
+          if (hours === 0 && minutes <= 5) {
+              const lastReportDate = localStorage.getItem('last_auto_report_sent');
+              const todayStr = now.toISOString().split('T')[0];
+              
+              if (lastReportDate !== todayStr) {
+                  localStorage.setItem('last_auto_report_sent', todayStr);
+                  
+                  // حساب تاريخ اليوم السابق (اليوم الذي انتهى)
+                  const yesterday = new Date(now);
+                  yesterday.setDate(yesterday.getDate() - 1);
+                  const targetDateStr = yesterday.toISOString().split('T')[0];
+                  
+                  await sendDailyReportToWhatsAppAuto(targetDateStr);
+              }
+          }
+      }, 60000); // يفحص كل دقيقة تلقائياً
+  }
+
+  async function sendDailyReportToWhatsAppAuto(targetDateStr) {
       try {
-          const snapshot = await db.collection('orders').where('dateString', '==', todayStr).get();
+          const snapshot = await db.collection('orders').where('dateString', '==', targetDateStr).get();
           
           let totalCustomers = snapshot.size;
           let totalSalesProductsAmount = 0;
@@ -917,23 +931,20 @@
               }
           });
 
-          // بناء رسالة التقرير المطلوبة
-          let reportMsg = `📊 *التقرير اليومي للمبيعات - ماركت نت*\n`;
-          reportMsg += `📅 *التاريخ:* ${todayStr}\n`;
+          let reportMsg = `📊 *التقرير اليومي الأوتوماتيكي للمبيعات - ماركت نت*\n`;
+          reportMsg += `📅 *التاريخ:* ${targetDateStr}\n`;
           reportMsg += `----------------------------------\n`;
-          reportMsg += `👥 *عدد العملاء (الطلبات):* ${totalCustomers}\n`;
+          reportMsg += `👥 *عدد الطلبات:* ${totalCustomers}\n`;
           reportMsg += `📦 *إجمالي عدد القطع المباعة:* ${totalItemsCount} قطعة\n`;
           reportMsg += `💰 *إجمالي قيمة المنتجات:* ${totalSalesProductsAmount} جنيه\n`;
           reportMsg += `🚴 *إجمالي مصاريف التوصيل:* ${totalDeliveryAmount} جنيه\n`;
-          if (totalTipsAmount > 0) {
-              reportMsg += `💙 *إجمالي الإكراميات:* ${totalTipsAmount} جنيه\n`;
-          }
+          if (totalTipsAmount > 0) reportMsg += `💙 *إجمالي الإكراميات:* ${totalTipsAmount} جنيه\n`;
           reportMsg += `⭐ *إجمالي الإيرادات الكلية:* ${grandTotalRevenue} جنيه\n`;
           reportMsg += `----------------------------------\n`;
-          reportMsg += `📋 *القطع المباعة من كل منتج على حدة:*\n`;
+          reportMsg += `📋 *تفاصيل القطع المباعة لكل منتج:*\n`;
 
           if (Object.keys(productQuantitiesMap).length === 0) {
-              reportMsg += `_لا توجد مبيعات مسجلة اليوم حتى الآن._\n`;
+              reportMsg += `_لا توجد مبيعات مسجلة في هذا اليوم._\n`;
           } else {
               let i = 1;
               for (let prodName in productQuantitiesMap) {
@@ -942,42 +953,13 @@
               }
           }
 
-          reportMsg += `\n✨ تم إنشاء هذا التقرير تلقائياً بواسطة نظام ماركت نت.`;
+          reportMsg += `\n✨ إرسال أوتوماتيكي بانتهاء اليوم بعد الساعة 12 منتصف الليل.`;
 
           const encodedReport = encodeURIComponent(reportMsg);
-          const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedReport}`;
-
-          if (isAutomatic) {
-              // فتح نافذة التقرير تلقائياً بعد منتصف الليل
-              window.open(whatsappUrl, '_blank');
-          } else {
-              window.open(whatsappUrl, '_blank');
-          }
-
+          window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedReport}`, '_blank');
       } catch (err) {
-          console.error("خطأ في جلب تقرير المبيعات:", err);
-          if (!isAutomatic) alert('حدث خطأ أثناء جلب تقرير المبيعات.');
+          console.error("خطأ في إرسال التقرير التلقائي:", err);
       }
-  }
-
-  // فحص تلقائي بعد الساعة 12 منتصف الليل (يتحقق كل ساعة أو دقيقة عندما يكون المتجر مفتوحاً)
-  function initMidnightReportChecker() {
-      setInterval(() => {
-          const now = new Date();
-          const hours = now.getHours();
-          const minutes = now.getMinutes();
-          
-          // إذا كانت الساعة 12 صباحاً (00:00 أو 00:01) ولم يتم إرسال تقرير اليوم بعد
-          if (hours === 0 && minutes <= 2) {
-              const lastReportDate = localStorage.getItem('last_midnight_report_date');
-              const todayStr = now.toISOString().split('T')[0];
-              
-              if (lastReportDate !== todayStr) {
-                  localStorage.setItem('last_midnight_report_date', todayStr);
-                  sendDailyReportToWhatsApp(true);
-              }
-          }
-      }, 60000); // يفحص كل دقيقة
   }
 </script>
 </body>
